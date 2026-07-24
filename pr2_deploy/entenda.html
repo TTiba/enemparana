@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entenda os dados · Painel ENEM 2025 · Paraná</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..1000&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles_pr.css">
+<meta name="robots" content="noindex, nofollow">
+<script>window.LOCK_UF = "PR"; window.LOCK_UF_NOME = "Paraná"; window.API_STATIC = 1;</script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <div class="brand">
+      <img src="brasao_pr.svg" alt="Brasão do Paraná" class="brasao-pr">
+      <span class="brand-name">Painel ENEM <b>2025</b> · Paraná</span>
+    </div>
+    <span class="brand-by">um produto <b>Wayground</b></span>
+  </div>
+</header>
+
+<main class="wrap">
+  <p class="volta"><a href="index.html">← Voltar ao painel</a></p>
+
+  <section class="card selector">
+    <h1>Entenda os dados 📊</h1>
+    <p class="sub">O que significa cada número do painel, de onde ele vem e como ler
+       sem cair em armadilhas. Fonte: microdados públicos do ENEM 2025 (INEP).</p>
+  </section>
+
+  <div class="info-grid">
+
+    <section class="info-card">
+      <div class="info-band" style="background:var(--pink)">Notas por área</div>
+      <div class="info-body">
+        <p><b>O que é:</b> a média dos alunos da seleção em cada uma das 4 provas —
+        Linguagens, Humanas, Natureza e Matemática. A nota de cada aluno vem pronta
+        dos microdados e é calculada pelo INEP com <b>TRI</b> (Teoria de Resposta ao Item).</p>
+        <p><b>A escala:</b> centrada em 500 com desvio de 100 (referência ENEM 2009).
+        Grosso modo: 400 = um desvio abaixo da média histórica, 600 = um desvio acima.</p>
+        <p><b>Por que TRI e não nº de acertos:</b> a TRI pondera o padrão de respostas —
+        acertar itens difíceis errando os fáceis (padrão de chute) vale menos que um
+        padrão coerente. Por isso dois alunos com o mesmo nº de acertos podem ter notas diferentes.</p>
+      </div>
+    </section>
+
+    <section class="info-card">
+      <div class="info-band" style="background:var(--rose)">Redação e competências</div>
+      <div class="info-body">
+        <p><b>O que é:</b> média da nota de redação (0 a 1000) e das 5 competências
+        (0 a 200 cada), avaliadas por corretores humanos:</p>
+        <p><b>C1</b> norma culta · <b>C2</b> compreender o tema no tipo dissertativo-argumentativo ·
+        <b>C3</b> selecionar e organizar argumentos · <b>C4</b> coesão e mecanismos linguísticos ·
+        <b>C5</b> proposta de intervenção.</p>
+        <p><b>Como usar:</b> o perfil das competências localiza a fragilidade — uma escola
+        com C1 alta e C5 baixa não tem problema de escrita, tem problema de
+        <i>repertório para propor intervenção</i>.</p>
+      </div>
+    </section>
+
+    <section class="info-card">
+      <div class="info-band" style="background:var(--lime)">% de acerto por item</div>
+      <div class="info-body">
+        <p><b>O que é:</b> a proporção de alunos da seleção que marcou o gabarito de cada
+        questão. Calculado por nós comparando a resposta de cada aluno
+        (microdados) com o gabarito oficial, item a item.</p>
+        <p><b>Atenção:</b> diferente da nota, isso é um indicador <i>clássico</i> — todo
+        item vale igual e chute não é descontado. Com 5 alternativas, ~20% de acerto
+        é o piso do chute, não zero conhecimento.</p>
+        <div class="info-demo">
+          <div class="mini-track" style="max-width:220px"><div class="mini-fill" style="width:45%;background:var(--lime)"></div><div class="mini-mark" style="left:60%"></div></div>
+          <small>barra = observado · traço ▍= esperado pela TRI</small>
+        </div>
+      </div>
+    </section>
+
+    <section class="info-card">
+      <div class="info-band" style="background:var(--mint)">Dificuldade (b)</div>
+      <div class="info-body">
+        <p><b>O que é:</b> o parâmetro de dificuldade que o INEP calibrou para cada item,
+        na mesma escala θ das proficiências. Publicado nos microdados — não estimamos nada.</p>
+        <p><b>Como ler:</b> um aluno com proficiência igual ao <b>b</b> do item tem ~60%
+        de chance de acertá-lo. No painel: <span class="b-facil">b &lt; 0 fácil</span> ·
+        <span class="b-media">0 a 1,2 média</span> ·
+        <span class="b-dificil">acima de 1,2 difícil</span>.</p>
+        <p><b>Uso prático:</b> errar muito um item de b = 3,5 é esperado para quase
+        qualquer escola; errar muito um item de b = 0 é sinal de alerta.</p>
+      </div>
+    </section>
+
+    <section class="info-card">
+      <div class="info-band" style="background:var(--peach)">Δ Brasil (e referências UF)</div>
+      <div class="info-body">
+        <p><b>O que é:</b> a diferença, em pontos percentuais, entre o acerto da sua
+        seleção e o acerto do Brasil <i>nas mesmas questões</i>.</p>
+        <p><span class="delta-up">+6 pp</span> acima do país ·
+           <span class="delta-down">−6 pp</span> abaixo.</p>
+        <p><b>Limite:</b> compara populações diferentes — uma escola seletiva tende a
+        ficar verde em tudo, uma escola de contexto vulnerável tende a ficar vermelha
+        em tudo. Diz <i>onde você está</i>, não <i>quanto você agrega</i>. Para isso
+        existe o Δ esperado. →</p>
+      </div>
+    </section>
+
+    <section class="info-card destaque-tri">
+      <div class="info-band" style="background:var(--ink);color:var(--cream)">Δ esperado (TRI) — o indicador-chave</div>
+      <div class="info-body">
+        <p><b>O que é:</b> a diferença entre o que a seleção <i>acertou</i> e o que ela
+        <i>deveria acertar dado o nível dos seus próprios alunos</i>. Usamos a curva TRI
+        de cada item (parâmetros oficiais a, b, c) para perguntar: "alunos com essas
+        notas acertam quanto desse item no Brasil?" — e comparamos com o observado.</p>
+        <p><b>Por que importa:</b> desconta o nível da turma e isola a contribuição da
+        escola naquele conteúdo específico.</p>
+        <div class="info-demo info-demo-duo">
+          <div>
+            <b>Escola A · alunos fortes (média 600)</b>
+            <small>esperado 60%</small>
+            <div class="mini-track"><div class="mini-fill" style="width:45%;background:var(--peach)"></div><div class="mini-mark" style="left:60%"></div></div>
+            <small>observado 45% → <span class="delta-down">−15 pp</span> lacuna específica de conteúdo</small>
+          </div>
+          <div>
+            <b>Escola B · alunos com defasagem (média 400)</b>
+            <small>esperado 21%</small>
+            <div class="mini-track"><div class="mini-fill" style="width:26%;background:var(--mint)"></div><div class="mini-mark" style="left:21%"></div></div>
+            <small>observado 26% → <span class="delta-up">+5 pp</span> ensino rendendo acima do nível</small>
+          </div>
+        </div>
+        <p>No % bruto, A (45%) parece melhor que B (26%). No Δ esperado, é o contrário:
+        A tem um buraco escondido; B está agregando valor. <b>Verde = a escola entrega
+        mais do que o nível dos alunos explica.</b></p>
+        <p><b>Como usar — é uma bússola interna:</b> como o nível dos alunos vem das notas
+        desta mesma prova, a média dos Δ esperados de uma escola em todos os itens é
+        aproximadamente zero por construção — ninguém fica "abaixo do esperado em tudo".
+        O que o indicador revela é o <i>desequilíbrio do currículo</i>: um −10 pp em H28
+        compensado por +7 pp em H3 significa que a escola ensina H3 acima do padrão
+        nacional para alunos daquele nível, e H28 abaixo. O ganho prático: <b>H28 é onde
+        uma hora de aula extra rende mais</b> — os alunos têm capacidade demonstrada
+        (o nível global deles prova isso), mas não absorveram aquele conteúdo específico.
+        Fechar esse buraco sobe a nota global.</p>
+        <p><b>Cuidado ao interpretar:</b> um item sozinho é ruidoso — cada prova tem só
+        1 a 3 itens por habilidade. Δ negativo num item isolado é uma <i>hipótese a
+        investigar</i>; Δ negativo consistente em vários itens da mesma habilidade é um
+        <i>diagnóstico acionável</i>.</p>
+      </div>
+    </section>
+
+    <section class="info-card">
+      <div class="info-band" style="background:var(--lilac)">Habilidade</div>
+      <div class="info-body">
+        <p><b>O que é:</b> cada item do ENEM avalia 1 das 30 habilidades da Matriz de
+        Referência do INEP daquela área (H1 a H30). O vínculo item→habilidade vem nos
+        microdados; a descrição, da matriz oficial.</p>
+        <p><b>No painel:</b> passe o mouse no chip para ler a descrição; clique para ver
+        aulas e atividades relacionadas (demo).</p>
+        <p><b>Cuidado estatístico:</b> cada prova tem só 1 a 3 itens por habilidade —
+        conclusões por habilidade num único ano são hipóteses, não veredictos.</p>
+      </div>
+    </section>
+
+    <section class="info-card">
+      <div class="info-band" style="background:var(--cream); border-bottom:1.5px solid var(--ink-12)">Quem entra na conta</div>
+      <div class="info-body">
+        <p><b>Só concluintes com escola identificada</b> (1,74 milhão em 2025): os
+        microdados informam a escola apenas de quem estava concluindo o ensino médio.
+        Treineiros e egressos ficam de fora automaticamente.</p>
+        <p><b>Participação é voluntária:</b> em escolas com poucos inscritos, quem fez o
+        ENEM tende a ser o grupo mais engajado — leia médias de escolas pequenas com cautela.</p>
+        <p><b>Itens de reaplicação e provas adaptadas</b> são removidos da tabela quando
+        respondidos por poucos alunos da seleção, para não distorcer as comparações.</p>
+      </div>
+    </section>
+
+    <section class="info-card">
+      <div class="info-band" style="background:var(--lilac)">Comparações entre anos (2021 – 2025)</div>
+      <div class="info-body">
+        <p><b>Janela de tempo:</b> o painel usa cinco edições do ENEM (2021 a 2025).
+        A escala de notas e os parâmetros TRI dos itens são calibrados pelo próprio
+        INEP para serem <i>comparáveis entre anos</i> — 520 em 2022 e 520 em 2025
+        querem dizer essencialmente a mesma coisa em termos de proficiência.</p>
+        <p><b>Concluintes:</b> o filtro é o mesmo em todos os anos — quem concluiu o
+        ensino médio e tem escola identificável. Isso mantém a comparação limpa.</p>
+        <p><b>Escolas antes de 2024:</b> até o ENEM 2023 o INEP <i>não expunha</i> o
+        código INEP da escola nos microdados (apenas se era pública ou privada). Por
+        isso o drill-down por escola só cobre 2024 e 2025 — a UI mostra um aviso
+        explícito quando esse limite é atingido.</p>
+        <p><b>2021 · pandemia:</b> a prova foi aplicada em janeiro de 2022 com cerca
+        de <b>1 milhão de concluintes</b>, contra os ~2,7 M típicos. O painel mantém
+        o ano na série (para não abrir buracos), mas marca esse ponto com um badge
+        de atenção (⚠). Leia esse ano com contexto — não é uma medida "normal" da
+        educação brasileira.</p>
+        <p><b>Habilidades:</b> a Matriz de Referência do ENEM é a mesma desde 2009
+        (H1–H30 em quatro áreas), então a comparação de <i>cobertura</i> e
+        <i>desempenho</i> por habilidade entre anos é direta. A página
+        <a href="criticas.html">Análise</a> reúne esse cruzamento em tabela.</p>
+      </div>
+    </section>
+
+  </div>
+
+  <footer class="rodape">
+    Fontes: Microdados ENEM 2021 – 2025, Matriz de Referência e parâmetros TRI dos itens — INEP.
+    Percentuais de acerto e Δs calculados pela plataforma a partir das respostas item a item.
+  </footer>
+</main>
+
+</body>
+</html>

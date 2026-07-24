@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ranking de escolas · Painel ENEM 2025 · Paraná</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..1000&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles_pr.css">
+<meta name="robots" content="noindex, nofollow">
+<script>window.LOCK_UF = "PR"; window.LOCK_UF_NOME = "Paraná"; window.API_STATIC = 1;</script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <div class="brand">
+      <img src="brasao_pr.svg" alt="Brasão do Paraná" class="brasao-pr">
+      <span class="brand-name">Painel ENEM <b>2025</b> · Paraná</span>
+    </div>
+    <div class="topbar-links">
+      <a href="index.html">Painel</a>
+      <a href="mapa.html">Mapa</a>
+      <a href="criticas.html">Análise</a>
+      <a href="priorizacao.html">Priorização</a>
+      <a href="entenda.html">Entenda os dados</a>
+      <span class="brand-by">um produto <b>Wayground</b></span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap wrap-wide">
+
+  <section class="card">
+    <h1 style="margin:0 0 6px;font-size:clamp(24px,3.6vw,32px);font-weight:900;letter-spacing:-.02em">
+      Ranking de escolas · <span id="rk-escopo">Paraná</span>
+    </h1>
+    <p class="sub" style="max-width:780px;color:var(--ink-40);margin:0 0 4px">
+      Todas as escolas com pelo menos <b>30 alunos presentes no 1º dia</b>
+      no ENEM 2025, ordenadas pela média geral. Média por área na escala
+      ENEM 0–1000. Clique numa escola para abrir seu painel.
+    </p>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h3>Filtros</h3>
+      <span class="hint" id="rk-resumo">carregando…</span>
+    </div>
+    <div class="crit-controls">
+      <div class="crit-ctrl">
+        <label>Estado</label>
+        <select id="rk-uf" class="rk-select" hidden>
+          <option value="PR">Paraná</option>
+        </select>
+        <div class="uf-chip" style="min-height:34px;padding:8px 16px">Paraná</div>
+      </div>
+      <div class="crit-ctrl">
+        <label>Núcleo Regional</label>
+        <select id="rk-nre" class="rk-select">
+          <option value="">Todos (PR inteiro)</option>
+        </select>
+      </div>
+      <div class="crit-ctrl">
+        <label>Rede (dependência administrativa)</label>
+        <div class="tabs" id="rk-rede">
+          <button data-dep="0"  class="on">Todas</button>
+          <button data-dep="1">Federal</button>
+          <button data-dep="2">Estadual</button>
+          <button data-dep="3">Municipal</button>
+          <button data-dep="4">Privada</button>
+        </div>
+      </div>
+      <div class="crit-ctrl" style="flex:1">
+        <label>Buscar escola ou município</label>
+        <input id="rk-busca" type="text" class="rk-busca"
+               placeholder="Ex.: Objetivo, São Paulo…">
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="tbl-scroll">
+      <table class="tbl" id="rk-tabela">
+        <thead>
+          <tr>
+            <th style="width:44px">#</th>
+            <th class="rk-sort" data-sort="nome">Escola</th>
+            <th class="rk-sort" data-sort="municipio">Município</th>
+            <th class="rk-sort" data-sort="uf" style="width:70px">UF</th>
+            <th class="rk-sort" data-sort="dependencia_nome" style="width:96px">Rede</th>
+            <th class="rk-sort" data-sort="n_lc" style="width:76px;text-align:right" title="Presentes no 1º dia (LC + CH)">1º dia</th>
+      <th class="rk-sort" data-sort="n_mt" style="width:76px;text-align:right" title="Presentes no 2º dia (CN + MT)">2º dia</th>
+            <th class="rk-sort" data-sort="media_geral" style="text-align:right">Média geral</th>
+            <th class="rk-sort" data-sort="media_red"   style="text-align:right">Redação</th>
+            <th class="rk-sort" data-sort="media_lc"    style="text-align:right">LC</th>
+            <th class="rk-sort" data-sort="media_ch"    style="text-align:right">CH</th>
+            <th class="rk-sort" data-sort="media_cn"    style="text-align:right">CN</th>
+            <th class="rk-sort" data-sort="media_mt"    style="text-align:right">MT</th>
+          </tr>
+        </thead>
+        <tbody id="rk-tbody">
+          <tr><td colspan="13" class="skeleton" style="padding:24px;text-align:center">Carregando…</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="foot-note" style="margin-top:12px">
+      Fonte: Microdados ENEM 2025 (INEP). Concluintes com escola identificada.
+      Escolas com menos de 30 alunos presentes no 1º dia ficam de fora para
+      evitar ruído amostral. 1º dia = Linguagens + Humanas; 2º dia = Natureza + Matemática.
+    </p>
+  </section>
+
+  <footer class="rodape">Fonte: INEP · Painel ENEM 2025 · Wayground</footer>
+</main>
+
+<script src="filtros.js"></script>
+<script src="ranking_escolas.js"></script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+/* ===== Personalização PR =================================================
+   Adaptações mínimas sobre styles.css: brasão no topbar + tag SP.
+   O restante do design/paleta permanece idêntico ao site principal. */
+
+.brand { gap: 12px; }
+
+.brasao-pr {
+  height: 34px;
+  width: auto;
+  display: block;
+  filter: drop-shadow(0 1px 0 rgba(0,0,0,.06));
+}
+
+.pr-tag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 10px 3px;
+  background: var(--ink);
+  color: var(--cream);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  vertical-align: 3px;
+}
+
+/* Chip fixo "Paraná" no lugar do dropdown de UF */
+.uf-chip {
+  display: inline-flex; align-items: center;
+  font: inherit; font-weight: 700; font-size: 14px;
+  color: var(--ink);
+  background: var(--cream-soft);
+  border: 1.5px solid var(--ink-12);
+  border-radius: 999px;
+  padding: 12px 22px;
+  min-height: 46px;
+  white-space: nowrap;
+}
+
+/* Rótulos de rede levemente adaptados no home PR */
+.selector h1 { max-width: 780px; }
+
+/* Trilhas — grade de 4 colunas na página de habilidade */
+.trilhas {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin: 18px 0;
+}
+@media (max-width: 1180px) { .trilhas { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px)  { .trilhas { grid-template-columns: 1fr; } }
+
+.trilha { padding: 20px; }
+.trilha .card-head h3 { font-size: 18px; }
+.trilha .card-head .hint { font-size: 11.5px; }
+.trilha .lista-links { margin-top: 12px; }
+.trilha .link-item { padding: 10px 12px; }
+.trilha .li-txt b { font-size: 13.5px; line-height: 1.25; }
+.trilha .li-txt small { font-size: 11px; line-height: 1.35; }
+
+/* faixas de cor no topo de cada trilha, ecoando a paleta do portal */
+.trilha { border-top: 6px solid transparent; }
+.trilha-estr   { border-top-color: var(--lilac); }
+.trilha-pratica { border-top-color: var(--rose); }
+.trilha-aprof  { border-top-color: var(--mint); }
+.trilha-recomp { border-top-color: var(--peach); }
+
+.trilha-estr .link-item   { background: var(--cream-soft); }
+.trilha-pratica .link-item { background: #ffe6f2; }
+.trilha-aprof .link-item  { background: #e2f7f4; }
+.trilha-recomp .link-item { background: #ffedd8; }

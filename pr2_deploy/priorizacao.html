@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Priorização de habilidades · PR · Painel ENEM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..1000&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles_pr.css">
+<style>
+  /* --- página priorização ------------------------------------------------ */
+  .pri-hero { display:flex; gap:24px; flex-wrap:wrap; margin: 12px 0 16px }
+  .pri-legenda { display:flex; gap:14px; flex-wrap:wrap; font-size:12.5px;
+                 color: var(--ink-60); align-items:center }
+  .pri-legenda .sw { display:inline-block; width:12px; height:12px;
+                     border-radius:3px; vertical-align:-2px; margin-right:6px }
+  .pri-grade { display:grid; grid-template-columns: 60px 1fr 90px 120px;
+               gap: 6px 12px; align-items:center; padding: 8px 4px }
+  .pri-grade .cel-h { font-weight:700; font-size:12px; color:var(--ink-60);
+                       text-align:right; padding-right:8px }
+  .pri-grade .cel-h b { color:var(--ink); font-size:14px }
+  .pri-grade .cel-val { font-family: 'DM Sans', monospace; font-weight:700;
+                         font-size:13px; text-align:right; }
+  .pri-grade .cel-hint { font-size:11px; color: var(--ink-60);
+                          font-style: italic; }
+  .pri-bar-wrap { position: relative; height: 22px; background: var(--ink-06);
+                  border-radius: 4px; overflow: hidden }
+  .pri-bar-zero { position: absolute; top:0; bottom:0; width:1.5px;
+                   background: var(--ink); left: 50%; }
+  .pri-bar-ruido { position: absolute; top:0; bottom:0; background: rgba(0,0,0,.05); }
+  .pri-bar-fill { position: absolute; top:2px; bottom:2px; border-radius: 2px;
+                   transition: all .3s ease; }
+  .pri-year-mark { position: absolute; top:0; bottom:0; width: 2px;
+                    background: rgba(0,0,0,.55); }
+  .pri-year-mark::after { content: attr(data-y); position: absolute;
+                    font-size: 9px; font-weight: 700; color: var(--ink);
+                    top: -12px; left: 3px; white-space: nowrap; }
+  .pri-hab-titulo { font-size:13.5px; font-weight: 600; padding-right:10px;
+                     color: var(--ink); cursor: default }
+  .pri-hab-titulo small { display:block; font-weight:400; color:var(--ink-60);
+                           font-size:11px; margin-top:1px }
+  .pri-summary { display: grid; grid-template-columns: repeat(4, 1fr);
+                  gap: 12px; margin: 10px 0 4px }
+  .pri-summary .card { padding: 12px 14px; margin:0 }
+  .pri-summary h4 { margin:0 0 4px; font-size:12px; color:var(--ink-60);
+                     text-transform:uppercase; letter-spacing:.05em; font-weight:700 }
+  .pri-summary .num { font-family:'DM Sans',monospace; font-size:22px; font-weight:700 }
+  .pri-summary .lbl { font-size:11px; color:var(--ink-60); margin-top:2px }
+  .pri-eixo { position: relative; height: 22px; margin: 4px 0 4px 60px;
+               font-size: 10px; color: var(--ink-60) }
+  .pri-eixo .tk { position: absolute; top: 0; transform: translateX(-50%) }
+  .pri-eixo .tk::before { content:""; display:block; width:1px; height:5px;
+                           background:var(--ink-40); margin: 0 auto 2px }
+  .pri-controle { padding:10px 0; display:flex; gap: 16px; align-items:center;
+                    flex-wrap: wrap }
+  .pri-toggle { display: inline-flex; gap:10px; align-items:center;
+                 font-size:12.5px; cursor:pointer; user-select:none }
+  .pri-toggle input { transform: scale(1.1) }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <div class="brand">
+      <img src="brasao_pr.svg" class="brasao-pr" alt="Brasão do Paraná">
+      <span class="brand-name">Painel ENEM <b>2025</b> <span class="pr-tag">Paraná</span></span>
+    </div>
+    <div class="topbar-links">
+      <a href="index.html">Painel</a>
+      <a href="mapa.html">Mapa</a>
+      <a href="ranking_escolas.html">Ranking</a>
+      <a href="criticas.html">Análise</a>
+      <a href="priorizacao.html" class="on">Priorização</a>
+      <a href="entenda.html">Entenda os dados</a>
+      <span class="brand-by">um produto <b>Wayground</b></span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="card selector">
+    <h1>Priorização de habilidades · Paraná 🎯</h1>
+    <p class="sub">Habilidades onde o Paraná ensina <b>abaixo</b> ou <b>acima</b>
+       do esperado pela TRI, dado o nível dos alunos.
+       Dado combinado de 2024 e 2025. Barras à esquerda do zero: <b>lacuna</b>
+       (candidato a plano pedagógico). À direita: <b>força</b> (a referência
+       interna do estado). Use os anos 2024 e 2025 lado a lado pra separar
+       sinal de ruído: uma habilidade só é confiável quando os dois anos vão
+       no mesmo sentido.</p>
+    <div class="tabs" id="tabs-area">
+      <button data-a="MT" class="on">Matemática</button>
+      <button data-a="LC">Linguagens</button>
+      <button data-a="CH">Humanas</button>
+      <button data-a="CN">Natureza</button>
+    </div>
+    <div class="pri-controle">
+      <label class="pri-toggle">
+        <input type="checkbox" id="chk-consistente">
+        <span>Só habilidades <b>consistentes</b> (mesmo sinal 2024 &amp; 2025)</span>
+      </label>
+      <label class="pri-toggle">
+        <input type="checkbox" id="chk-ord-delta" checked>
+        <span>Ordenar por Δ (mais negativo primeiro)</span>
+      </label>
+    </div>
+  </section>
+
+  <div class="pri-summary" id="pri-summary"></div>
+
+  <section class="card">
+    <div class="card-head">
+      <h3 id="pri-titulo">Matemática · habilidades por Δ esperado (2024+2025)</h3>
+      <span class="hint">Δ em pontos percentuais · barra vermelha = lacuna · azul = força</span>
+    </div>
+    <div class="pri-legenda">
+      <span><i class="sw" style="background:var(--rose)"></i>Δ &lt; 0 e consistente 2024+2025 · <b>priorizar</b></span>
+      <span><i class="sw" style="background:#f4c56a"></i>Δ &lt; 0 mas inconsistente · <b>investigar</b></span>
+      <span><i class="sw" style="background:#8fbeed"></i>Δ &gt; 0 e consistente · <b>manter/replicar</b></span>
+      <span><i class="sw" style="background:rgba(0,0,0,.15)"></i>zona de ruído (±1pp)</span>
+      <span>Marcador ▎ = ano específico</span>
+    </div>
+    <div class="pri-eixo" id="pri-eixo"></div>
+    <div class="pri-grade" id="pri-grade"></div>
+    <p class="foot-note">Barra combinada de 2024+2025. Traços verticais marcam o
+       Δ de cada ano individual — quando estão juntos e no mesmo lado do zero,
+       o sinal é robusto. Habilidades com ~1-3 itens por ano têm alta variância;
+       consistência entre anos filtra a maior parte do ruído.
+       Descrição das habilidades vem da Matriz de Referência do INEP.</p>
+  </section>
+
+  <footer class="rodape">
+    Fonte: Microdados ENEM 2024 + 2025 (INEP). Recorte: escolas do Paraná,
+    itens majoritários (n_max_ESC_BR ≥ 25% do teto anual). Cálculo:
+    Δ = (Σ acertos - Σ esperado_TRI) / Σ n · 100 pontos percentuais.
+  </footer>
+</main>
+
+<script>window.LOCK_UF = "PR"; window.LOCK_UF_NOME = "Paraná"; window.API_STATIC = 1;</script>
+<script src="habilidades.js"></script>
+<script src="priorizacao.js"></script>
+</body>
+</html>

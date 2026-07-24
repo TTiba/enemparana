@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Habilidade · Painel ENEM 2025 · Paraná</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..1000&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles_pr.css">
+<meta name="robots" content="noindex, nofollow">
+<script>window.LOCK_UF = "PR"; window.LOCK_UF_NOME = "Paraná"; window.API_STATIC = 1;</script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <div class="brand">
+      <img src="brasao_pr.svg" alt="Brasão do Paraná" class="brasao-pr">
+      <span class="brand-name">Painel ENEM <b>2025</b> · Paraná</span>
+    </div>
+    <span class="brand-by">um produto <b>Wayground</b></span>
+  </div>
+</header>
+
+<main class="wrap">
+  <p class="volta"><a href="index.html">← Voltar ao painel</a></p>
+
+  <section class="card hab-hero">
+    <div id="hab-banda" class="hab-banda"></div>
+    <div class="hab-hero-in">
+      <div id="hab-area" class="hab-area"></div>
+      <div id="hab-comp" class="hab-comp"></div>
+      <hr class="hab-hero-sep">
+      <div class="hab-hab-line">
+        <span id="hab-chip-h" class="chip-hab"></span>
+        <p id="hab-desc" class="hab-desc-txt"></p>
+      </div>
+      <p id="hab-alvo" class="hab-alvo" hidden></p>
+    </div>
+  </section>
+
+  <section id="hab-cobertura" class="card" hidden>
+    <div class="card-head">
+      <h3>Cobertura no ENEM · 2021 a 2025</h3>
+      <span class="hint">quantos itens desta habilidade cada prova cobrou e o acerto médio no Brasil</span>
+    </div>
+    <div id="hab-cobertura-tiles" class="hab-tiles"></div>
+    <p id="hab-recorrentes" class="foot-note" hidden></p>
+    <details style="margin-top:12px">
+      <summary style="cursor:pointer;font-size:13px;color:var(--ink-40)">
+        Ver itens por ano (CO_ITEM, dificuldade b, % acerto BR)
+      </summary>
+      <div id="hab-itens-detalhe" style="margin-top:10px"></div>
+    </details>
+  </section>
+
+  <section id="hab-evolucao" class="card" hidden>
+    <div class="card-head">
+      <h3 id="hab-evolucao-titulo">Evolução do desempenho · 2021 a 2025</h3>
+      <span class="hint">acerto médio nos itens desta habilidade, ano a ano</span>
+    </div>
+    <div id="hab-evolucao-body"></div>
+    <p id="hab-evolucao-nota" class="foot-note" hidden></p>
+  </section>
+
+  <section id="hab-questoes" class="card" hidden>
+    <div class="card-head">
+      <h3>Questões desta habilidade · ENEM 2025 (caderno AZUL)</h3>
+      <span class="hint">reprodução oficial do INEP — clique para ampliar</span>
+    </div>
+    <div id="hab-questoes-grid" class="hab-quest-grid"></div>
+    <p class="foot-note" id="hab-questoes-nota"></p>
+  </section>
+
+  <section class="entidade">
+    <div>
+      <h2>Trilhas pedagógicas para esta habilidade</h2>
+      <div class="meta">Roteiro sugerido de conteúdos e atividades por momento
+        da aprendizagem · <b>conteúdo demonstrativo</b></div>
+    </div>
+    <div class="chip-nivel" style="background:var(--pink)">demo</div>
+  </section>
+
+  <div class="trilhas">
+    <section class="card trilha trilha-estr">
+      <div class="card-head">
+        <h3>📘 Conteúdo estruturado</h3>
+        <span class="hint">aulas do RCO · sequência didática</span>
+      </div>
+      <div id="col-estruturado" class="lista-links"></div>
+    </section>
+
+    <section class="card trilha trilha-pratica">
+      <div class="card-head">
+        <h3>✏️ Prática autônoma</h3>
+        <span class="hint">lição de casa · Wayground</span>
+      </div>
+      <div id="col-pratica" class="lista-links"></div>
+    </section>
+
+    <section class="card trilha trilha-aprof">
+      <div class="card-head">
+        <h3>🚀 Aprofundamento</h3>
+        <span class="hint">para quem quer ir além</span>
+      </div>
+      <div id="col-aprofundamento" class="lista-links"></div>
+    </section>
+
+    <section class="card trilha trilha-recomp">
+      <div class="card-head">
+        <h3>🔁 Recomposição</h3>
+        <span class="hint">reforço e retomada</span>
+      </div>
+      <div id="col-recomposicao" class="lista-links"></div>
+    </section>
+  </div>
+
+  <footer class="rodape">
+    Demonstração de conceito — os vínculos aula/atividade ↔ habilidade são
+    simulados para fins de apresentação do produto.
+  </footer>
+</main>
+
+<script src="filtros.js"></script>
+<script src="habilidades.js"></script>
+<script src="competencias.js"></script>
+<script src="charts.js"></script>
+<script src="habilidade.js"></script>
+</body>
+</html>

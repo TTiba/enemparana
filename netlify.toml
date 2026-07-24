@@ -1,0 +1,7 @@
+[build]
+  publish = "pr2_deploy"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"

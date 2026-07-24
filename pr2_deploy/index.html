@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel ENEM 2025 · Paraná · Wayground</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..1000&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles_pr.css">
+<script>window.LOCK_UF = "PR"; window.LOCK_UF_NOME = "Paraná"; window.API_STATIC = 1;</script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <div class="brand">
+      <img src="brasao_pr.svg" alt="Brasão do Paraná" class="brasao-pr">
+      <span class="brand-name">Painel ENEM <b>2025</b> · Paraná</span>
+    </div>
+    <div class="topbar-links">
+      <a href="mapa.html">Mapa</a>
+      <a href="ranking_escolas.html">Ranking</a>
+      <a href="criticas.html">Análise</a>
+      <a href="priorizacao.html">Priorização</a>
+      <a href="entenda.html">Entenda os dados</a>
+      <span class="brand-by">um produto <b>Wayground</b></span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- Seletor Estado > Município > Escola -->
+  <section class="card selector">
+    <h1>O que a escola paranaense ensinou este ano?</h1>
+    <p class="sub">Explore o desempenho no ENEM 2025 no Paraná por NRE, município e escola —
+       redação, áreas do conhecimento e cada item da prova.
+       <span class="sub-hist">Dados de 2021 a 2025.</span></p>
+    <div class="tabs tabs-rede" id="tabs-rede">
+      <button data-rede="T">Todas as redes</button>
+      <button data-rede="PUB" class="on">Públicas</button>
+      <button data-rede="PRIV">Privadas</button>
+    </div>
+    <div class="selects">
+      <label>Estado
+        <div class="uf-chip">Paraná</div>
+      </label>
+      <label>Núcleo Regional
+        <select id="sel-nre"><option value="">Todos (PR inteiro)</option></select>
+      </label>
+      <label>Município
+        <select id="sel-mun"><option value="">Todos os municípios</option></select>
+      </label>
+      <label>Escola
+        <span class="combo">
+          <input id="inp-esc" type="text" autocomplete="off" disabled
+                 placeholder="Digite para buscar…">
+          <div id="combo-list" class="combo-list" hidden></div>
+        </span>
+      </label>
+      <button id="btn-limpar" class="btn-ghost" type="button">Limpar</button>
+    </div>
+  </section>
+
+  <!-- Cabeçalho da entidade -->
+  <section id="entidade" class="entidade">
+    <div>
+      <h2 id="ent-nome">Paraná</h2>
+      <div id="ent-meta" class="meta"></div>
+    </div>
+    <div id="ent-chip" class="chip-nivel">Estado</div>
+  </section>
+
+  <!-- KPIs -->
+  <section id="kpis" class="kpis"></section>
+
+  <!-- Evolução 2021–2025 -->
+  <section id="evolucao" class="card evolucao" hidden>
+    <div class="card-head">
+      <h3>Evolução 2021 – 2025</h3>
+      <span class="hint">média geral por área (escala ENEM); tracejado = Brasil</span>
+    </div>
+    <div id="evolucao-body"></div>
+    <p id="evolucao-nota" class="foot-note" hidden></p>
+  </section>
+
+  <div class="duo">
+    <!-- Redação: competências -->
+    <section class="card">
+      <div class="card-head">
+        <h3>Redação · competências</h3>
+        <span class="hint">média de 0 a 200 por competência</span>
+      </div>
+      <div id="comps"></div>
+    </section>
+
+    <!-- Comparação por área -->
+    <section class="card">
+      <div class="card-head">
+        <h3>Comparação por área</h3>
+        <span class="hint">médias na escala ENEM</span>
+      </div>
+      <div id="areas-comp"></div>
+    </section>
+  </div>
+
+  <!-- Desempenho por competência -->
+  <section id="card-comp" class="card" hidden>
+    <div class="card-head">
+      <h3>Desempenho por competência <span id="tit-comp-sub">· 2025</span></h3>
+      <span class="hint" id="hint-comp">
+        agrupamento oficial da Matriz de Referência — clique numa competência
+        para filtrar as questões correspondentes
+      </span>
+    </div>
+    <div class="tabs-linha">
+      <div class="tabs" id="tabs-area-comp">
+        <button data-area="LC">Linguagens</button>
+        <button data-area="CH">Humanas</button>
+        <button data-area="CN">Natureza</button>
+        <button data-area="MT" class="on">Matemática</button>
+      </div>
+      <div class="tabs" id="tabs-modo-comp">
+        <button data-modo="atual" class="on">Ano atual</button>
+        <button data-modo="evolucao">Evolução 2021 – 2025</button>
+      </div>
+    </div>
+    <div id="comp-body"></div>
+  </section>
+
+  <!-- Itens -->
+  <section class="card">
+    <div class="card-head">
+      <h3>Desempenho por item · <span id="tit-ano-itens">2025</span></h3>
+      <span class="hint">
+        barra colorida = % acerto observado · <b>▍</b> = esperado pela TRI ·
+        barra lilás embaixo = acerto no Brasil (referência)
+      </span>
+    </div>
+    <div class="tabs-linha">
+      <div class="tabs" id="tabs-area">
+        <button data-area="LC">Linguagens</button>
+        <button data-area="CH">Humanas</button>
+        <button data-area="CN">Natureza</button>
+        <button data-area="MT" class="on">Matemática</button>
+      </div>
+      <div class="tabs tabs-ano" id="tabs-ano">
+        <button data-ano="2021" title="Aplicada em jan/2022 · pandemia">2021 ⚠</button>
+        <button data-ano="2022">2022</button>
+        <button data-ano="2023">2023</button>
+        <button data-ano="2024">2024</button>
+        <button data-ano="2025" class="on">2025</button>
+      </div>
+    </div>
+    <div class="tbl-scroll">
+      <table class="tbl" id="tbl-itens">
+        <thead><tr>
+          <th>Habilidade</th>
+          <th title="Número de itens desta habilidade nesta prova">Nº itens</th>
+          <th>Dificuldade (b)</th>
+          <th class="col-bar">% acerto (seleção)</th>
+          <th title="% de acerto neste item na UF (quando aplica) e no Brasil — é a referência pra comparar o desempenho da sua seleção">Acerto UF · BR</th>
+          <th title="Diferença entre o % de acerto da seleção e o % do Brasil no mesmo item, em pontos percentuais">Δ Brasil</th>
+          <th title="Diferença entre o acerto observado e o esperado pela TRI dado o nível dos alunos desta seleção">Δ esperado</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="foot-note">Habilidades exibidas conforme a matriz de referência do INEP (H1–H30 por área).
+       Quando o mapa próprio de habilidades por item for carregado, ele substitui esta coluna.</p>
+  </section>
+
+  <footer class="rodape">
+    Fonte: Microdados ENEM 2021–2025 (INEP). Concluintes do ensino médio.
+    A partir de 2024 o INEP passou a expor o código INEP da escola, portanto o
+    histórico por escola cobre apenas 2024–2025. Células com poucos participantes
+    devem ser lidas com cautela.
+  </footer>
+</main>
+
+<script src="filtros.js"></script>
+<script src="habilidades.js"></script>
+<script src="competencias.js"></script>
+<script src="charts.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

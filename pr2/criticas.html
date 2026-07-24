@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Análise de habilidades · Painel ENEM · Wayground · Paraná</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..1000&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles_pr.css">
+<meta name="robots" content="noindex, nofollow">
+<script>window.LOCK_UF = "PR"; window.LOCK_UF_NOME = "Paraná"; window.API_STATIC = 1;</script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <div class="brand">
+      <img src="brasao_pr.svg" alt="Brasão do Paraná" class="brasao-pr">
+      <span class="brand-name">Painel ENEM <b>2025</b> · Paraná</span>
+    </div>
+    <div class="topbar-links">
+      <a href="index.html">Painel</a>
+      <a href="mapa.html">Mapa</a>
+      <a href="ranking_escolas.html">Ranking escolas</a>
+      <a href="priorizacao.html">Priorização</a>
+      <a href="entenda.html">Entenda os dados</a>
+      <span class="brand-by">um produto <b>Wayground</b></span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap wrap-wide">
+
+  <section class="card">
+    <h1 style="margin:0 0 6px;font-size:clamp(24px,3.6vw,32px);font-weight:900;letter-spacing:-.02em">
+      Análise de habilidades
+    </h1>
+    <p class="sub" style="max-width:780px;color:var(--ink-40);margin:0 0 4px">
+      Tabela de acerto por habilidade × ano para o grupo escolhido. As duas
+      últimas colunas mostram a <b>média dos 5 anos</b> e o <b>esperado pela
+      TRI</b> para esse grupo — habilidades onde a média fica muito abaixo do
+      esperado indicam gaps consistentes.
+    </p>
+    <p id="crit-alvo" class="hab-alvo" hidden></p>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h3>Filtros</h3>
+      <span class="hint" id="crit-resumo">calculando…</span>
+    </div>
+    <div class="tabs tabs-rede" id="crit-rede">
+      <button data-rede="T">Todas as redes</button>
+      <button data-rede="PUB" class="on">Públicas</button>
+      <button data-rede="PRIV">Privadas</button>
+    </div>
+    <div class="selects">
+      <label>Estado
+        <div class="uf-chip">Paraná</div>
+      </label>
+      <label>Núcleo Regional
+        <select id="sel-nre"><option value="">Todos (PR inteiro)</option></select>
+      </label>
+      <label>Município
+        <select id="sel-mun"><option value="">Todos os municípios</option></select>
+      </label>
+      <label>Escola
+        <span class="combo">
+          <input id="inp-esc" type="text" autocomplete="off" disabled
+                 placeholder="Digite para buscar…">
+          <div id="combo-list" class="combo-list" hidden></div>
+        </span>
+      </label>
+      <button id="btn-limpar" class="btn-ghost" type="button">Limpar</button>
+    </div>
+    <div class="crit-controls" style="margin-top:14px">
+      <div class="crit-ctrl">
+        <label>Área</label>
+        <div class="tabs" id="crit-area">
+          <button data-area="" class="on">Todas</button>
+          <button data-area="LC">Linguagens</button>
+          <button data-area="CH">Humanas</button>
+          <button data-area="CN">Natureza</button>
+          <button data-area="MT">Matemática</button>
+        </div>
+      </div>
+      <div class="crit-ctrl">
+        <label>Anos considerados na média/esperado</label>
+        <div class="tabs" id="crit-anos">
+          <button data-ano="2021" class="on">2021 ⚠</button>
+          <button data-ano="2022" class="on">2022</button>
+          <button data-ano="2023" class="on">2023</button>
+          <button data-ano="2024" class="on">2024</button>
+          <button data-ano="2025" class="on">2025</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="tbl-scroll">
+      <table class="tbl crit-tabela" id="crit-tabela">
+        <thead>
+          <tr id="crit-thead">
+            <th class="crit-col-area sortable" data-sort="area">Área</th>
+            <th class="crit-col-h sortable" data-sort="h">Hab.</th>
+            <th class="crit-col-desc sortable" data-sort="desc">Habilidade</th>
+            <th class="crit-col-ano sortable" data-sort="a0">2021</th>
+            <th class="crit-col-ano sortable" data-sort="a1">2022</th>
+            <th class="crit-col-ano sortable" data-sort="a2">2023</th>
+            <th class="crit-col-ano sortable" data-sort="a3">2024</th>
+            <th class="crit-col-ano sortable" data-sort="a4">2025</th>
+            <th class="crit-col-media sortable" data-sort="media">Média <span id="crit-media-lbl">2021 – 2025</span></th>
+            <th class="crit-col-esp sortable" data-sort="esperado" title="Percentual esperado pela TRI dado o nível dos alunos deste grupo — se a média fica abaixo, é gap efetivo">Esperado (TRI)</th>
+            <th class="crit-col-delta sortable" data-sort="delta" title="Média observada menos esperado pela TRI, em pontos percentuais">Δ vs esperado</th>
+          </tr>
+        </thead>
+        <tbody id="crit-tbody">
+          <tr><td colspan="11" class="skeleton" style="padding:24px;text-align:center">Carregando…</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="foot-note" style="margin-top:14px">
+      Cores das células: intensidade proporcional ao acerto (vermelho ≈ 0% → verde/amarelo ≈ 100%).
+      "—" significa que a habilidade não foi cobrada naquele ano ou não há dados no grupo (ex.: escola pré-2024).
+    </p>
+  </section>
+
+  <footer class="rodape">
+    Fonte: Microdados ENEM 2021 – 2025 (INEP). Escala de cores baseada no
+    acerto observado; esperado calculado a partir dos parâmetros TRI oficiais
+    dos itens e da nota média do grupo selecionado.
+  </footer>
+</main>
+
+<script src="filtros.js"></script>
+<script src="habilidades.js"></script>
+<script src="competencias.js"></script>
+<script src="charts.js"></script>
+<script src="criticas.js"></script>
+</body>
+</html>

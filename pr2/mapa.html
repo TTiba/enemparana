@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapa do Brasil · Painel ENEM 2025 · Paraná</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..1000&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles_pr.css">
+<meta name="robots" content="noindex, nofollow">
+<script>window.LOCK_UF = "PR"; window.LOCK_UF_NOME = "Paraná"; window.API_STATIC = 1;</script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <div class="brand">
+      <img src="brasao_pr.svg" alt="Brasão do Paraná" class="brasao-pr">
+      <span class="brand-name">Painel ENEM <b>2025</b> · Paraná</span>
+    </div>
+    <div class="topbar-links">
+      <a href="index.html">Painel</a>
+      <a href="ranking_escolas.html">Ranking</a>
+      <a href="criticas.html">Análise</a>
+      <a href="priorizacao.html">Priorização</a>
+      <a href="entenda.html">Entenda os dados</a>
+      <span class="brand-by">um produto <b>Wayground</b></span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap wrap-wide">
+
+  <section class="card selector">
+    <h1>Paraná no mapa 🗺️</h1>
+    <p class="sub">Média de cada NRE (Núcleo Regional de Educação) no ENEM 2025.
+       Passe o mouse para detalhes; clique num NRE para abrir seus municípios,
+       clique num município para ver o detalhamento no painel à direita.</p>
+    <div class="tabs tabs-rede" id="tabs-rede">
+      <button data-rede="T">Todas as redes</button>
+      <button data-rede="PUB" class="on">Públicas</button>
+      <button data-rede="PRIV">Privadas</button>
+    </div>
+    <div class="tabs" id="tabs-metrica">
+      <button data-m="media_geral" class="on">Média geral</button>
+      <button data-m="media_red">Redação</button>
+      <button data-m="media_lc">Linguagens</button>
+      <button data-m="media_ch">Humanas</button>
+      <button data-m="media_cn">Natureza</button>
+      <button data-m="media_mt">Matemática</button>
+    </div>
+  </section>
+
+  <div class="mapa-layout">
+    <!-- Coluna do mapa -->
+    <section class="card mapa-card">
+      <div class="card-head">
+        <h3 id="mapa-titulo">Paraná · NREs</h3>
+        <button id="btn-brasil" class="btn-ghost btn-mini" type="button" hidden>← Paraná</button>
+      </div>
+      <div id="mapa-wrap">
+        <div class="skeleton">Carregando mapa…</div>
+      </div>
+      <div class="legenda">
+        <span id="leg-min"></span>
+        <div class="leg-grad"></div>
+        <span id="leg-max"></span>
+      </div>
+    </section>
+
+    <!-- Coluna de detalhes -->
+    <div class="mapa-detalhes">
+
+      <section class="card">
+        <div class="card-head">
+          <h3 id="det-titulo">Paraná</h3>
+          <span class="hint" id="det-sub"></span>
+        </div>
+        <div id="det-kpis" class="det-kpis"></div>
+      </section>
+
+      <section id="card-hist" class="card" hidden>
+        <div class="card-head">
+          <h3 id="hist-titulo">Distribuição da nota</h3>
+          <span class="hint" id="hist-hint">acerto médio por faixa de 25 pontos · linha lilás = Brasil</span>
+        </div>
+        <div id="hist-body"></div>
+      </section>
+
+      <section id="card-top-esc" class="card">
+        <div class="card-head">
+          <h3 id="top-esc-titulo">Top 10 escolas</h3>
+          <span class="hint">média geral · escolas com ≥ 30 concluintes</span>
+        </div>
+        <div id="top-esc-body"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h3 id="rank-titulo">Ranking</h3>
+          <span class="hint">média na escala ENEM</span>
+        </div>
+        <label class="chk-minn">
+          <input type="checkbox" id="chk-minn">
+          incluir locais com menos de 30 presentes (1º dia)
+        </label>
+        <div id="ranking" class="ranking"></div>
+      </section>
+
+    </div>
+  </div>
+
+  <footer class="rodape">
+    Fonte: Microdados ENEM 2025 (INEP). Médias apenas de concluintes com escola
+    identificada — não representam toda a população que fez a prova.
+  </footer>
+</main>
+
+<div id="map-tip" class="tooltip" hidden></div>
+
+<script src="filtros.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script src="mapa.js"></script>
+</body>
+</html>
