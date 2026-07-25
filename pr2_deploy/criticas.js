@@ -174,6 +174,8 @@ function corAcerto(p) {
 }
 function corDelta(d) {
   if (d == null) return "transparent";
+  // arredondado a 0 pp → neutro (nem lacuna nem força)
+  if (Math.abs(d * 100) < 0.5) return "var(--ink-06)";
   // divergente centrado em 0 (± 15pp = saturado)
   const t = Math.min(1, Math.abs(d) / 0.15);
   const base = d >= 0 ? [187, 227, 138] : [255, 143, 143];
@@ -274,8 +276,9 @@ function render() {
     const celDelta = () => {
       if (l.delta == null) return `<td class="crit-cel-vazio">—</td>`;
       const pp = l.delta * 100;
-      const sign = pp >= 0 ? "+" : "";
-      return `<td class="crit-cel crit-delta" style="background:${corDelta(l.delta)}">${sign}${pp.toFixed(0)} pp</td>`;
+      const arr = Math.round(pp);
+      const sign = arr > 0 ? "+" : arr < 0 ? "−" : "";
+      return `<td class="crit-cel crit-delta" style="background:${corDelta(l.delta)}">${sign}${Math.abs(arr)} pp</td>`;
     };
     const desc = l.desc.length > 80 ? l.desc.slice(0, 78) + "…" : l.desc;
     const linkQs = new URLSearchParams({

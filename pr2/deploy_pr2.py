@@ -74,7 +74,7 @@ data_out = os.path.join(OUT, "data")
 os.makedirs(data_out)
 for f in ("nre_pr.geojson", "mun_pr.geojson", "nre_agg.json",
           "mun_to_cel.json", "nre_to_muns.json",
-          "nre_hist_resumo.json",
+          "nre_hist_resumo.json", "hist_nota_pr.json",
           "priorizacao_habilidades_pr_estado.json",
           "priorizacao_habilidades_pr_estado.csv"):
     src = os.path.join(PR2, "data", f)
