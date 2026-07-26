@@ -576,9 +576,9 @@ function barRow(lbl, val, max, cor, valTxt) {
 /* ---------- render: itens ------------------------------------------------- */
 function classifB(b) {
   if (b == null) return ["", "–"];
-  if (b < 0)   return ["b-facil", `${fmt(b)} · fácil`];
-  if (b < 1.2) return ["b-media", `${fmt(b)} · média`];
-  return ["b-dificil", `${fmt(b)} · difícil`];
+  if (b < 0)   return ["b-facil", fmt(b)];
+  if (b < 1.2) return ["b-media", fmt(b)];
+  return ["b-dificil", fmt(b)];
 }
 
 /* Em LC, H5-H8 aparecem como 2 itens por versão (inglês + espanhol). Do
