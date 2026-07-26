@@ -235,6 +235,18 @@ hb_orig = os.path.join(API_ORIG, "habilidades")
 if os.path.exists(hb_orig):
     shutil.copytree(hb_orig, os.path.join(api_out, "habilidades"))
 
+# historico/ESC/{inep}.json — chama script que agrega hist_item por escola PR
+log("Gerando historico/ESC/ (2024+2025 por escola do PR)…")
+import subprocess
+script_esc = os.path.join(BASE, "pipeline", "build_historico_esc_pr.py")
+r = subprocess.run(["python3", script_esc], capture_output=True, text=True)
+if r.returncode != 0:
+    log("  ! build_historico_esc_pr.py falhou:")
+    log(r.stderr)
+else:
+    for linha in r.stdout.strip().splitlines()[-2:]:
+        log("  " + linha)
+
 # ---------------------------------------------------------------- robots + toml
 with open(os.path.join(OUT, "robots.txt"), "w") as f:
     f.write("User-agent: *\nDisallow: /\n")

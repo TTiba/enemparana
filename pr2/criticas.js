@@ -64,12 +64,15 @@ async function carregarDados() {
   habIndex = await fetch("api/habilidades/index.json").then((r) => r.json());
   const { nivel, chave } = nivelChave();
 
-  // ESC não tem historico/. Fallback: usa PR e mostra aviso.
-  if (nivel === "ESC") return await carregarUF();
-
   // NRE: agrega client-side os municípios do NRE
-  if (nivel === "NRE") {
-    return await carregarNRE(chave);
+  if (nivel === "NRE") return await carregarNRE(chave);
+
+  // ESC: puxa historico/ESC/{inep}.json (gerado por pipeline/build_historico_esc_pr.py).
+  // Se faltar, fallback pro PR com aviso.
+  if (nivel === "ESC") {
+    const hist = await fetch(`api/historico/ESC/${chave}.json`).then((r) => r.ok ? r.json() : null);
+    if (!hist) return await carregarUF();
+    return computarDeHistorico(hist);
   }
 
   const hist = await fetch(`api/historico/${nivel}/${chave}.json`).then((r) => r.ok ? r.json() : null);
