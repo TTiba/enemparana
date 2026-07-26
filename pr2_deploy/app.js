@@ -684,22 +684,24 @@ function renderItens(rowsRaw, nivel) {
     const dEspHtml = badge(r.p_esp == null ? null : r.p - r.p_esp);
     // UF só some quando nivel === "BR" (aí não há UF selecionada); em
     // UF/MUN/ESC mostra a média da UF pai — quando disponível.
-    const ufTd = nivel === "BR" || r.p_uf == null ? "–" : `${fmt(r.p_uf * 100, 0)}%`;
-    const brTd = r.p_br == null ? "–" : `${fmt(r.p_br * 100, 0)}%`;
+    const ufTd = nivel === "BR" || r.p_uf == null ? "–"
+      : `<span title="UF: ${fmt(r.p_uf * 100, 1)}%">${fmt(r.p_uf * 100, 0)}%</span>`;
+    const brTd = r.p_br == null ? "–"
+      : `<span title="Brasil: ${fmt(r.p_br * 100, 1)}%">${fmt(r.p_br * 100, 0)}%</span>`;
     return `<tr>
       <td>${chip}${lang}</td>
       <td class="pct-n"><b>${n}</b></td>
       <td class="${bCls}">${bTxt}</td>
       <td class="col-bar">
-        <div class="mini-track">
+        <div class="mini-track" title="Acerto observado: ${fmt(r.p * 100, 1)}%${r.p_esp != null ? ` · esperado pela TRI: ${fmt(r.p_esp * 100, 1)}%` : ""}">
           <div class="mini-fill" style="width:${r.p * 100}%;background:${cor}"></div>
           ${r.p_esp == null ? "" :
             `<div class="mini-mark" style="left:${r.p_esp * 100}%"
-                  title="Esperado pela TRI: ${fmt(r.p_esp * 100, 0)}%"></div>`}
+                  title="Esperado pela TRI: ${fmt(r.p_esp * 100, 1)}%"></div>`}
           <span class="mini-val">${fmt(r.p * 100, 0)}%</span>
         </div>
         ${r.p_br == null ? "" :
-          `<div class="mini-track-br" title="Acerto no Brasil: ${fmt(r.p_br * 100, 0)}%">
+          `<div class="mini-track-br" title="Acerto no Brasil: ${fmt(r.p_br * 100, 1)}%">
              <div class="mini-fill-br" style="width:${r.p_br * 100}%"></div>
            </div>`}
       </td>
