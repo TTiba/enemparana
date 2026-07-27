@@ -180,35 +180,6 @@ a.chip-hab:hover { background: var(--pink); color: var(--card); transform: trans
 .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 @media (max-width: 860px) { .duo { grid-template-columns: 1fr; } }
 
-/* ===== Trilhas — grade de 4 colunas na página de habilidade =============== */
-.trilhas {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
-  margin: 18px 0;
-}
-@media (max-width: 1180px) { .trilhas { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 640px)  { .trilhas { grid-template-columns: 1fr; } }
-
-.trilha { padding: 20px; }
-.trilha .card-head h3 { font-size: 18px; }
-.trilha .card-head .hint { font-size: 11.5px; }
-.trilha .lista-links { margin-top: 12px; }
-.trilha .link-item { padding: 10px 12px; }
-.trilha .li-txt b { font-size: 13.5px; line-height: 1.25; }
-.trilha .li-txt small { font-size: 11px; line-height: 1.35; }
-
-.trilha { border-top: 6px solid transparent; }
-.trilha-estr   { border-top-color: var(--lilac); }
-.trilha-pratica { border-top-color: var(--rose); }
-.trilha-aprof  { border-top-color: var(--mint); }
-.trilha-recomp { border-top-color: var(--peach); }
-
-.trilha-estr .link-item   { background: var(--cream-soft); }
-.trilha-pratica .link-item { background: #ffe6f2; }
-.trilha-aprof .link-item  { background: #e2f7f4; }
-.trilha-recomp .link-item { background: #ffedd8; }
-
 .bar-row { display: grid; grid-template-columns: 130px 1fr 52px; align-items: center; gap: 10px; margin: 7px 0; font-size: 13.5px; }
 .bar-row .lbl { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bar-row .lbl small { display: block; font-weight: 500; color: var(--ink-40); font-size: 11px; }
@@ -340,26 +311,6 @@ a.chip-hab:hover { background: var(--pink); color: var(--card); transform: trans
   background: var(--cream); border: 1.5px solid var(--ink-12);
   font-weight: 700; font-size: 12.5px; padding: 4px 12px; border-radius: 999px;
 }
-.lista-links { display: flex; flex-direction: column; gap: 10px; }
-.link-item {
-  display: flex; align-items: center; gap: 12px;
-  text-decoration: none; color: var(--ink);
-  border: 1.5px solid var(--ink-12); border-radius: var(--radius-sm);
-  padding: 12px 14px;
-  transition: transform .1s, box-shadow .15s, border-color .15s;
-}
-.link-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 14px var(--ink-12);
-  border-color: var(--ink);
-}
-.link-rco { background: var(--cream-soft); }
-.link-wg  { background: var(--rose); }
-.li-ico { font-size: 18px; flex: 0 0 auto; }
-.li-txt { flex: 1; min-width: 0; }
-.li-txt b { display: block; font-weight: 800; font-size: 14px; }
-.li-txt small { color: rgba(59,20,42,.55); font-size: 12px; font-weight: 600; }
-.li-seta { font-weight: 900; font-size: 16px; flex: 0 0 auto; }
 .rodape { color: var(--ink-40); font-size: 12.5px; text-align: center; padding: 26px 0 40px; }
 
 /* ===== Histórico 2021–2025 ================================================ */

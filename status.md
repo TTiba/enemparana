@@ -236,6 +236,13 @@ não é a média bruta da UF/BR.
   exibição, e o default já é PUB). Testado nos 4 cenários: com parâmetros,
   index limpo, raiz `/` e navegação index→Análise.
 
+- **Trilhas pedagógicas demo removidas** (27/07): a página de habilidade
+  tinha 4 colunas de conteúdo simulado (RCO/Wayground) marcadas como "demo".
+  Removidas de `habilidade.html`, `habilidade.js` (92 linhas: `TRILHAS`,
+  `wg()`, `rco()` e as variáveis `tema`/`temaCap` que só serviam a elas) e o
+  CSS órfão de `styles.css` (49 linhas) e `styles_pr.css` (29 linhas). A
+  página agora tem: cobertura no ENEM → evolução → questões da prova.
+
 ## Pontos de atenção
 
 - **hist_nota MUN não existe no banco nacional** (só BR/UF). Por isso o
