@@ -232,12 +232,10 @@ async function agregarItensNRE(nre, area, ano, rede) {
     for (const rows of listas) {
       for (const [item, n, p, pEsp, hab, b, lingua] of rows) {
         if (!n) continue;
-        const cur = agg.get(item) || { n: 0, sp: 0, nP: 0, sEsp: 0, nEsp: 0,
+        const cur = agg.get(item) || { n: 0, sp: 0, sEsp: 0, nEsp: 0,
                                          hab, b, lingua };
         cur.n += n;
-        // p e p_esp têm denominadores próprios: um município pode trazer n>0
-        // com p null (ou vice-versa), e dividir pelo n total subestimaria.
-        if (p != null) { cur.sp += p * n; cur.nP += n; }
+        if (p != null) cur.sp += p * n;
         if (pEsp != null) { cur.sEsp += pEsp * n; cur.nEsp += n; }
         agg.set(item, cur);
       }
@@ -255,7 +253,7 @@ async function agregarItensNRE(nre, area, ano, rede) {
     const rb = refBr?.[rede] || {};
     return [...agg.entries()].map(([item, r]) => ({
       item, n: r.n,
-      p: r.nP ? r.sp / r.nP : null,
+      p: r.n ? r.sp / r.n : null,
       p_esp: r.nEsp ? r.sEsp / r.nEsp : null,
       habilidade_inep: r.hab, param_b: r.b, tp_lingua: r.lingua,
       p_uf: ru[item] ?? null, p_br: rb[item] ?? null,
@@ -603,11 +601,6 @@ function fundirLEM(rows) {
   for (const [hab, vers] of lem.entries()) {
     if (vers.length === 1) { fundidos.push(vers[0]); continue; }
     const nTot = vers.reduce((s, x) => s + (x.n || 0), 0) || 1;
-    // Atenção: p_uf e p_br também são ponderados pelo n DA SELEÇÃO, não pelo
-    // n da UF/Brasil. Ou seja, a referência é padronizada pelo mix
-    // inglês/espanhol da seleção — é o que se quer (compara a seleção com uma
-    // UF/BR hipotética que tivesse a mesma proporção de idiomas, isolando o
-    // efeito de composição), mas não é a média bruta da UF/BR.
     const wavg = (campo) => {
       const num = vers.reduce((s, x) => s + (x[campo] != null ? x[campo] * (x.n || 0) : 0), 0);
       const den = vers.reduce((s, x) => s + (x[campo] != null ? (x.n || 0) : 0), 0);
