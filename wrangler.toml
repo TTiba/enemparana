@@ -1,0 +1,8 @@
+name = "enemparana"
+compatibility_date = "2025-01-01"
+
+# Site 100% estático — servido como assets via Cloudflare Workers.
+# Fonte dos arquivos: pr2_deploy/ (gerado por pr2/deploy_pr2.py).
+[assets]
+directory = "./pr2_deploy"
+not_found_handling = "404-page"
