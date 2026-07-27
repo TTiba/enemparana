@@ -35,9 +35,26 @@
     return out;
   }
 
+  /* Página inicial aberta sem nenhum parâmetro = começar do zero.
+   *
+   * Sem isso o localStorage restaurava a última escola visitada e o painel
+   * abria pré-filtrado num município/escola, em vez de mostrar o Paraná
+   * inteiro. As outras páginas continuam lendo o localStorage — é ele que
+   * carrega o contexto entre elas, já que os links do topo não levam
+   * parâmetros. Como não existe link de volta pro index, chegar aqui é
+   * sempre um começo deliberado.
+   *
+   * A rede (PUB/PRIV/T) não é resetada: é preferência de exibição, não
+   * navegação, e o default já é PUB. */
+  function entradaLimpa() {
+    if (location.search) return false;
+    const p = location.pathname.replace(/\/+$/, "");
+    return p === "" || p.endsWith("/index.html") || p === "index.html";
+  }
+
   function carregar() {
     const url = lerURL();
-    const ls  = lerLS();
+    const ls  = entradaLimpa() ? {} : lerLS();
     const p = new URLSearchParams(location.search);
     const temUrlNre = p.has("nre");
     const temUrlMun = p.has("mun");
@@ -47,7 +64,7 @@
       nre:  temUrlNre ? (url.nre || "") : (url.nre ?? ls.nre ?? DEFAULTS.nre),
       mun:  temUrlMun ? (url.mun || "") : (url.mun ?? ls.mun ?? DEFAULTS.mun),
       esc:  temUrlEsc ? (url.esc || "") : (url.esc ?? ls.esc ?? DEFAULTS.esc),
-      rede: url.rede  ?? ls.rede ?? DEFAULTS.rede,
+      rede: url.rede  ?? lerLS().rede ?? DEFAULTS.rede,
     };
   }
 

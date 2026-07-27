@@ -225,6 +225,17 @@ denominador próprio (`nP`), como o `p_esp` já tinha; (b) a ponderação de
 direta pelo mix de idioma da seleção, o que isola efeito de composição, mas
 não é a média bruta da UF/BR.
 
+- **Painel abria pré-filtrado numa escola** (27/07): o `localStorage`
+  (`enem.filtros.pr2`) restaurava a última seleção, então abrir o site levava
+  direto pra um município/escola em vez do Paraná inteiro. Fix em
+  `filtros.js`: `index.html` (ou `/`) **sem nenhum parâmetro** ignora o
+  localStorage e começa do zero. As demais páginas seguem lendo dele — é o
+  que carrega o contexto entre elas, já que os links do topo não levam
+  parâmetros — e como não existe link de volta pro index, chegar nele é
+  sempre um começo deliberado. A `rede` não é resetada (é preferência de
+  exibição, e o default já é PUB). Testado nos 4 cenários: com parâmetros,
+  index limpo, raiz `/` e navegação index→Análise.
+
 ## Pontos de atenção
 
 - **hist_nota MUN não existe no banco nacional** (só BR/UF). Por isso o
