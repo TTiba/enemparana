@@ -165,6 +165,33 @@ inflada ~+2,9 pp em média — em MT da Feijó chega a trocar o sinal (painel di
 +1,4 pp acima do esperado; o correto é −0,9 pp abaixo). Fix é no `build_db.py`
 /pipeline do repo plataforma (cálculo de p_esp), fora deste repo.
 
+**Confirmação em escala (27/07)** — repetido em Ponta Grossa inteira e no PR,
+reconstruindo a distribuição de θ a partir de `hist_nota_pr.json` (buckets de
+25 pts; método validado contra os θ exatos da Feijó: erro de 0,02 pp no
+agregado). Viés do esperado vs acerto observado:
+
+| população | alunos | θ médio | D=1 | D=1,7 (hoje) | D ótimo |
+|---|---|---|---|---|---|
+| Feijó (ESC) | 200 | −0,02 | −0,14 pp | −2,88 pp | 0,98 |
+| Ponta Grossa · PUB | 1.422 | −0,02 | −0,20 pp | −2,95 pp | 0,97 |
+| Ponta Grossa · T | 2.284 | +0,28 | +0,52 pp | −1,42 pp | 1,12 |
+| Paraná · PUB | 50.328 | +0,09 | +0,09 pp | −2,41 pp | 1,02 |
+| Paraná · T | 64.780 | +0,25 | +0,49 pp | −1,58 pp | 1,11 |
+| Paraná · PRIV | 14.452 | +0,80 | +1,90 pp | +1,35 pp | >2,5 |
+
+Três populações públicas independentes de 200 a 50.328 alunos convergem em
+D ≈ 1,0. **O viés do D=1,7 é θ-dependente** (−3,0 pp na rede pública, −1,4 pp
+em todas as redes): não é offset constante, distorce a *comparação* entre
+escolas/redes, favorecendo artificialmente as mais fracas — o oposto do que um
+painel de priorização precisa. Em Ponta Grossa, 29 itens (PUB) e 46 itens (T)
+de ~180 **trocam de sinal** no "Δ esperado" com a correção.
+
+**Ressalva separada — rede privada**: o 3PL superestima os privados em ~+1,9 pp
+em qualquer D (o ótimo estoura 2,5). Não é causado nem resolvido pela correção
+do D; é desajuste de modelo, consistente com ausência de parâmetro de descuido
+(o 3PL não tem assíntota superior < 1, e o efeito cresce com θ). Vale documentar
+como limitação conhecida.
+
 **Menores**: (a) `agregarItensNRE` (app.js:237-256) usa `r.n` como denominador
 de `p` mas só soma `p*n` quando `p != null` — se algum município vier com n>0
 e p null, subestima; usar denominador próprio como já faz com `p_esp`;
