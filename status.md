@@ -142,6 +142,35 @@ dashboard Cloudflare inconcluso — retomar depois amanhã.
   cada célula de % acerto pra evitar confusão com arredondamento (ex.: 12,5%
   aparece como 13%). Commit `ad0f2a6`. **⚠ Ver §TODOs.**
 
+## Auditoria de cálculo (27/07) — planilha Feijó como gabarito
+
+Pente-fino da lógica de cálculo usando a escola Regente Feijó (INEP 41063325,
+Ponta Grossa) reconstruída direto dos microdados numa planilha independente.
+
+**Bate 100%** (item a item, 180 itens válidos): universo de itens (o filtro de
+caderno majoritário coincide com o critério de abandono da planilha), `n` por
+item, `p` observado, `param_b`, médias por área, `media_red` (com redações
+zeradas incluídas), agregação por habilidade (média ponderada por n — mesma
+lógica de criticas.js/habilidade.js) e agregação NRE (ponderada por n ✓).
+`media_geral` = média das 5 notas dos alunos com presença completa (504,64 ✓).
+
+**Divergência encontrada — constante D da TRI**: o `p_esp` do painel é a média
+sobre os alunos da 3PL com **D=1,7** (`c+(1-c)/(1+e^(-1,7·a(θ-b)))`); replica
+com erro máx. 0,0005 (= arredondamento). Teste de calibração contra o acerto
+observado da escola: **D=1 acerta** (viés −0,13 pp; por área ±0,9 pp) e
+**D=1,7 subestima sistematicamente** (viés −2,9 pp; −1,4 a −3,8 pp por área).
+Ou seja, os parâmetros publicados pelo INEP já estão na métrica logística e
+devem ser usados **sem** o fator 1,7. Consequência: a coluna "Δ esperado" está
+inflada ~+2,9 pp em média — em MT da Feijó chega a trocar o sinal (painel diz
++1,4 pp acima do esperado; o correto é −0,9 pp abaixo). Fix é no `build_db.py`
+/pipeline do repo plataforma (cálculo de p_esp), fora deste repo.
+
+**Menores**: (a) `agregarItensNRE` (app.js:237-256) usa `r.n` como denominador
+de `p` mas só soma `p*n` quando `p != null` — se algum município vier com n>0
+e p null, subestima; usar denominador próprio como já faz com `p_esp`;
+(b) `fundirLEM` pondera `p_br`/`p_uf` pelo n da seleção (mix de idioma da
+escola, não do BR) — padronização direta, defensável, mas convém documentar.
+
 ## Pontos de atenção
 
 - **hist_nota MUN não existe no banco nacional** (só BR/UF). Por isso o
