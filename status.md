@@ -192,6 +192,17 @@ do D; é desajuste de modelo, consistente com ausência de parâmetro de descuid
 (o 3PL não tem assíntota superior < 1, e o efeito cresce com θ). Vale documentar
 como limitação conhecida.
 
+**Demo lado a lado (27/07)** — `pipeline/d1_demo/gera_site_paralelo_d1.py`
+gera `pr2_deploy_d1/` (gitignored): cópia do site com `p_esp` recalculado em
+D=1 a partir dos parâmetros oficiais dos itens 2025
+(`params_itens_2025.json`) e das distribuições de nota em buckets
+(`hist_nota_pr.json` pra UF/PR e Ponta Grossa; buckets exatos da Feijó com
+inglês/espanhol separados em `feijo_buckets_2025.json`). Rodar:
+`python3 pipeline/d1_demo/gera_site_paralelo_d1.py`, depois servir
+`pr2_deploy` na 9000 e `pr2_deploy_d1` na 9001. Limites do demo: itens 2025
+das entidades PR/PG/Feijó; itens EN·ES em UF/MUN ficam "–" (sem distribuição
+de θ por língua nesses níveis); anos 2021-2024 mantêm o valor antigo.
+
 **Menores**: (a) `agregarItensNRE` (app.js:237-256) usa `r.n` como denominador
 de `p` mas só soma `p*n` quando `p != null` — se algum município vier com n>0
 e p null, subestima; usar denominador próprio como já faz com `p_esp`;
