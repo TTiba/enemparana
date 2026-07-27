@@ -238,10 +238,9 @@ não é a média bruta da UF/BR.
 
 - **Trilhas pedagógicas demo removidas** (27/07): a página de habilidade
   tinha 4 colunas de conteúdo simulado (RCO/Wayground) marcadas como "demo".
-  Removidas de `habilidade.html`, `habilidade.js` (92 linhas: `TRILHAS`,
-  `wg()`, `rco()` e as variáveis `tema`/`temaCap` que só serviam a elas) e o
-  CSS órfão de `styles.css` (49 linhas) e `styles_pr.css` (29 linhas). A
-  página agora tem: cobertura no ENEM → evolução → questões da prova.
+  Removidas de `habilidade.html`, `habilidade.js` (92 linhas) e o CSS órfão de
+  `styles.css` e `styles_pr.css`. A página fica com cobertura no ENEM →
+  evolução → questões da prova.
 
 ## Pontos de atenção
 
@@ -257,6 +256,20 @@ não é a média bruta da UF/BR.
   do 2º dia pra descartar cadernos de reaplicação/adaptados.
 - **Deploy é não-listado**: `X-Robots-Tag: noindex, nofollow` em todas as
   respostas + `robots.txt` disallow-all.
+
+## Provas com imagem disponível
+
+O painel mapeia CO_ITEM → habilidade nos **5 anos** (2021-2025) em
+`api/habilidades/{area}/{h}.json`, mas as **imagens** só existem para os anos
+que o pipeline nacional gerou em `deploy/api/questoes/{ano}.json`. Hoje:
+**só 2025** (62 páginas WebP do caderno AZUL).
+
+Pra liberar outros anos são três passos: (1) gerar
+`deploy/api/questoes/{ano}.json` + as imagens no repo `plataforma`;
+(2) incluir o ano em `ANOS_QUESTOES` no `deploy_pr2.py`; (3) fazer
+`habilidade.js` buscar os anos disponíveis em vez do 2025 fixo
+(`fetch('api/questoes/2025.json')`, hoje hardcoded) e agrupar por ano na
+seção "Questões desta habilidade".
 
 ## TODOs abertos
 

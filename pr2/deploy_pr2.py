@@ -37,7 +37,7 @@ copiar = [
     "priorizacao.html", "habilidade.html", "entenda.html",
     "app.js", "mapa.js", "criticas.js", "ranking_escolas.js",
     "priorizacao.js", "habilidade.js", "habilidades.js",
-    "competencias.js", "charts.js", "filtros.js",
+    "competencias.js", "charts.js", "filtros.js", "tooltip.js",
     "styles.css", "styles_pr.css", "brasao_pr.svg",
 ]
 for f in copiar:
