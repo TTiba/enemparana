@@ -785,3 +785,17 @@ a.chip-hab:hover { background: var(--pink); color: var(--card); transform: trans
 }
 
 .skeleton { color: var(--ink-40); font-style: italic; padding: 18px 4px; }
+
+/* Tooltip próprio (ver tooltip.js) — substitui o `title` nativo, que tinha
+   ~1s de atraso e sumia ao mover o mouse. position:fixed no <body> pra não
+   ser recortado pelo overflow:auto do .tbl-scroll. */
+.tip-bolha {
+  position: fixed; z-index: 9999; pointer-events: none;
+  max-width: 320px; padding: 7px 10px; border-radius: 8px;
+  background: var(--ink); color: #fff;
+  font-size: 12.5px; font-weight: 600; line-height: 1.35;
+  box-shadow: 0 4px 14px rgba(0,0,0,.22);
+  opacity: 0; transform: translateY(2px);
+  transition: opacity .09s ease, transform .09s ease;
+}
+.tip-bolha.tip-on { opacity: 1; transform: translateY(0); }

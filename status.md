@@ -194,20 +194,36 @@ como limitação conhecida.
 
 **Demo lado a lado (27/07)** — `pipeline/d1_demo/gera_site_paralelo_d1.py`
 gera `pr2_deploy_d1/` (gitignored): cópia do site com `p_esp` recalculado em
-D=1 a partir dos parâmetros oficiais dos itens 2025
-(`params_itens_2025.json`) e das distribuições de nota em buckets
-(`hist_nota_pr.json` pra UF/PR e Ponta Grossa; buckets exatos da Feijó com
-inglês/espanhol separados em `feijo_buckets_2025.json`). Rodar:
-`python3 pipeline/d1_demo/gera_site_paralelo_d1.py`, depois servir
-`pr2_deploy` na 9000 e `pr2_deploy_d1` na 9001. Limites do demo: itens 2025
-das entidades PR/PG/Feijó; itens EN·ES em UF/MUN ficam "–" (sem distribuição
-de θ por língua nesses níveis); anos 2021-2024 mantêm o valor antigo.
+D=1 a partir dos parâmetros oficiais dos itens 2025. Rodar o script (~30s),
+depois servir `pr2_deploy` na 9000 e `pr2_deploy_d1` na 9001.
 
-**Menores**: (a) `agregarItensNRE` (app.js:237-256) usa `r.n` como denominador
-de `p` mas só soma `p*n` quando `p != null` — se algum município vier com n>0
-e p null, subestima; usar denominador próprio como já faz com `p_esp`;
-(b) `fundirLEM` pondera `p_br`/`p_uf` pelo n da seleção (mix de idioma da
-escola, não do BR) — padronização direta, defensável, mas convém documentar.
+Cobertura: **UF/PR + 398 municípios** (distribuição de θ exata do
+`hist_nota_pr.json`), **32 NREs** (automático — o painel agrega os municípios
+no cliente) e **2.052 escolas** (distribuição do próprio município deslocada
+pra bater com a média da escola; aproximação validada contra os θ exatos da
+Feijó: erro médio 0,10 pp, máx 0,42 pp). A Feijó usa θ exatos, com
+inglês/espanhol separados. Fora: itens EN·ES nos demais níveis ficam "–"
+(sem distribuição por língua) e anos 2021-2024 mantêm o valor antigo.
+
+Resultado (`pipeline/d1_demo/verifica_calibracao.py`, que checa qualquer
+deploy sem precisar dos microdados):
+
+| | erro do modelo · original | erro · D=1 |
+|---|---|---|
+| UF/PR · PUB | −2,47 pp | **+0,09 pp** |
+| Municípios · PUB (365) | −2,82 pp | −0,10 pp |
+| Escolas (amostra 300) | −2,00 pp (dp 1,90) | +0,52 pp (dp 1,11) |
+
+A queda do desvio-padrão entre escolas (1,90 → 1,11 pp) confirma que o D=1,7
+injetava variância espúria na comparação entre elas. `PATCH-build_db.md` traz
+o roteiro da correção definitiva no repo `plataforma`.
+
+**Menores** — ambos resolvidos em 27/07: (a) `agregarItensNRE` usava `r.n`
+como denominador de `p` mas só somava `p*n` quando `p != null`; agora `p` tem
+denominador próprio (`nP`), como o `p_esp` já tinha; (b) a ponderação de
+`p_br`/`p_uf` no `fundirLEM` está documentada no código — é padronização
+direta pelo mix de idioma da seleção, o que isola efeito de composição, mas
+não é a média bruta da UF/BR.
 
 ## Pontos de atenção
 
@@ -234,12 +250,19 @@ escola, não do BR) — padronização direta, defensável, mas convém document
   no deploy nacional", rodar antes o pipeline de questões de lá) → `rsync` das
   duas pastas → commit/push → `netlify deploy --prod --dir=pr2_deploy`.
   O `pr2_deploy/` deste repo ainda **não** tem as imagens.
-- [ ] **Tooltip mouseover no painel inicial não funciona** (26/07): adicionei
-  `<span title="…">` nas colunas de % acerto (Feijó H9 exibe 13% mas tooltip
-  deveria mostrar 12,5%). Não aparece ao passar o mouse. Investigar: (a) se
-  o `<span>` foi renderizado de fato no DOM, (b) se algum CSS `pointer-events:
-  none` está bloqueando, (c) se o browser respeita tooltip nativo em elementos
-  dentro de células flex/grid. Ver `pr2/app.js:574-576` e `685-689`.
+- [x] ~~**Tooltip mouseover no painel inicial não funciona**~~ (resolvido
+  27/07). Investigado no Chromium via Playwright: as três hipóteses do TODO
+  estavam erradas — o `<span>`/`<div>` **está** no DOM com o `title` certo, o
+  `pointer-events:none` do `.mini-val` **não** bloqueia (o hit-test cai no
+  `.mini-track`, que carrega o title) e o browser resolve o title subindo a
+  árvore normalmente. Nas 3 posições testadas da barra da H9 o tooltip
+  resolvia pra "Acerto observado: 12,5%". A causa provável do relato era o
+  Netlify desatualizado (deploy é manual) somada ao comportamento ruim do
+  `title` nativo: ~1s de atraso e some ao menor movimento. Fix: `pr2/tooltip.js`
+  substitui o nativo por uma bolha própria, imediata e estilizada, em
+  `position:fixed` no `<body>` (o `.tbl-scroll` tem `overflow:auto` e
+  recortaria um `::after`). Mantém `aria-label` pra leitor de tela e funciona
+  no foco por teclado. Verificado por screenshot.
 - [ ] Configurar site Cloudflare terminando o setup no dashboard (repo já tem
   `wrangler.toml`; falta clicar Deploy).
 - [ ] Considerar filtro NRE na página de priorização.
