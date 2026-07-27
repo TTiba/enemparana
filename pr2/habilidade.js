@@ -280,11 +280,22 @@ Promise.all([
   fetch(`api/habilidades/${area}/${h}.json`).then((r) => r.ok ? r.json() : null),
   fetch(`api/questoes/2025.json`).then((r) => r.ok ? r.json() : null),
 ]).then(([habData, quest]) => {
-  if (!habData || !quest || !quest.itens) return;
   const card = document.getElementById("hab-questoes");
   const grid = document.getElementById("hab-questoes-grid");
   const nota = document.getElementById("hab-questoes-nota");
-  if (!card || !grid) return;
+  if (!card || !grid || !nota) return;
+
+  // Antes o card ficava escondido sem nenhuma mensagem quando um dos dois
+  // JSONs faltava — foi assim que a ausência de api/questoes/ no pr2_deploy
+  // passou batida. Agora o card sempre aparece dizendo o que houve.
+  if (!quest || !quest.itens) {
+    nota.textContent = "As imagens das provas oficiais não estão disponíveis nesta versão do painel.";
+    card.hidden = false; return;
+  }
+  if (!habData) {
+    nota.textContent = "Não foi possível carregar os itens desta habilidade.";
+    card.hidden = false; return;
+  }
 
   const itens2025 = habData.por_ano?.["2025"]?.itens || [];
   if (!itens2025.length) {
@@ -299,8 +310,11 @@ Promise.all([
     const langLabel = q.tp_lingua === 0 ? "Inglês"
                     : q.tp_lingua === 1 ? "Espanhol" : null;
     const headline = `Questão ${q.co_posicao}` + (langLabel ? ` · ${langLabel}` : "");
-    const sub = `Dificuldade b = ${Number(it.param_b).toFixed(2)} · ${Math.round(it.p_br * 100)}% de acerto no Brasil`;
-    const imgs = q.imgs.map((src, i) =>
+    const partesSub = [];
+    if (it.param_b != null) partesSub.push(`Dificuldade b = ${Number(it.param_b).toFixed(2)}`);
+    if (it.p_br != null) partesSub.push(`${Math.round(it.p_br * 100)}% de acerto no Brasil`);
+    const sub = partesSub.join(" · ");
+    const imgs = (q.imgs || []).map((src, i) =>
       `<a href="${src}" target="_blank" class="hab-quest-imgwrap"
           title="Abrir em nova aba (página ${q.pags[i]} do caderno)">
          <img loading="lazy" src="${src}" alt="Questão ${q.co_posicao}${langLabel ? " (" + langLabel + ")" : ""}">
@@ -320,7 +334,15 @@ Promise.all([
     nota.textContent = `${cards.length} ${cards.length === 1 ? "questão exibida" : "questões exibidas"} do caderno AZUL do ENEM 2025.`;
   }
   card.hidden = false;
-}).catch((e) => console.warn("questões não carregadas:", e));
+}).catch((e) => {
+  console.warn("questões não carregadas:", e);
+  const card = document.getElementById("hab-questoes");
+  const nota = document.getElementById("hab-questoes-nota");
+  if (card && nota) {
+    nota.textContent = "Erro ao carregar as questões desta habilidade.";
+    card.hidden = false;
+  }
+});
 
 /* -------- Evolução do desempenho na habilidade (2021-2025) ---------------- */
 /* Séries:

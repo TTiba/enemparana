@@ -111,7 +111,20 @@ dashboard Cloudflare inconcluso — retomar depois amanhã.
   tabela de itens funcionam com média ponderada dos munis) + top escolas
   agregado no painel do mapa + histograma de nota por NRE/MUN.
 
-## Correções recentes (24-26/07)
+## Correções recentes (24-27/07)
+
+- **Questões da habilidade não apareciam** (27/07): ao clicar num chip de
+  habilidade, `habilidade.html` abria sem a seção "Questões desta habilidade"
+  (imagens WebP das provas oficiais) — e sem nenhuma mensagem explicando.
+  Causa: `deploy_pr2.py` nunca copiou `api/questoes/{ano}.json` nem as imagens
+  referenciadas por ele, então o `fetch` dava 404 e `habilidade.js` retornava
+  cedo deixando o card `hidden`. Fix em duas partes: (a) `deploy_pr2.py` agora
+  copia `api/questoes/2025.json` e cada arquivo listado em `imgs[]`, resolvendo
+  os caminhos contra a raiz do deploy nacional e preservando a mesma estrutura
+  dentro de `pr2_deploy/`; (b) `habilidade.js` deixa de falhar em silêncio —
+  o card sempre aparece, com nota explícita quando os dados faltam, e os
+  rótulos de `b`/`% BR` não imprimem mais `NaN` quando vêm nulos.
+  **⚠ Exige rebuild — ver §TODOs.**
 
 - **hist_nota_pr.json faltando no deploy** (25/07): `deploy_pr2.py` não estava
   copiando o arquivo. Fix: adicionado à lista de assets. Commit `95e1e98`.
@@ -146,6 +159,14 @@ dashboard Cloudflare inconcluso — retomar depois amanhã.
 
 ## TODOs abertos
 
+- [ ] **Publicar as questões da habilidade** (27/07): a correção do
+  `deploy_pr2.py` está commitada, mas as imagens WebP moram no repo
+  `plataforma/` (`deploy/questoes_img/…`) e só entram no `pr2_deploy/` num
+  rebuild. Fluxo: `python3 pr2/deploy_pr2.py` no `plataforma/` (conferir na
+  saída a linha "N imagens de questões copiadas"; se disser "questoes/ ausente
+  no deploy nacional", rodar antes o pipeline de questões de lá) → `rsync` das
+  duas pastas → commit/push → `netlify deploy --prod --dir=pr2_deploy`.
+  O `pr2_deploy/` deste repo ainda **não** tem as imagens.
 - [ ] **Tooltip mouseover no painel inicial não funciona** (26/07): adicionei
   `<span title="…">` nas colunas de % acerto (Feijó H9 exibe 13% mas tooltip
   deveria mostrar 12,5%). Não aparece ao passar o mouse. Investigar: (a) se

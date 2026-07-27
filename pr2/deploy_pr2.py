@@ -15,7 +15,8 @@ import sqlite3
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PR2 = os.path.join(BASE, "pr2")
-API_ORIG = os.path.join(BASE, "deploy", "api")
+DEPLOY_ORIG = os.path.join(BASE, "deploy")
+API_ORIG = os.path.join(DEPLOY_ORIG, "api")
 OUT = os.path.join(BASE, "pr2_deploy")
 DB = os.path.join(BASE, "data", "enem2025.sqlite")
 
@@ -234,6 +235,46 @@ log("Copiando habilidades/ (BR-wide)…")
 hb_orig = os.path.join(API_ORIG, "habilidades")
 if os.path.exists(hb_orig):
     shutil.copytree(hb_orig, os.path.join(api_out, "habilidades"))
+
+# questoes/{ano}.json + as imagens WebP das provas que elas referenciam.
+# Sem isso a seção "Questões desta habilidade" de habilidade.html não aparece.
+# habilidade.js só consome 2025 hoje; a lista explícita evita arrastar as
+# imagens de anos que nenhuma tela exibe.
+ANOS_QUESTOES = ("2025",)
+log("Copiando questoes/ + imagens das provas…")
+q_orig = os.path.join(API_ORIG, "questoes")
+if os.path.exists(q_orig):
+    os.makedirs(os.path.join(api_out, "questoes"), exist_ok=True)
+    n_img, n_falta = 0, 0
+    for ano in ANOS_QUESTOES:
+        src = os.path.join(q_orig, f"{ano}.json")
+        if not os.path.exists(src):
+            log(f"  ! questoes/{ano}.json ausente no deploy nacional")
+            continue
+        shutil.copy(src, os.path.join(api_out, "questoes", f"{ano}.json"))
+        with open(src, encoding="utf-8") as f:
+            quest = json.load(f)
+        # imgs[] guarda caminhos relativos à raiz do site nacional (deploy/),
+        # não à raiz de api/ — replicamos o mesmo caminho dentro de pr2_deploy
+        # pra não precisar reescrever o JSON nem hardcodar o nome do diretório.
+        for q in (quest.get("itens") or {}).values():
+            for rel in q.get("imgs") or []:
+                rel = os.path.normpath(rel.lstrip("/"))
+                if rel.startswith(".."):
+                    continue
+                img_src = os.path.join(DEPLOY_ORIG, rel)
+                if not os.path.exists(img_src):
+                    n_falta += 1
+                    continue
+                img_dst = os.path.join(OUT, rel)
+                os.makedirs(os.path.dirname(img_dst), exist_ok=True)
+                shutil.copy(img_src, img_dst)
+                n_img += 1
+    log(f"  {n_img} imagens de questões copiadas"
+        + (f" · {n_falta} ausentes no deploy nacional" if n_falta else ""))
+else:
+    log("  ! questoes/ ausente no deploy nacional — rode o pipeline de "
+        "questões lá antes; a seção 'Questões desta habilidade' fica vazia")
 
 # historico/ESC/{inep}.json — chama script que agrega hist_item por escola PR
 log("Gerando historico/ESC/ (2024+2025 por escola do PR)…")
