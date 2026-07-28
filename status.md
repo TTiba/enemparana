@@ -274,7 +274,11 @@ não é a média bruta da UF/BR.
 
 ## Provas com imagem disponível
 
-- **2025**: completa (dias 1 e 2, 62 páginas WebP) — veio do pipeline nacional.
+- **2025**: dia 1 com **recortes por questão** (95, gerados do PDF oficial em
+  27/07, sem CSV — as posições vieram do próprio `api/questoes/2025.json`);
+  dia 2 segue com páginas inteiras do pipeline nacional. **⚠ O PDF de D2
+  enviado (CD8) é do caderno VERDE** — as posições mudam entre cores, então
+  não dá pra usar; falta o PDF AZUL do 2º dia de 2025 pros recortes de CN/MT.
 - **2024**: **completa** (dias 1 e 2) — `pipeline/build_questoes_ano.py` a
   partir dos PDFs oficiais + ITENS_PROVA_2024: 185/185 itens, 60 páginas e
   **185 recortes por questão** (região só da questão, colunas costuradas,
@@ -283,8 +287,16 @@ não é a média bruta da UF/BR.
   leitura (a palavra ESPANHOL já aparece na capa) e **páginas de coluna
   única** detectadas por página (D1: 15, 28 · D2: 15, 23, 26-28) — sem isso
   o recorte cortava a metade direita dessas páginas.
-- **2021-2023**: pendentes — precisam do ITENS_PROVA_{ano}.csv + PDFs D1/D2.
-  O gerador é genérico; é só rodar com os arquivos de cada ano.
+- **2023**: PDF do D1 (CD1 azul ✓) já em mãos; faltam `ITENS_PROVA_2023.csv`
+  e o PDF AZUL do D2 (o arquivo enviado como 2023-D2 era o 2025-D2 verde
+  duplicado). **2021-2022**: pendentes — CSV + PDFs D1/D2 de cada ano.
+
+Robustez do gerador (27/07, achados com 2025): geometria da página **medida
+no próprio PDF** (margens variam por ano — constantes fixas fatiavam a 1ª
+linha da coluna e a borda esquerda); âncoras de fim de fluxo (Proposta de
+Redação/rascunho — sem isso a última questão de LC engolia a redação
+inteira); delimitação também por blocos "QUESTÕES N A M" seguintes; clip
+afastado 3pt da divisória central de microtexto.
 
 A seção virou **carrossel** (um slide por questão, ano mais recente primeiro,
 chip do ano, setas + contador, scroll-snap). Slide usa o `recorte` quando o

@@ -45,9 +45,6 @@ from PIL import Image, ImageOps
 LARGURA_WEBP = 1150          # mesma largura dos WebP de página do 2025
 QUALIDADE_WEBP = 80
 ZOOM_RECORTE = 3.0           # coluna ~254pt → ~760px de largura
-TOPO_COLUNA_PT = 120         # âncora acima disso na 1ª coluna = topo de página
-CONTEUDO_TOPO = 85           # faixa útil da página (fora cabeçalho/rodapé)
-CONTEUDO_BASE = 745
 
 
 def sem_acento(s):
@@ -96,7 +93,39 @@ class Anc:
         return (self.pag, self.col, self.y)
 
 
-def layout_de(doc):
+def geometria_de(doc):
+    """Faixa útil da página, medida no próprio PDF — as margens variam de ano
+    pra ano (2024: conteúdo a partir de x=32/y≈85; 2025: x=22,7/y≈76), e
+    constantes fixas fatiavam a 1ª linha da coluna e a borda esquerda.
+
+    topo  = menor y das âncoras 'QUESTÃO N' (conteúdo nunca começa acima)
+    base  = topo do rodapé ('… DIA … CADERNO …' no pé da página)
+    x_lo/x_hi = extremos dos blocos de texto do miolo.
+    """
+    ancs_y, foot_y, xs0, xs1 = [], [], [], []
+    for pg in doc:
+        h = pg.rect.height
+        for x0, y0, x1, y1, txt, *_ in pg.get_text("blocks"):
+            t = sem_acento(txt.upper())
+            if "DIA" in t and "CADERNO" in t and y0 > h * 0.85:
+                foot_y.append(y0)
+                continue
+            if len(txt.strip()) < 3:
+                continue
+            if re.search(r"QUESTAO\s+\d", t):
+                ancs_y.append(y0)
+                xs0.append(x0)
+            xs0.append(x0)
+            xs1.append(x1)
+    return {
+        "topo": (min(ancs_y) - 3) if ancs_y else 80,
+        "base": (min(foot_y) - 4) if foot_y else 745,
+        "x_lo": max(0.0, (sorted(xs0)[len(xs0) // 100] if xs0 else 26) - 4),
+        "x_hi": (sorted(xs1)[-1 - len(xs1) // 100] if xs1 else 545) + 4,
+    }
+
+
+def layout_de(doc, geo):
     """{pagina: 1|2} — nº de colunas, detectado pelos blocos de texto que
     cruzam o meio da página (o ENEM mistura: capa e algumas páginas de prova,
     sobretudo no 2º dia, são de coluna única)."""
@@ -104,24 +133,29 @@ def layout_de(doc):
     for i, pg in enumerate(doc):
         meio = pg.rect.width / 2
         cruzam = sum(1 for x0, y0, x1, y1, txt, *_ in pg.get_text("blocks")
-                     if CONTEUDO_TOPO < y0 and y1 < CONTEUDO_BASE
+                     if geo["topo"] < y0 and y1 < geo["base"]
                      and x0 < meio - 30 and x1 > meio + 30 and len(txt.strip()) > 40)
         out[i + 1] = 1 if cruzam >= 2 else 2
     return out
 
 
-def ancoras_do_pdf(doc, layout):
+def ancoras_do_pdf(doc, layout, geo):
     ancs = []
     for i, pg in enumerate(doc):
         meio = pg.rect.width / 2
         for x0, y0, x1, y1, txt, *_ in pg.get_text("blocks"):
             t = sem_acento(txt.upper())
             col = 0 if (layout[i + 1] == 1 or x0 < meio) else 1
-            topo = col == 0 and y0 < TOPO_COLUNA_PT
+            topo = col == 0 and y0 < geo["topo"] + 45
             for m in re.finditer(r"QUESTOES\s+(\d{1,3})\s+A\s+(\d{1,3})", t):
                 ancs.append(Anc(int(m.group(1)), int(m.group(2)), i + 1, col, y0, topo, "blk"))
             for m in re.finditer(r"QUESTAO\s+(\d{1,3})", t):
                 ancs.append(Anc(int(m.group(1)), int(m.group(1)), i + 1, col, y0, topo, "ind"))
+            # seções que encerram o fluxo de questões sem serem questões —
+            # sem isso a última questão de LC engolia a Proposta de Redação
+            if re.search(r"PROPOSTA DE REDACAO|INSTRUCOES PARA A REDACAO|"
+                         r"FOLHA DE RASCUNHO|RASCUNHO DA REDACAO", t):
+                ancs.append(Anc(9999, 9999, i + 1, col, y0, topo, "fim"))
     ancs.sort(key=lambda a: a.pos)
     return ancs
 
@@ -153,8 +187,14 @@ def montar_fluxos(ancs):
     for lingua, fluxo in ((0, fluxo_en), (1, fluxo_es), (None, fluxo_com)):
         inds = [a for a in fluxo if a.tipo == "ind"]
         blks = [a for a in fluxo if a.tipo == "blk"]
-        for i, a in enumerate(inds):
-            fim = inds[i + 1] if i + 1 < len(inds) else seq_limites[lingua]
+        for a in inds:
+            # o fim é a PRÓXIMA âncora de qualquer tipo em ordem de leitura:
+            # a questão seguinte, o texto-base do grupo seguinte (senão a
+            # última questão antes de um bloco engoliria o texto dos vizinhos)
+            # ou o início da seção de redação/rascunho
+            fim = next((b for b in fluxo if b.pos > a.pos
+                        and not (b.tipo == "blk" and b.qa <= a.qa <= b.qb)),
+                       None) or seq_limites[lingua]
             blk = next((b for b in blks if b.qa <= a.qa <= b.qb), None)
             out[(a.qa, lingua)] = {"ini": a, "fim": fim, "blk": blk}
     return out
@@ -184,18 +224,18 @@ def _trim(img, margem=8):
     return img.crop((x0, y0, x1, y1))
 
 
-def _segmentos(doc, layout, ini_pos, fim_pos):
+def _segmentos(doc, layout, geo, ini_pos, fim_pos):
     """Retângulos (pag, col, y0, y1) do trecho ini→fim em ordem de leitura.
     Em página de coluna única não existe col 1: avança direto de página."""
     segs = []
     pag, col, y = ini_pos
     while (pag, col) != (fim_pos[0], fim_pos[1]):
-        segs.append((pag, col, y, CONTEUDO_BASE))
+        segs.append((pag, col, y, geo["base"]))
         if col == 0 and layout.get(pag, 2) == 2:
             col = 1
         else:
             pag += 1; col = 0
-        y = CONTEUDO_TOPO
+        y = geo["topo"]
         if pag > fim_pos[0]:            # salvaguarda contra andar além do fim
             break
     if fim_pos[2] - 4 > y and (pag, col) == (fim_pos[0], fim_pos[1]):
@@ -203,16 +243,17 @@ def _segmentos(doc, layout, ini_pos, fim_pos):
     return segs
 
 
-def _render_segs(doc, layout, segs):
+def _render_segs(doc, layout, geo, segs):
     tiras = []
     for pag, col, y0, y1 in segs:
         pg = doc[pag - 1]
         meio = pg.rect.width / 2
+        # ±3pt do meio: fora da divisória central de microtexto ("ENEM2024…")
         if layout.get(pag, 2) == 1:
-            clip = pymupdf.Rect(26, y0, pg.rect.width - 22, y1)
+            clip = pymupdf.Rect(geo["x_lo"], y0, geo["x_hi"], y1)
         else:
-            clip = pymupdf.Rect(26 if col == 0 else meio, y0,
-                                meio if col == 0 else pg.rect.width - 22, y1)
+            clip = pymupdf.Rect(geo["x_lo"] if col == 0 else meio + 3, y0,
+                                meio - 2 if col == 0 else geo["x_hi"], y1)
         if clip.height < 8:
             continue
         pix = pg.get_pixmap(matrix=pymupdf.Matrix(ZOOM_RECORTE, ZOOM_RECORTE), clip=clip)
@@ -231,16 +272,16 @@ def _render_segs(doc, layout, segs):
     return folha
 
 
-def recorte_da_questao(doc, layout, ent):
+def recorte_da_questao(doc, layout, geo, ent):
     """Imagem da questão: texto-base compartilhado (se houver) + corpo."""
     ini, fim, blk = ent["ini"], ent["fim"], ent["blk"]
     ult_col = 0 if layout.get(ini.pag, 2) == 1 else 1
-    fim_pos = fim.pos if fim is not None else (ini.pag, ult_col, CONTEUDO_BASE)
+    fim_pos = fim.pos if fim is not None else (ini.pag, ult_col, geo["base"])
     partes = []
     if blk is not None and blk.pos < ini.pos:
-        partes += _segmentos(doc, layout, blk.pos, ini.pos)
-    partes += _segmentos(doc, layout, ini.pos, fim_pos)
-    return _render_segs(doc, layout, partes)
+        partes += _segmentos(doc, layout, geo, blk.pos, ini.pos)
+    partes += _segmentos(doc, layout, geo, ini.pos, fim_pos)
+    return _render_segs(doc, layout, geo, partes)
 
 
 def render_pagina(doc, p, destino):
@@ -254,11 +295,14 @@ def render_pagina(doc, p, destino):
 # ------------------------------------------------------------------ pipeline
 def processar_dia(pdf_path, provas_do_dia, ano, dia_num, deploy, itens_out):
     doc = pymupdf.open(pdf_path)
-    layout = layout_de(doc)
+    geo = geometria_de(doc)
+    print(f"  geometria: y {geo['topo']:.0f}-{geo['base']:.0f} · "
+          f"x {geo['x_lo']:.0f}-{geo['x_hi']:.0f}")
+    layout = layout_de(doc, geo)
     n1col = [p for p, n in layout.items() if n == 1 and p > 1]
     if n1col:
         print(f"  páginas de coluna única: {n1col}")
-    fluxos = montar_fluxos(ancoras_do_pdf(doc, layout))
+    fluxos = montar_fluxos(ancoras_do_pdf(doc, layout, geo))
     rel_dir = f"questoes/{ano}"
     os.makedirs(os.path.join(deploy, rel_dir), exist_ok=True)
 
@@ -279,7 +323,7 @@ def processar_dia(pdf_path, provas_do_dia, ano, dia_num, deploy, itens_out):
             if lingua is not None:
                 registro["tp_lingua"] = lingua
             sufixo = {0: "_en", 1: "_es", None: ""}[lingua]
-            rec = recorte_da_questao(doc, layout, ent)
+            rec = recorte_da_questao(doc, layout, geo, ent)
             if rec is not None:
                 rel_rec = f"{rel_dir}/rec_d{dia_num}_q{pos:03d}{sufixo}.webp"
                 rec.save(os.path.join(deploy, rel_rec), "WEBP", quality=QUALIDADE_WEBP)
@@ -289,9 +333,10 @@ def processar_dia(pdf_path, provas_do_dia, ano, dia_num, deploy, itens_out):
             n_map += 1
 
     for p in sorted(usadas):
-        destino = os.path.join(deploy, rel_dir, f"dia_{dia_num}_pag_{p:02d}.webp")
-        if not os.path.exists(destino):
-            render_pagina(doc, p, destino)
+        # sempre re-renderiza: garante que página e recorte venham da MESMA
+        # edição do PDF (misturar com imagens antigas de outra fonte descarta
+        # a garantia de paginação idêntica)
+        render_pagina(doc, p, os.path.join(deploy, rel_dir, f"dia_{dia_num}_pag_{p:02d}.webp"))
     print(f"  dia {dia_num}: {n_map} itens mapeados · {n_sem} sem âncora · "
           f"{n_rec} recortes · {len(usadas)} páginas")
 
@@ -299,7 +344,8 @@ def processar_dia(pdf_path, provas_do_dia, ano, dia_num, deploy, itens_out):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ano", type=int, required=True)
-    ap.add_argument("--csv", required=True)
+    ap.add_argument("--csv", help="ITENS_PROVA_{ano}.csv; se omitido, usa as "
+                    "posições já existentes em api/questoes/{ano}.json")
     ap.add_argument("--pdf-d1")
     ap.add_argument("--pdf-d2")
     ap.add_argument("--deploy", default="pr2_deploy")
@@ -307,11 +353,27 @@ def main():
     if not args.pdf_d1 and not args.pdf_d2:
         sys.exit("informe --pdf-d1 e/ou --pdf-d2")
 
-    print(f"Localizando cadernos regulares AZUL de {args.ano}…")
-    regulares = achar_provas_regulares(args.csv, args.deploy, args.ano)
-    for prova, info in sorted(regulares.items()):
-        print(f"  CO_PROVA {prova}: {info['area']} ({info['dia']}) · "
-              f"cobertura no painel {info['cobertura']}")
+    if args.csv:
+        print(f"Localizando cadernos regulares AZUL de {args.ano}…")
+        regulares = achar_provas_regulares(args.csv, args.deploy, args.ano)
+        for prova, info in sorted(regulares.items()):
+            print(f"  CO_PROVA {prova}: {info['area']} ({info['dia']}) · "
+                  f"cobertura no painel {info['cobertura']}")
+    else:
+        base = os.path.join(args.deploy, "api", "questoes", f"{args.ano}.json")
+        if not os.path.exists(base):
+            sys.exit(f"sem --csv preciso de {base} com as posições já mapeadas")
+        print(f"Posições vindas de {base} (sem CSV)…")
+        antigos = json.load(open(base, encoding="utf-8"))["itens"]
+        regulares = {}
+        for co, v in antigos.items():
+            chave = (v["dia"], v["area"])
+            reg = regulares.setdefault(chave, {"area": v["area"], "dia": v["dia"], "rows": []})
+            reg["rows"].append({"CO_POSICAO": v["co_posicao"], "SG_AREA": v["area"],
+                                "CO_ITEM": co,
+                                "TP_LINGUA": "" if v.get("tp_lingua") is None
+                                             else str(v["tp_lingua"])})
+        regulares = {f"{d}/{a}": r for (d, a), r in regulares.items()}
 
     saida = os.path.join(args.deploy, "api", "questoes", f"{args.ano}.json")
     itens = {}
