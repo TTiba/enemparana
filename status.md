@@ -274,17 +274,27 @@ não é a média bruta da UF/BR.
 
 ## Provas com imagem disponível
 
-O painel mapeia CO_ITEM → habilidade nos **5 anos** (2021-2025) em
-`api/habilidades/{area}/{h}.json`, mas as **imagens** só existem para os anos
-que o pipeline nacional gerou em `deploy/api/questoes/{ano}.json`. Hoje:
-**só 2025** (62 páginas WebP do caderno AZUL).
+- **2025**: completa (dias 1 e 2, 62 páginas WebP) — veio do pipeline nacional.
+- **2024**: **dia 1 (LC+CH)** gerado em 27/07 por
+  `pipeline/build_questoes_ano.py` a partir do PDF oficial + ITENS_PROVA_2024
+  (95 itens, 30 páginas, 8,4 MB; LEM inglês/espanhol desambiguado pela ordem
+  de leitura — a 1ª ocorrência de cada questão 1-5 é inglês). CN/MT de 2024
+  aguardam o PDF do dia 2 — rodar o mesmo script com `--pdf-d2` (ele mescla
+  no JSON existente). Cadernos regulares identificados por interseção com o
+  painel: LC 1395 · CH 1383 · MT 1407 · CN 1419.
+- **2021-2023**: pendentes — precisam do ITENS_PROVA_{ano}.csv + PDFs D1/D2.
 
-Pra liberar outros anos são três passos: (1) gerar
-`deploy/api/questoes/{ano}.json` + as imagens no repo `plataforma`;
-(2) incluir o ano em `ANOS_QUESTOES` no `deploy_pr2.py`; (3) fazer
-`habilidade.js` buscar os anos disponíveis em vez do 2025 fixo
-(`fetch('api/questoes/2025.json')`, hoje hardcoded) e agrupar por ano na
-seção "Questões desta habilidade".
+`habilidade.js` agora é multi-ano: tenta `api/questoes/{ano}.json` pros 5
+anos, agrupa a seção por ano (mais recente primeiro) e lista na nota os anos
+mapeados ainda sem imagem — nada falha em silêncio.
+
+**⚠ Rebuild do plataforma apaga o 2024**: o fluxo `deploy_pr2.py` + `rsync
+--delete` regenera `pr2_deploy/` a partir do `deploy/` nacional, que não tem
+o 2024. Antes do próximo rebuild, copiar pro plataforma:
+`pr2_deploy/api/questoes/2024.json` → `deploy/api/questoes/2024.json` e
+`pr2_deploy/questoes/2024/` → `deploy/questoes/2024/` (o `deploy_pr2.py` já
+está com `ANOS_QUESTOES = ("2024", "2025")` e re-copia sozinho). Se esquecer,
+o git acusa a deleção — restaurar com checkout.
 
 ## TODOs abertos
 

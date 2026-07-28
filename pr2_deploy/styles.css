@@ -750,3 +750,11 @@ a.chip-hab:hover { background: var(--pink); color: var(--card); transform: trans
   transition: opacity .09s ease, transform .09s ease;
 }
 .tip-bolha.tip-on { opacity: 1; transform: translateY(0); }
+
+/* Cabeçalho de ano na seção de questões (multi-ano) */
+.hab-quest-anohdr {
+  font-size: 15px; font-weight: 900; letter-spacing: .02em; color: var(--ink-40);
+  text-transform: uppercase; border-bottom: 2px solid var(--ink-12);
+  padding-bottom: 6px; margin: 26px 0 2px;
+}
+.hab-quest-anohdr:first-child { margin-top: 0; }

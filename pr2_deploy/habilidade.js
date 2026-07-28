@@ -177,63 +177,84 @@ fetch(`api/habilidades/${area}/${h}.json`)
   })
   .catch((e) => console.warn("cobertura não carregada:", e));
 
-/* -------- Questões desta habilidade (imagens WebP das provas oficiais) ----- */
+/* -------- Questões desta habilidade (imagens WebP das provas oficiais) -----
+ * Multi-ano: tenta api/questoes/{ano}.json pra cada ano da série. Ano sem o
+ * JSON (ou cujo caderno ainda não cobre a área — ex.: 2024 só tem o dia 1)
+ * entra na nota "sem imagens ainda", nunca em silêncio. */
+const ANOS_QUESTOES = [...ANOS_HAB].sort((a, b) => b - a);   // 2025 → 2021
 Promise.all([
   fetch(`api/habilidades/${area}/${h}.json`).then((r) => r.ok ? r.json() : null),
-  fetch(`api/questoes/2025.json`).then((r) => r.ok ? r.json() : null),
-]).then(([habData, quest]) => {
+  ...ANOS_QUESTOES.map((ano) =>
+    fetch(`api/questoes/${ano}.json`).then((r) => r.ok ? r.json() : null).catch(() => null)),
+]).then(([habData, ...quests]) => {
   const card = document.getElementById("hab-questoes");
   const grid = document.getElementById("hab-questoes-grid");
   const nota = document.getElementById("hab-questoes-nota");
   if (!card || !grid || !nota) return;
 
-  // Antes o card ficava escondido sem nenhuma mensagem quando um dos dois
-  // JSONs faltava — foi assim que a ausência de api/questoes/ no pr2_deploy
-  // passou batida. Agora o card sempre aparece dizendo o que houve.
-  if (!quest || !quest.itens) {
-    nota.textContent = "As imagens das provas oficiais não estão disponíveis nesta versão do painel.";
-    card.hidden = false; return;
-  }
+  // Antes o card ficava escondido sem nenhuma mensagem quando um dos JSONs
+  // faltava — foi assim que a ausência de api/questoes/ no pr2_deploy passou
+  // batida. Agora o card sempre aparece dizendo o que houve.
   if (!habData) {
     nota.textContent = "Não foi possível carregar os itens desta habilidade.";
     card.hidden = false; return;
   }
-
-  const itens2025 = habData.por_ano?.["2025"]?.itens || [];
-  if (!itens2025.length) {
-    nota.textContent = "Nenhuma questão desta habilidade encontrada no ENEM 2025 regular.";
+  const questPorAno = {};
+  ANOS_QUESTOES.forEach((ano, i) => { if (quests[i]?.itens) questPorAno[ano] = quests[i].itens; });
+  if (!Object.keys(questPorAno).length) {
+    nota.textContent = "As imagens das provas oficiais não estão disponíveis nesta versão do painel.";
     card.hidden = false; return;
   }
 
-  const cards = [];
-  for (const it of itens2025) {
-    const q = quest.itens[String(it.CO_ITEM)];
-    if (!q) continue;
-    const langLabel = q.tp_lingua === 0 ? "Inglês"
-                    : q.tp_lingua === 1 ? "Espanhol" : null;
-    const headline = `Questão ${q.co_posicao}` + (langLabel ? ` · ${langLabel}` : "");
-    const partesSub = [];
-    if (it.param_b != null) partesSub.push(`Dificuldade b = ${Number(it.param_b).toFixed(2)}`);
-    if (it.p_br != null) partesSub.push(`${Math.round(it.p_br * 100)}% de acerto no Brasil`);
-    const sub = partesSub.join(" · ");
-    const imgs = (q.imgs || []).map((src, i) =>
-      `<a href="${src}" target="_blank" class="hab-quest-imgwrap"
-          title="Abrir em nova aba (página ${q.pags[i]} do caderno)">
-         <img loading="lazy" src="${src}" alt="Questão ${q.co_posicao}${langLabel ? " (" + langLabel + ")" : ""}">
-       </a>`).join("");
-    cards.push(`<div class="hab-quest">
-      <div class="hab-quest-head" style="border-left-color:${info.cor}">
-        <div class="hab-quest-headline">${headline}</div>
-        <div class="hab-quest-sub">${sub}</div>
-      </div>
-      <div class="hab-quest-imgs">${imgs}</div>
-    </div>`);
+  const blocos = [];
+  const semImagem = [];   // anos em que a habilidade caiu mas não há imagem
+  let totalCards = 0;
+  for (const ano of ANOS_QUESTOES) {
+    const itensAno = habData.por_ano?.[String(ano)]?.itens || [];
+    if (!itensAno.length) continue;          // habilidade não caiu nesse ano
+    const qmap = questPorAno[ano];
+    const cards = [];
+    for (const it of itensAno) {
+      const q = qmap?.[String(it.CO_ITEM)];
+      if (!q) continue;
+      const langLabel = q.tp_lingua === 0 ? "Inglês"
+                      : q.tp_lingua === 1 ? "Espanhol" : null;
+      const headline = `Questão ${q.co_posicao}` + (langLabel ? ` · ${langLabel}` : "");
+      const partesSub = [];
+      if (it.param_b != null) partesSub.push(`Dificuldade b = ${Number(it.param_b).toFixed(2)}`);
+      if (it.p_br != null) partesSub.push(`${Math.round(it.p_br * 100)}% de acerto no Brasil`);
+      const imgs = (q.imgs || []).map((src, i) =>
+        `<a href="${src}" target="_blank" class="hab-quest-imgwrap"
+            title="Abrir em nova aba (página ${q.pags[i]} do caderno ${ano})">
+           <img loading="lazy" src="${src}" alt="ENEM ${ano} · questão ${q.co_posicao}${langLabel ? " (" + langLabel + ")" : ""}">
+         </a>`).join("");
+      cards.push(`<div class="hab-quest">
+        <div class="hab-quest-head" style="border-left-color:${info.cor}">
+          <div class="hab-quest-headline">${headline}</div>
+          <div class="hab-quest-sub">${partesSub.join(" · ")}</div>
+        </div>
+        <div class="hab-quest-imgs">${imgs}</div>
+      </div>`);
+    }
+    if (cards.length) {
+      totalCards += cards.length;
+      blocos.push(`<h4 class="hab-quest-anohdr">ENEM ${ano}</h4>` + cards.join(""));
+    } else {
+      semImagem.push(ano);
+    }
   }
-  if (!cards.length) {
-    nota.textContent = "As questões estão mapeadas mas as imagens ainda não foram geradas para esta habilidade.";
+
+  if (!totalCards) {
+    nota.textContent = semImagem.length
+      ? `As questões de ${semImagem.join(", ")} estão mapeadas, mas as imagens dessas provas ainda não foram geradas.`
+      : "Nenhuma questão desta habilidade encontrada nas provas regulares.";
   } else {
-    grid.innerHTML = cards.join("");
-    nota.textContent = `${cards.length} ${cards.length === 1 ? "questão exibida" : "questões exibidas"} do caderno AZUL do ENEM 2025.`;
+    grid.innerHTML = blocos.join("");
+    const anosOk = ANOS_QUESTOES.filter((a) =>
+      (habData.por_ano?.[String(a)]?.itens || []).some((it) => questPorAno[a]?.[String(it.CO_ITEM)]));
+    nota.textContent = `${totalCards} ${totalCards === 1 ? "questão exibida" : "questões exibidas"} `
+      + `do caderno AZUL (${anosOk.join(", ")}).`
+      + (semImagem.length ? ` Sem imagens ainda para: ${semImagem.join(", ")}.` : "");
   }
   card.hidden = false;
 }).catch((e) => {
