@@ -291,8 +291,13 @@ não é a média bruta da UF/BR.
   LC 889 · CH 879 · MT 899 · CN 909 (o CSV traz um 2º conjunto azul
   digital/reaplicação com ordenação idêntica — o gerador agora desambigua e
   ignora a duplicata, abortando se as ordenações divergirem).
-- **2022**: **só o dia 2** (90/90, CN+MT) — **falta o PDF azul do D1
-  (CD1)**; LC/CH de 2022 exibem "sem imagens ainda" até ele chegar.
+- **2022**: completa (185/185) — D1 CD1 + D2 CD7 azuis; LC 1065 · CH 1055 ·
+  MT 1075 · CN 1085.
+
+**COLEÇÃO COMPLETA (27/07): 925 recortes, 5 anos × 185 itens.** O
+`deploy_pr2.py` já está com ANOS_QUESTOES = 2021-2025 — antes do próximo
+rebuild no plataforma, copiar `api/questoes/*.json` e `questoes/*` pro
+`deploy/` de lá, senão o rsync --delete apaga tudo.
 
 Correção estrutural (27/07, achada no 2021-D2): âncoras passaram de bloco
 pra **linha** do PDF — o extrator às vezes funde "Questão N" no meio de um

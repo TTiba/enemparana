@@ -240,7 +240,7 @@ if os.path.exists(hb_orig):
 # Sem isso a seção "Questões desta habilidade" de habilidade.html não aparece.
 # habilidade.js só consome 2025 hoje; a lista explícita evita arrastar as
 # imagens de anos que nenhuma tela exibe.
-ANOS_QUESTOES = ("2024", "2025")
+ANOS_QUESTOES = ("2021", "2022", "2023", "2024", "2025")
 log("Copiando questoes/ + imagens das provas…")
 q_orig = os.path.join(API_ORIG, "questoes")
 if os.path.exists(q_orig):
