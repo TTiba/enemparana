@@ -179,6 +179,15 @@ agregado). Viés do esperado vs acerto observado:
 | Paraná · T | 64.780 | +0,25 | +0,49 pp | −1,58 pp | 1,11 |
 | Paraná · PRIV | 14.452 | +0,80 | +1,90 pp | +1,35 pp | >2,5 |
 
+Cobertura do demo, conferida entidade por entidade (27/07): UF/PR ✓, **398 de
+398 municípios** ✓, 32 NREs (por agregação no cliente) ✓, **2.052 escolas** ✓.
+Só o ano **2025** — o bloco 2021-2024 do `historico` fica em D=1,7, então a
+página de Análise mistura os dois regimes. Um defeito foi corrigido no
+caminho: o heurístico `n < 0,9·nA` pra detectar itens de língua estrangeira
+falhava em município pequeno (Rio Bonito do Iguaçu: 30 alunos, itens com
+n=14 por fragmentação entre cadernos), anulando 275 itens comuns em 36
+entidades. Agora o teste é o `tp_lingua`, que é exato — 0 falsos positivos.
+
 Três populações públicas independentes de 200 a 50.328 alunos convergem em
 D ≈ 1,0. **O viés do D=1,7 é θ-dependente** (−3,0 pp na rede pública, −1,4 pp
 em todas as redes): não é offset constante, distorce a *comparação* entre

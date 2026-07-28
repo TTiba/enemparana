@@ -23,10 +23,14 @@ COBERTURA (itens de 2025)
                                 separados — único caso sem aproximação.
 
 FORA DE ESCOPO (mantém o valor antigo ou vira null)
-  - Itens de língua estrangeira fora da Feijó: sem distribuição de θ por
-    língua, p_esp vira null e a UI mostra "–". Na Feijó a distribuição cheia
-    de LC erra até ±10 pp nesses itens, então ausente é melhor que enviesado.
-  - Anos 2021-2024: os parâmetros desses itens não estão neste repo.
+  - Itens de língua estrangeira fora da Feijó (identificados por tp_lingua,
+    não por heurística de n): sem distribuição de θ por língua, p_esp vira
+    null e a UI mostra "–". Na Feijó a distribuição cheia de LC erra até
+    ±10 pp nesses itens, então ausente é melhor que enviesado.
+  - **Anos 2021-2024**: só o bloco 2025 é corrigido, nos dois níveis
+    (entidade e historico). A página de Análise, que agrega vários anos,
+    mistura 2025 corrigido com 2021-2024 em D=1,7 — o que só se resolve
+    de verdade no pipeline do plataforma (ver PATCH-build_db.md).
 
 Uso:  python3 pipeline/d1_demo/gera_site_paralelo_d1.py
       cd pr2_deploy_d1 && python3 -m http.server 9001
@@ -82,21 +86,27 @@ def pesp(pontos, a, b, c, shift=0.0):
     return round(sum(w * p3pl(a, bb, c, t) for t, w in pontos), 3)
 
 
-def corrigir(rows, grades, shift, n_area, grades_lingua=None):
+def corrigir(rows, grades, shift, grades_lingua=None):
     """Recalcula p_esp de [co, n, p, p_esp, hab, b, lingua?] in-place.
 
     grades: grade da área. grades_lingua: {tp_lingua: grade} quando houver.
-    Itens com n < 90% do total da área são parciais (LEM): só corrigidos se
-    houver grade da língua; senão p_esp vira None.
+
+    Itens de língua estrangeira (tp_lingua 0=inglês, 1=espanhol) são expostos
+    só a parte dos alunos, então precisam da distribuição de θ daquele
+    subgrupo; sem ela, p_esp vira None e a UI mostra "–".
+
+    O tp_lingua é o teste exato. Antes eu inferia "exposição parcial" por
+    n < 90% do total da área, o que quebrava em município pequeno: lá a
+    exposição se fragmenta entre cadernos (ex.: Rio Bonito do Iguaçu, 30
+    alunos, itens com n=14), e itens comuns eram anulados sem motivo.
     """
     cor = anu = 0
     for arr in rows:
-        n, p_esp = arr[1], arr[3]
         prm = PARAMS.get(str(arr[0]))
-        if p_esp is None or prm is None:
+        if arr[3] is None or prm is None:
             continue
-        if n_area and n < 0.9 * n_area:
-            lingua = arr[6] if len(arr) > 6 else None
+        lingua = arr[6] if len(arr) > 6 else None
+        if lingua is not None:
             g = (grades_lingua or {}).get(lingua)
             if g is None:
                 arr[3] = None
@@ -141,7 +151,7 @@ def patch_por_rede(caminho, grades_por_rede):
         for area, rows in itens.items():
             if area not in g:
                 continue
-            r = corrigir(rows, g[area][0], 0.0, g[area][1])
+            r = corrigir(rows, g[area][0], 0.0)
             tot = [x + y for x, y in zip(tot, r)]
     escrever(caminho, doc)
     return tot
@@ -160,11 +170,10 @@ def patch_escola(caminho, grades_mun, medias_esc, grades_lingua=None):
             g = grades_mun.get(area)
             if not g:
                 continue
-            pontos, n_mun, media_mun = g
+            pontos, _n_mun, media_mun = g
             m_esc = medias_esc.get(area)
             shift = ((m_esc - media_mun) / 100) if m_esc is not None else 0.0
-            n_area = max((r[1] for r in rows), default=0)
-            r = corrigir(rows, pontos, shift, n_area, grades_lingua)
+            r = corrigir(rows, pontos, shift, grades_lingua)
             tot = [x + y for x, y in zip(tot, r)]
     escrever(caminho, doc)
     return tot
