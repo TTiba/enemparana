@@ -285,9 +285,11 @@ não é a média bruta da UF/BR.
   leitura (a palavra ESPANHOL já aparece na capa) e **páginas de coluna
   única** detectadas por página (D1: 15, 28 · D2: 15, 23, 26-28) — sem isso
   o recorte cortava a metade direita dessas páginas.
-- **2023**: PDF do D1 (CD1 azul ✓) já em mãos; faltam `ITENS_PROVA_2023.csv`
-  e o PDF AZUL do D2 (o arquivo enviado como 2023-D2 era o 2025-D2 verde
-  duplicado). **2021-2022**: pendentes — CSV + PDFs D1/D2 de cada ano.
+- **2023**: **completa com recortes** (185/185) — D1 CD1 + D2 CD7, azuis;
+  cadernos LC 1201 · CH 1191 · MT 1211 · CN 1221. Validação semântica: a
+  Q137 (média em tabela) mapeia pra MT H27, exatamente a habilidade de
+  medidas de tendência central. **2021-2022**: pendentes — CSV + PDFs
+  azuis D1/D2 de cada ano.
 
 Robustez do gerador (27/07, achados com 2025): geometria da página **medida
 no próprio PDF** (margens variam por ano — constantes fixas fatiavam a 1ª
