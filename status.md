@@ -274,11 +274,9 @@ não é a média bruta da UF/BR.
 
 ## Provas com imagem disponível
 
-- **2025**: dia 1 com **recortes por questão** (95, gerados do PDF oficial em
-  27/07, sem CSV — as posições vieram do próprio `api/questoes/2025.json`);
-  dia 2 segue com páginas inteiras do pipeline nacional. **⚠ O PDF de D2
-  enviado (CD8) é do caderno VERDE** — as posições mudam entre cores, então
-  não dá pra usar; falta o PDF AZUL do 2º dia de 2025 pros recortes de CN/MT.
+- **2025**: **completa com recortes** (185/185) — D1 CD1 e D2 CD7, ambos
+  azuis, processados sem CSV (posições do próprio `api/questoes/2025.json`).
+  Validação: a Q137 recortada é a mesma questão exibida pelo site publicado.
 - **2024**: **completa** (dias 1 e 2) — `pipeline/build_questoes_ano.py` a
   partir dos PDFs oficiais + ITENS_PROVA_2024: 185/185 itens, 60 páginas e
   **185 recortes por questão** (região só da questão, colunas costuradas,
