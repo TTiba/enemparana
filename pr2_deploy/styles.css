@@ -758,3 +758,39 @@ a.chip-hab:hover { background: var(--pink); color: var(--card); transform: trans
   padding-bottom: 6px; margin: 26px 0 2px;
 }
 .hab-quest-anohdr:first-child { margin-top: 0; }
+
+/* Carrossel de questões (habilidade.html) --------------------------------- */
+.hab-carrossel { display: flex; align-items: stretch; gap: 10px; }
+.hc-viewport {
+  flex: 1; display: flex; overflow-x: auto; scroll-snap-type: x mandatory;
+  scrollbar-width: none; border-radius: var(--radius-sm);
+}
+.hc-viewport::-webkit-scrollbar { display: none; }
+.hc-slide {
+  flex: 0 0 100%; min-width: 0; scroll-snap-align: center;
+  scroll-snap-stop: always; padding: 0 2px;
+}
+.hc-img {
+  max-height: 72vh; overflow-y: auto; text-align: center;
+  border: 1.5px solid var(--ink-12); border-radius: var(--radius-sm);
+  background: #fff;
+}
+.hc-img img { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+.hc-nav {
+  flex: 0 0 44px; align-self: center; height: 76px; border-radius: 12px;
+  border: 1.5px solid var(--ink-12); background: var(--cream);
+  font-size: 26px; font-weight: 900; color: var(--ink); cursor: pointer;
+  transition: background .12s, transform .1s;
+}
+.hc-nav:hover:not(:disabled) { background: var(--ink-06); transform: scale(1.05); }
+.hc-nav:disabled { opacity: .25; cursor: default; }
+.hc-contador {
+  text-align: center; margin-top: 8px;
+  font-size: 12.5px; font-weight: 700; color: var(--ink-40);
+}
+.hc-ano-chip {
+  display: inline-block; background: var(--ink); color: #fff;
+  font-size: 12px; font-weight: 800; letter-spacing: .03em;
+  padding: 2px 10px; border-radius: 999px; margin-right: 8px;
+  vertical-align: 3px;
+}

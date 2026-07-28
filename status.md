@@ -275,14 +275,21 @@ não é a média bruta da UF/BR.
 ## Provas com imagem disponível
 
 - **2025**: completa (dias 1 e 2, 62 páginas WebP) — veio do pipeline nacional.
-- **2024**: **dia 1 (LC+CH)** gerado em 27/07 por
-  `pipeline/build_questoes_ano.py` a partir do PDF oficial + ITENS_PROVA_2024
-  (95 itens, 30 páginas, 8,4 MB; LEM inglês/espanhol desambiguado pela ordem
-  de leitura — a 1ª ocorrência de cada questão 1-5 é inglês). CN/MT de 2024
-  aguardam o PDF do dia 2 — rodar o mesmo script com `--pdf-d2` (ele mescla
-  no JSON existente). Cadernos regulares identificados por interseção com o
-  painel: LC 1395 · CH 1383 · MT 1407 · CN 1419.
+- **2024**: **completa** (dias 1 e 2) — `pipeline/build_questoes_ano.py` a
+  partir dos PDFs oficiais + ITENS_PROVA_2024: 185/185 itens, 60 páginas e
+  **185 recortes por questão** (região só da questão, colunas costuradas,
+  texto-base "QUESTÕES N A M" incluído), 34 MB. Cadernos: LC 1395 · CH 1383 ·
+  MT 1407 · CN 1419. Armadilhas tratadas: LEM desambiguado pela ordem de
+  leitura (a palavra ESPANHOL já aparece na capa) e **páginas de coluna
+  única** detectadas por página (D1: 15, 28 · D2: 15, 23, 26-28) — sem isso
+  o recorte cortava a metade direita dessas páginas.
 - **2021-2023**: pendentes — precisam do ITENS_PROVA_{ano}.csv + PDFs D1/D2.
+  O gerador é genérico; é só rodar com os arquivos de cada ano.
+
+A seção virou **carrossel** (um slide por questão, ano mais recente primeiro,
+chip do ano, setas + contador, scroll-snap). Slide usa o `recorte` quando o
+JSON traz; senão cai pra página inteira (caso do 2025, que veio do pipeline
+nacional antigo — regerar com este script quando quiser recortes lá também).
 
 `habilidade.js` agora é multi-ano: tenta `api/questoes/{ano}.json` pros 5
 anos, agrupa a seção por ano (mais recente primeiro) e lista na nota os anos

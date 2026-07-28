@@ -206,57 +206,85 @@ Promise.all([
     card.hidden = false; return;
   }
 
-  const blocos = [];
+  // Um slide por questão, do ano mais recente pro mais antigo. Com recorte
+  // (região só da questão, colunas costuradas) quando o gerador produziu;
+  // senão cai pra(s) página(s) inteira(s) — caso do 2025, vindo do pipeline
+  // nacional antigo.
+  const slides = [];
   const semImagem = [];   // anos em que a habilidade caiu mas não há imagem
-  let totalCards = 0;
   for (const ano of ANOS_QUESTOES) {
     const itensAno = habData.por_ano?.[String(ano)]?.itens || [];
     if (!itensAno.length) continue;          // habilidade não caiu nesse ano
     const qmap = questPorAno[ano];
-    const cards = [];
+    let achou = false;
     for (const it of itensAno) {
       const q = qmap?.[String(it.CO_ITEM)];
       if (!q) continue;
+      achou = true;
       const langLabel = q.tp_lingua === 0 ? "Inglês"
                       : q.tp_lingua === 1 ? "Espanhol" : null;
-      const headline = `Questão ${q.co_posicao}` + (langLabel ? ` · ${langLabel}` : "");
       const partesSub = [];
-      if (it.param_b != null) partesSub.push(`Dificuldade b = ${Number(it.param_b).toFixed(2)}`);
+      if (it.param_b != null) partesSub.push(`b = ${Number(it.param_b).toFixed(2)}`);
       if (it.p_br != null) partesSub.push(`${Math.round(it.p_br * 100)}% de acerto no Brasil`);
-      const imgs = (q.imgs || []).map((src, i) =>
-        `<a href="${src}" target="_blank" class="hab-quest-imgwrap"
-            title="Abrir em nova aba (página ${q.pags[i]} do caderno ${ano})">
-           <img loading="lazy" src="${src}" alt="ENEM ${ano} · questão ${q.co_posicao}${langLabel ? " (" + langLabel + ")" : ""}">
-         </a>`).join("");
-      cards.push(`<div class="hab-quest">
+      const pagLink = (q.imgs || [])[0];
+      const corpo = q.recorte
+        ? `<img loading="lazy" src="${q.recorte}" alt="ENEM ${ano} · questão ${q.co_posicao}${langLabel ? " (" + langLabel + ")" : ""}">`
+        : (q.imgs || []).map((src, i) =>
+            `<img loading="lazy" src="${src}" alt="ENEM ${ano} · questão ${q.co_posicao} · página ${q.pags[i]}">`).join("");
+      slides.push(`<div class="hc-slide">
         <div class="hab-quest-head" style="border-left-color:${info.cor}">
-          <div class="hab-quest-headline">${headline}</div>
-          <div class="hab-quest-sub">${partesSub.join(" · ")}</div>
+          <div class="hab-quest-headline">
+            <span class="hc-ano-chip">ENEM ${ano}</span> Questão ${q.co_posicao}${langLabel ? ` · ${langLabel}` : ""}
+          </div>
+          <div class="hab-quest-sub">${partesSub.join(" · ")}
+            ${pagLink ? ` · <a href="${pagLink}" target="_blank">ver página do caderno</a>` : ""}</div>
         </div>
-        <div class="hab-quest-imgs">${imgs}</div>
+        <div class="hc-img">${corpo}</div>
       </div>`);
     }
-    if (cards.length) {
-      totalCards += cards.length;
-      blocos.push(`<h4 class="hab-quest-anohdr">ENEM ${ano}</h4>` + cards.join(""));
-    } else {
-      semImagem.push(ano);
-    }
+    if (!achou) semImagem.push(ano);
   }
 
-  if (!totalCards) {
+  if (!slides.length) {
     nota.textContent = semImagem.length
       ? `As questões de ${semImagem.join(", ")} estão mapeadas, mas as imagens dessas provas ainda não foram geradas.`
       : "Nenhuma questão desta habilidade encontrada nas provas regulares.";
-  } else {
-    grid.innerHTML = blocos.join("");
-    const anosOk = ANOS_QUESTOES.filter((a) =>
-      (habData.por_ano?.[String(a)]?.itens || []).some((it) => questPorAno[a]?.[String(it.CO_ITEM)]));
-    nota.textContent = `${totalCards} ${totalCards === 1 ? "questão exibida" : "questões exibidas"} `
-      + `do caderno AZUL (${anosOk.join(", ")}).`
-      + (semImagem.length ? ` Sem imagens ainda para: ${semImagem.join(", ")}.` : "");
+    card.hidden = false;
+    return;
   }
-  card.hidden = false;
+
+  grid.innerHTML = `
+    <div class="hab-carrossel">
+      <button class="hc-nav hc-prev" aria-label="Questão anterior">‹</button>
+      <div class="hc-viewport">${slides.join("")}</div>
+      <button class="hc-nav hc-next" aria-label="Próxima questão">›</button>
+    </div>
+    <div class="hc-contador"></div>`;
+
+  card.hidden = false;   // antes de medir: com o card hidden, clientWidth é 0
+
+  const vp = grid.querySelector(".hc-viewport");
+  const cont = grid.querySelector(".hc-contador");
+  const bPrev = grid.querySelector(".hc-prev");
+  const bNext = grid.querySelector(".hc-next");
+  const atual = () => vp.clientWidth ? Math.round(vp.scrollLeft / vp.clientWidth) : 0;
+  const atualizar = () => {
+    const i = atual();
+    cont.textContent = `${i + 1} / ${slides.length}`;
+    bPrev.disabled = i <= 0;
+    bNext.disabled = i >= slides.length - 1;
+  };
+  const ir = (delta) => vp.scrollBy({ left: delta * vp.clientWidth, behavior: "smooth" });
+  bPrev.addEventListener("click", () => ir(-1));
+  bNext.addEventListener("click", () => ir(1));
+  vp.addEventListener("scroll", () => requestAnimationFrame(atualizar), { passive: true });
+  atualizar();
+
+  const anosOk = ANOS_QUESTOES.filter((a) =>
+    (habData.por_ano?.[String(a)]?.itens || []).some((it) => questPorAno[a]?.[String(it.CO_ITEM)]));
+  nota.textContent = `${slides.length} ${slides.length === 1 ? "questão" : "questões"} `
+    + `do caderno AZUL (${anosOk.join(", ")}) — use as setas pra navegar.`
+    + (semImagem.length ? ` Sem imagens ainda para: ${semImagem.join(", ")}.` : "");
 }).catch((e) => {
   console.warn("questões não carregadas:", e);
   const card = document.getElementById("hab-questoes");
