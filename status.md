@@ -285,11 +285,20 @@ não é a média bruta da UF/BR.
   leitura (a palavra ESPANHOL já aparece na capa) e **páginas de coluna
   única** detectadas por página (D1: 15, 28 · D2: 15, 23, 26-28) — sem isso
   o recorte cortava a metade direita dessas páginas.
-- **2023**: **completa com recortes** (185/185) — D1 CD1 + D2 CD7, azuis;
-  cadernos LC 1201 · CH 1191 · MT 1211 · CN 1221. Validação semântica: a
-  Q137 (média em tabela) mapeia pra MT H27, exatamente a habilidade de
-  medidas de tendência central. **2021-2022**: pendentes — CSV + PDFs
-  azuis D1/D2 de cada ano.
+- **2023**: completa (185/185) — D1 CD1 + D2 CD7 azuis; LC 1201 · CH 1191 ·
+  MT 1211 · CN 1221. Validação semântica: Q137 (média em tabela) → MT H27.
+- **2021**: completa (185/185) — 1ª aplicação, D1 CD1 + D2 CD7 azuis;
+  LC 889 · CH 879 · MT 899 · CN 909 (o CSV traz um 2º conjunto azul
+  digital/reaplicação com ordenação idêntica — o gerador agora desambigua e
+  ignora a duplicata, abortando se as ordenações divergirem).
+- **2022**: **só o dia 2** (90/90, CN+MT) — **falta o PDF azul do D1
+  (CD1)**; LC/CH de 2022 exibem "sem imagens ainda" até ele chegar.
+
+Correção estrutural (27/07, achada no 2021-D2): âncoras passaram de bloco
+pra **linha** do PDF — o extrator às vezes funde "Questão N" no meio de um
+bloco de conteúdo, e a âncora no topo do bloco espremia a questão anterior
+pra 7pt (Q159/Q178 de 2021 ficavam sem recorte). Todos os anos foram
+regenerados com âncoras de linha.
 
 Robustez do gerador (27/07, achados com 2025): geometria da página **medida
 no próprio PDF** (margens variam por ano — constantes fixas fatiavam a 1ª

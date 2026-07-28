@@ -74,8 +74,31 @@ def achar_provas_regulares(csv_path, deploy, ano):
             area = its[0]["SG_AREA"]
             dia = "DIA_1" if area in ("LC", "CH") else "DIA_2"
             regulares[prova] = {"area": area, "dia": dia, "rows": its,
-                                "cobertura": f"{inter}/{len(cos)}"}
-    return regulares
+                                "cobertura": f"{inter}/{len(cos)}", "inter": inter}
+
+    # 2021/2022 têm DOIS conjuntos azuis que passam no filtro (impresso e
+    # digital/reaplicação). Fica um por (dia, área): o de maior cobertura.
+    # Se as ordenações divergirem, aborta — aí só um deles casa com o PDF.
+    por_chave = {}
+    for prova, info in regulares.items():
+        por_chave.setdefault((info["dia"], info["area"]), []).append((prova, info))
+    finais = {}
+    for chave, cands in por_chave.items():
+        cands.sort(key=lambda x: (-x[1]["inter"], int(x[0])))
+        eleito = cands[0]
+        mapa_e = {(r["CO_POSICAO"], r["TP_LINGUA"]): r["CO_ITEM"]
+                  for r in eleito[1]["rows"]}
+        for prova, info in cands[1:]:
+            mapa_o = {(r["CO_POSICAO"], r["TP_LINGUA"]): r["CO_ITEM"]
+                      for r in info["rows"]}
+            dif = sum(1 for k, v in mapa_e.items() if k in mapa_o and mapa_o[k] != v)
+            if dif:
+                sys.exit(f"provas {eleito[0]} e {prova} ({chave}) têm ordenações "
+                         f"diferentes ({dif} posições) — preciso saber qual casa "
+                         f"com o PDF; rode de novo indicando a prova")
+            print(f"  (ignorando CO_PROVA {prova}, duplicata de {eleito[0]} em {chave[1]})")
+        finais[eleito[0]] = eleito[1]
+    return finais
 
 
 # ------------------------------------------------------------------- âncoras
@@ -93,6 +116,19 @@ class Anc:
         return (self.pag, self.col, self.y)
 
 
+def linhas_de(pg):
+    """(x0, y0, x1, y1, texto) por LINHA — âncoras por bloco falham quando o
+    extrator funde 'Questão N' no meio de um bloco de conteúdo (2021 D2:
+    a Q159 ficava com 7pt de altura porque a âncora da Q160 era o topo de um
+    bloco que começava no conteúdo da 159)."""
+    for blk in pg.get_text("dict")["blocks"]:
+        for ln in blk.get("lines", []):
+            txt = "".join(sp["text"] for sp in ln.get("spans", []))
+            if txt.strip():
+                x0, y0, x1, y1 = ln["bbox"]
+                yield x0, y0, x1, y1, txt
+
+
 def geometria_de(doc):
     """Faixa útil da página, medida no próprio PDF — as margens variam de ano
     pra ano (2024: conteúdo a partir de x=32/y≈85; 2025: x=22,7/y≈76), e
@@ -105,7 +141,7 @@ def geometria_de(doc):
     ancs_y, foot_y, xs0, xs1 = [], [], [], []
     for pg in doc:
         h = pg.rect.height
-        for x0, y0, x1, y1, txt, *_ in pg.get_text("blocks"):
+        for x0, y0, x1, y1, txt in linhas_de(pg):
             t = sem_acento(txt.upper())
             if "DIA" in t and "CADERNO" in t and y0 > h * 0.85:
                 foot_y.append(y0)
@@ -132,7 +168,7 @@ def layout_de(doc, geo):
     out = {}
     for i, pg in enumerate(doc):
         meio = pg.rect.width / 2
-        cruzam = sum(1 for x0, y0, x1, y1, txt, *_ in pg.get_text("blocks")
+        cruzam = sum(1 for x0, y0, x1, y1, txt in linhas_de(pg)
                      if geo["topo"] < y0 and y1 < geo["base"]
                      and x0 < meio - 30 and x1 > meio + 30 and len(txt.strip()) > 40)
         out[i + 1] = 1 if cruzam >= 2 else 2
@@ -143,7 +179,7 @@ def ancoras_do_pdf(doc, layout, geo):
     ancs = []
     for i, pg in enumerate(doc):
         meio = pg.rect.width / 2
-        for x0, y0, x1, y1, txt, *_ in pg.get_text("blocks"):
+        for x0, y0, x1, y1, txt in linhas_de(pg):
             t = sem_acento(txt.upper())
             col = 0 if (layout[i + 1] == 1 or x0 < meio) else 1
             topo = col == 0 and y0 < geo["topo"] + 45
