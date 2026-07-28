@@ -788,11 +788,16 @@ async function renderCompetenciasAtual(body, comps) {
     if (!r.habilidade_inep) continue;
     const c = habToComp[r.habilidade_inep];
     if (!c) continue;
-    const a = agg.get(c.n) || { n: 0, acerto: 0, esp: 0, br: 0, itens: 0, hs: new Set() };
+    const a = agg.get(c.n) || { n: 0, nP: 0, nEsp: 0, nBr: 0,
+                                acerto: 0, esp: 0, br: 0, itens: 0, hs: new Set() };
+    // Cada média precisa do próprio denominador. Tratar p_esp/p_br nulos como
+    // zero sobre o n total afunda a barra: um item sem esperado entrava com 0
+    // no numerador mas com o n cheio embaixo (em LC, onde os itens EN·ES podem
+    // não ter esperado, isso derrubava a competência vários pp).
     a.n += r.n || 0;
-    a.acerto += (r.p || 0) * (r.n || 0);
-    a.esp += (r.p_esp != null ? r.p_esp : 0) * (r.n || 0);
-    a.br += (r.p_br != null ? r.p_br : 0) * (r.n || 0);
+    if (r.p     != null) { a.acerto += r.p     * (r.n || 0); a.nP   += r.n || 0; }
+    if (r.p_esp != null) { a.esp    += r.p_esp * (r.n || 0); a.nEsp += r.n || 0; }
+    if (r.p_br  != null) { a.br     += r.p_br  * (r.n || 0); a.nBr  += r.n || 0; }
     a.itens += 1;
     a.hs.add(r.habilidade_inep);
     agg.set(c.n, a);
@@ -810,9 +815,9 @@ async function renderCompetenciasAtual(body, comps) {
         <div class="comp-vazio">sem itens nesta prova</div>
       </div>`;
     }
-    const p = a.acerto / a.n;
-    const pEsp = a.esp / a.n;
-    const pBr = a.br / a.n;
+    const p = a.nP ? a.acerto / a.nP : 0;
+    const pEsp = a.nEsp ? a.esp / a.nEsp : 0;
+    const pBr = a.nBr ? a.br / a.nBr : 0;
     return `<div class="comp-row ${ativa}" data-comp="${c.n}">
       <div class="comp-lbl">
         <b>C${c.n}</b> · <span class="comp-tit">${c.titulo}</span>

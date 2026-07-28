@@ -218,7 +218,13 @@ A queda do desvio-padrão entre escolas (1,90 → 1,11 pp) confirma que o D=1,7
 injetava variância espúria na comparação entre elas. `PATCH-build_db.md` traz
 o roteiro da correção definitiva no repo `plataforma`.
 
-**Menores** — ambos resolvidos em 27/07: (a) `agregarItensNRE` usava `r.n`
+**Menores** — três resolvidos em 27/07: (c) `renderCompetenciasAtual`
+(app.js:791-820) somava `p_esp`/`p_br` nulos como **zero** sobre o `n` total,
+afundando a barra da competência — um item sem esperado entrava com 0 no
+numerador e com o n cheio no denominador. Agora cada média tem denominador
+próprio (`nP`/`nEsp`/`nBr`). No site publicado não havia nulos, então o valor
+não muda; no site D=1 (que anula p_esp dos itens EN·ES) o esperado de LC subia
+errado de 42,83% para 38,07% — 4,8 pp de erro. Os outros dois: (a) `agregarItensNRE` usava `r.n`
 como denominador de `p` mas só somava `p*n` quando `p != null`; agora `p` tem
 denominador próprio (`nP`), como o `p_esp` já tinha; (b) a ponderação de
 `p_br`/`p_uf` no `fundirLEM` está documentada no código — é padronização
