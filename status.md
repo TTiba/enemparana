@@ -321,13 +321,12 @@ nacional antigo — regerar com este script quando quiser recortes lá também).
 anos, agrupa a seção por ano (mais recente primeiro) e lista na nota os anos
 mapeados ainda sem imagem — nada falha em silêncio.
 
-**⚠ Rebuild do plataforma apaga o 2024**: o fluxo `deploy_pr2.py` + `rsync
---delete` regenera `pr2_deploy/` a partir do `deploy/` nacional, que não tem
-o 2024. Antes do próximo rebuild, copiar pro plataforma:
-`pr2_deploy/api/questoes/2024.json` → `deploy/api/questoes/2024.json` e
-`pr2_deploy/questoes/2024/` → `deploy/questoes/2024/` (o `deploy_pr2.py` já
-está com `ANOS_QUESTOES = ("2024", "2025")` e re-copia sozinho). Se esquecer,
-o git acusa a deleção — restaurar com checkout.
+**Rebuild não apaga mais as questões** (27/07): o `deploy_pr2.py` preserva
+`questoes/` e `api/questoes/` com `rename` antes do `rmtree` e devolve depois
+— instantâneo mesmo com 150 MB, e funciona mesmo que o deploy nacional ainda
+não as tenha. Mesma blindagem no `exporta_netlify.py` do repo nacional.
+Continua valendo copiar as imagens pro `deploy/` nacional se quiser que o
+`deploy_pr2.py` as re-copie de lá; sem isso, as preservadas seguem servindo.
 
 ## TODOs abertos
 

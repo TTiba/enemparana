@@ -26,9 +26,34 @@ def log(msg):
 
 
 # ---------------------------------------------------------------- limpar out
+# As questões (api/questoes/*.json + questoes/{ano}/*.webp) vêm do deploy
+# nacional e levam horas de PDF pra regerar. Preservamos com rename —
+# instantâneo, mesmo com ~150 MB — pra que o rmtree não as destrua caso o
+# deploy nacional ainda não as tenha.
+GUARDA = OUT + ".questoes_tmp"
+if os.path.exists(GUARDA):
+    shutil.rmtree(GUARDA)
+preservados = []
+for rel in ("questoes", os.path.join("api", "questoes")):
+    orig = os.path.join(OUT, rel)
+    if os.path.isdir(orig):
+        dest = os.path.join(GUARDA, rel)
+        os.makedirs(os.path.dirname(dest), exist_ok=True)
+        os.rename(orig, dest)
+        preservados.append(rel)
+if preservados:
+    log(f"Questões preservadas do rmtree: {', '.join(preservados)}")
+
 if os.path.exists(OUT):
     shutil.rmtree(OUT)
 os.makedirs(OUT)
+
+for rel in preservados:
+    dest = os.path.join(OUT, rel)
+    os.makedirs(os.path.dirname(dest), exist_ok=True)
+    os.rename(os.path.join(GUARDA, rel), dest)
+if os.path.exists(GUARDA):
+    shutil.rmtree(GUARDA)
 
 # ---------------------------------------------------------------- front
 log("Copiando front pr2/…")
