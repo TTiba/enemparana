@@ -6,3 +6,7 @@ __pycache__/
 # Local Netlify folder
 .netlify
 pr2_deploy_d1/
+
+# Backups do rebuild (pipeline/rebuild_d1.sh)
+backup-d17-*/
+rebuild-d1.log
