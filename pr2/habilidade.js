@@ -210,6 +210,33 @@ Promise.all([
   // (região só da questão, colunas costuradas) quando o gerador produziu;
   // senão cai pra(s) página(s) inteira(s) — caso do 2025, vindo do pipeline
   // nacional antigo.
+  // Distribuição das alternativas marcadas. Só aparece se o
+  // build_alternativas.py já anotou o api/questoes/{ano}.json — sem os campos,
+  // devolve "" e o slide fica como era. Mesmo cuidado da seção de questões,
+  // que sumiu inteira quando o api/questoes/ faltou no pr2_deploy.
+  const MIN_ALT = 200;    // abaixo disso a distribuição em 5 vias é ruído
+  const barrasAlt = (q) => {
+    if (!Array.isArray(q.alt) || !q.alt_n || q.alt_n < MIN_ALT) return "";
+    const tot = q.alt_n;
+    const pct = (v) => (v / tot) * 100;
+    const linhas = ["A", "B", "C", "D", "E"].map((L, i) => {
+      const p = pct(q.alt[i] || 0);
+      const ok = q.gab === L;
+      return `<div class="alt-row${ok ? " alt-ok" : ""}">
+        <span class="alt-l">${L}</span>
+        <span class="alt-bar"><i style="width:${p.toFixed(1)}%"></i></span>
+        <span class="alt-p">${p.toFixed(0)}%</span>
+        <span class="alt-gab">${ok ? "gabarito" : ""}</span>
+      </div>`;
+    }).join("");
+    const branco = pct(q.alt[5] || 0);
+    return `<div class="alt-bloco">
+      <div class="alt-tit">Alternativas marcadas
+        <span class="alt-base">${tot.toLocaleString("pt-BR")} respondentes${
+          branco >= 0.5 ? ` · ${branco.toFixed(0)}% em branco ou inválido` : ""}</span>
+      </div>${linhas}</div>`;
+  };
+
   const slides = [];
   const semImagem = [];   // anos em que a habilidade caiu mas não há imagem
   for (const ano of ANOS_QUESTOES) {
@@ -240,6 +267,7 @@ Promise.all([
             ${pagLink ? ` · <a href="${pagLink}" target="_blank">ver página do caderno</a>` : ""}</div>
         </div>
         <div class="hc-img">${corpo}</div>
+        ${barrasAlt(q)}
       </div>`);
     }
     if (!achou) semImagem.push(ano);

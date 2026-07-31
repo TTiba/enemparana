@@ -1,6 +1,6 @@
 # Estado atual — leia isto primeiro
 
-Atualizado: **2026-07-29**
+Atualizado: **2026-07-31**
 
 Arquivo curto e de manutenção obrigatória. Serve pra retomar o trabalho sem
 reconstruir contexto de memória. Detalhe e histórico ficam no `status.md`
@@ -70,14 +70,32 @@ microdados; compara `p` contra `p_esp` dentro do próprio deploy):
 | `deploy/` nacional | −2,54 pp | **+0,02 pp ✓** (BR·PUB 184,8 M exposições, −0,01 pp; 27 UFs dp 0,14) |
 | `pr2_deploy/` Paraná | −2,04 pp | **✗ "sem dados suficientes pra avaliar"** |
 
+## DECISÃO — o Paraná fica em D=1,7 até 2027
+
+Tomada em 31/07/2026. As análises do ano foram fechadas em cima dos valores
+publicados; mudar agora seria retrabalho para a equipe inteira. **O painel PR
+não deve ser rebuildado nem republicado com D=1 neste ciclo.** O nacional
+seguiu corrigido e verificado (+0,02 pp).
+
+Consequência prática para qualquer trabalho novo no PR: **nada que exija rodar
+o `build_db.py`**, porque ele recalcula o `p_esp` e traria o D=1 junto sem
+pedir licença. Features novas têm que entrar por script separado que só escreva
+no que precisa — foi assim que o `build_alternativas.py` foi feito.
+
 ## Em aberto
 
-1. **`pr2_deploy` do rebuild ficou sem dado avaliável.** A mensagem é um
-   `sys.exit` que só dispara quando nenhum item tem `p`, `p_esp` e `n` juntos.
-   Não é limitação do verificador (a cópia pré-rebuild avalia normal).
-   Diagnóstico: `python3 pipeline/diag_deploy.py deploy pr2_deploy`, mais
-   `ls -l data/*.sqlite` e o fim do `rebuild-d1.log`. **Não publicar o Paraná
-   antes de resolver.**
+1. **`pr2_deploy` do rebuild ficou sem dado avaliável.** *Adiado* — deixou de
+   ser urgente com a decisão acima, já que aquele rebuild não vai ao ar. Fica
+   registrado para 2027: a mensagem é um `sys.exit` que só dispara quando
+   nenhum item tem `p`, `p_esp` e `n` juntos, e não é limitação do verificador
+   (a cópia pré-rebuild avalia normal). Diagnóstico:
+   `python3 pipeline/diag_deploy.py deploy pr2_deploy`, mais
+   `ls -l data/*.sqlite` e o fim do `rebuild-d1.log`.
+
+1b. **Alternativas marcadas no carrossel** — frontend pronto e publicável
+   (degrada para nada sem os dados). Falta rodar, na máquina com microdados:
+   `python3 pipeline/build_alternativas.py --deploy pr2_deploy --uf PR`.
+   Escreve só em `api/questoes/{ano}.json`; não toca em `p_esp`.
 2. **`NU_PARAM_C` sem guarda.** A fórmula nova referencia `c`; em SQL
    `NULL + x = NULL`, então item sem `c` cadastrado agora rende `p_esp` nulo
    (a antiga nunca tocava em `c`). Conserto: `COALESCE(i.NU_PARAM_C, 0)` —
