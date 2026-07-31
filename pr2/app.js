@@ -1026,11 +1026,15 @@ document.addEventListener("mouseover", (e) => {
   const desc = (window.HABILIDADES?.[c.dataset.area] || {})[c.dataset.h];
   if (!desc) return;
   tip.innerHTML = `<b>H${c.dataset.h} · ${AREA_INFO[c.dataset.area].nome}</b>
-    ${desc}<span class="tip-cta">Clique para ver aulas do RCO e atividades →</span>`;
+    ${desc}`;
   tip.hidden = false;
   const r = c.getBoundingClientRect();
   const left = Math.max(8, Math.min(r.left, innerWidth - 348));
-  const top = r.bottom + 336 > innerHeight ? r.top - tip.offsetHeight - 8 : r.bottom + 8;
+  // altura real em vez do 336 fixo, que era calibrado pro tooltip com a linha
+  // de CTA — sem ela o tooltip encurtou e o limiar antigo o jogaria pra cima
+  // do chip sem necessidade.
+  const top = r.bottom + tip.offsetHeight + 8 > innerHeight
+    ? r.top - tip.offsetHeight - 8 : r.bottom + 8;
   tip.style.left = `${left}px`;
   tip.style.top = `${top}px`;
 });
