@@ -841,3 +841,16 @@ a.chip-hab:hover { background: var(--pink); color: var(--card); transform: trans
    interessa pedagogicamente é qual distrator puxou os alunos */
 .alt-ok .alt-l, .alt-ok .alt-p { color: var(--green-ok); font-weight: 700; }
 .alt-ok .alt-bar i { background: var(--green-ok); }
+
+/* ===== Referências bibliográficas (Entenda os dados) ==================== */
+.refs { margin: 6px 0 10px; padding-left: 20px; }
+.refs li {
+  margin-bottom: 7px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  /* recuo francês: a norma pede a 2ª linha alinhada à 1ª */
+  text-indent: -14px;
+  padding-left: 14px;
+  list-style: none;
+}
+.refs-nota { font-size: 13px; color: var(--ink-40); }
