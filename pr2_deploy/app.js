@@ -421,7 +421,7 @@ function serieHist(hist, campo) {
  * fica {} e nada muda na tela — o padrão continua sendo o valor publicado.
  */
 let REDACAO = null;          // null = ainda não tentou carregar
-let RED_SZ = false;          // recorte alternativo ligado?
+let RED_SZ = true;           // recorte alternativo é o padrão (decisão editorial)
 let _dadosResumo = null;     // pra re-renderizar sem refazer o fetch
 
 async function carregarRedacao() {
@@ -482,12 +482,12 @@ function kpiCard(sigla, alvo, ctx, hist) {
   let extra = "";
   if (alt) {
     const pct = alt.n ? (alt.n0 / alt.n) * 100 : 0;
-    extra = `<label class="kpi-alt${RED_SZ ? " on" : ""}" data-tip="Publicado: presentes no 1º dia,${
+    extra = `<label class="kpi-alt" data-tip="Publicado: presentes no 1º dia,${
       ""} com o zero contando como nota.&#10;Alternativo: só quem fez os dois${
       ""} dias e não zerou.&#10;${fmtInt(alt.n)} fizeram as duas provas · ${
       fmtInt(alt.n0)} zeraram (${pct.toFixed(1).replace(".", ",")}%).">
       <input type="checkbox" id="chk-red-sz"${RED_SZ ? " checked" : ""}>
-      2 dias, sem zeros</label>`;
+      2 dias, sem zeros <a href="entenda.html#recorte-redacao" tabindex="-1">?</a></label>`;
   }
   return `<div class="kpi">
     <div class="kpi-top" style="background:${info.cor}">${info.nome}</div>

@@ -870,13 +870,16 @@ a.chip-hab:hover { background: var(--pink); color: var(--card); transform: trans
 .kpi-alt input { margin: 0; accent-color: var(--rose); cursor: pointer; }
 .kpi-alt { white-space: nowrap; }
 .kpi-alt:hover { color: var(--ink); }
-/* ligado: o próprio rótulo vira o marcador, pra que um print do número já
-   carregue o aviso de que não é o valor publicado */
-.kpi-alt.on {
-  background: var(--rose);
-  color: var(--ink);
-  font-weight: 800;
-  padding: 3px 9px;
-  border-radius: 999px;
-  align-self: flex-start;
+/* Rótulo discreto, mas presente: o número exibido não é o mesmo denominador
+   que o INEP publica, e quem lê precisa poder saber disso sem caçar. O "?"
+   leva à explicação completa no Entenda os dados. */
+.kpi-alt a {
+  color: var(--ink-40);
+  text-decoration: none;
+  border: 1px solid var(--ink-12);
+  border-radius: 50%;
+  width: 13px; height: 13px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 800;
 }
+.kpi-alt a:hover { color: var(--ink); border-color: var(--ink-40); }
