@@ -36,7 +36,7 @@ let NRE_LISTA = [];    // ["APUCARANA", "AREA METROP.NORTE", ...] alfabético
 const SORT_DEFAULT_DIR = {
   nome: "asc", municipio: "asc", uf: "asc", dependencia_nome: "asc",
   n_participantes: "desc", n_lc: "desc", n_mt: "desc",
-  media_geral: "desc", media_red: "desc", media_lc: "desc",
+  media_geral: "desc", media_lc: "desc",
   media_ch: "desc", media_cn: "desc", media_mt: "desc",
 };
 
@@ -131,7 +131,6 @@ function render() {
       <td class="rk-num">${fmtInt(e.n_lc != null ? e.n_lc : e.n_participantes)}</td>
       <td class="rk-num">${fmtInt(e.n_mt != null ? e.n_mt : e.n_participantes)}</td>
       <td class="rk-num rk-forte">${fmt0(e.media_geral)}</td>
-      <td class="rk-num">${fmt0(e.media_red)}</td>
       <td class="rk-num">${fmt0(e.media_lc)}</td>
       <td class="rk-num">${fmt0(e.media_ch)}</td>
       <td class="rk-num">${fmt0(e.media_cn)}</td>

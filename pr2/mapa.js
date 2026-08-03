@@ -13,12 +13,12 @@ const LOCK_UF = window.LOCK_UF || "PR";
 const LOCK_UF_NOME = window.LOCK_UF_NOME || "Paraná";
 
 const METRICAS = {
-  media_geral: "Média geral", media_red: "Redação", media_lc: "Linguagens",
+  media_geral: "Média geral", media_lc: "Linguagens",
   media_ch: "Humanas", media_cn: "Natureza", media_mt: "Matemática",
 };
 const CAMPO_METRICA = {
   media_geral: "geral", media_lc: "lc", media_ch: "ch",
-  media_cn: "cn", media_mt: "mt", media_red: "red",
+  media_cn: "cn", media_mt: "mt",
 };
 const COR_CLARA = "#fdeef7", COR_ESCURA = "#b00073", SEM_DADOS = "#e9e5d4";
 const W = 640, H = 600;
@@ -339,7 +339,6 @@ function renderKpis(alvo, nivel, chave) {
     <div class="det-medias">
       ${[
         ["Média geral", "media_geral", "var(--pink)"],
-        ["Redação",     "media_red",   "var(--rose)"],
         ["Linguagens",  "media_lc",    "var(--lilac)"],
         ["Humanas",     "media_ch",    "var(--peach)"],
         ["Natureza",    "media_cn",    "var(--mint)"],

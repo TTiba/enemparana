@@ -1,6 +1,6 @@
 # Estado atual — leia isto primeiro
 
-Atualizado: **2026-08-02**
+Atualizado: **2026-08-03**
 
 Arquivo curto e de manutenção obrigatória. Serve pra retomar o trabalho sem
 reconstruir contexto de memória. Detalhe e histórico ficam no `status.md`
@@ -81,6 +81,24 @@ Consequência prática para qualquer trabalho novo no PR: **nada que exija rodar
 o `build_db.py`**, porque ele recalcula o `p_esp` e traria o D=1 junto sem
 pedir licença. Features novas têm que entrar por script separado que só escreva
 no que precisa — foi assim que o `build_alternativas.py` foi feito.
+
+## Redação saiu do painel (02/08)
+
+Decisão do cliente: o painel PR não exibe mais redação — só as quatro áreas.
+Removido de KPI, comparação por área, card de competências C1–C5, métrica do
+mapa e coluna do ranking; as duas seções sobre redação saíram do Entenda os
+dados. Sobrou só `charts.js` com a cor `RED`, inofensiva.
+
+O que **não** foi apagado, porque é análise válida e pode voltar:
+`pipeline/build_redacao_uf.py` (aqui) e `pipeline/build_redacao.py` (no
+`painelenem`), mais os achados nos itens 4 e 4b abaixo. `api/redacao/` saiu do
+`pr2_deploy` e da lista de preservação do `deploy_pr2.py` — se a redação
+voltar, os dois precisam voltar juntos.
+
+Contexto da decisão: o número que faz sentido pedagogicamente (sem os zeros)
+usa denominador diferente do que o Inep divulga, e apresentá-lo sem rótulo
+induziria a erro na comparação com outras fontes. Tirar foi preferido a
+publicar com ressalva.
 
 ## Em aberto
 
