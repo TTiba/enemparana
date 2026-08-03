@@ -1,6 +1,6 @@
 # Estado atual — leia isto primeiro
 
-Atualizado: **2026-08-01**
+Atualizado: **2026-08-02**
 
 Arquivo curto e de manutenção obrigatória. Serve pra retomar o trabalho sem
 reconstruir contexto de memória. Detalhe e histórico ficam no `status.md`
@@ -111,14 +111,20 @@ no que precisa — foi assim que o `build_alternativas.py` foi feito.
    | `hist_nota` da entidade | 64.685 | 2.027 no bucket 0 |
    | `data/hist_nota_pr.json` | 66.134 | exclui (filtro `> 0`) |
 
-   Nenhuma bate com a outra, e a média reconstruída do histograma não
-   reproduz o `media_red` publicado. Só o `hist_nota` da entidade é
-   internamente consistente (as seis áreas têm exatamente o mesmo total).
-   **Consequência prática:** não se pode comparar número de uma base com
-   número de outra, e a média de redação publicada não é reprodutível a
-   partir dos histogramas. Conserto: uma passada nos microdados com
-   `TP_STATUS_REDACAO`, em script separado (não pode rodar o `build_db.py`
-   — ver a DECISÃO acima).
+   **RESOLVIDO em 01/08:** as três não são arbitrárias, são dias de prova.
+   `n_lc = n_ch = n_red = 68.990` é **presença no dia 1**;
+   `n_cn = n_mt = 64.794` é **presença no dia 2**; o `hist_nota` com 64.685
+   é **quem foi nos dois dias** (99,83% do dia 2 — as seis áreas têm
+   exatamente o mesmo total porque é a interseção). Não é bug: são recortes
+   diferentes, e o painel mistura os dois sem rotular.
+
+   O que sobra de fato a consertar: **o painel não diz qual recorte cada
+   número usa**. `media_red` (575,2) é dia 1; qualquer média de CN/MT é dia 2.
+   Rotular isso na UI vale mais que mudar o cálculo.
+
+   Ainda em aberto: separar anulação de folha em branco exige
+   `TP_STATUS_REDACAO`, que só está nos microdados — script separado, não
+   pode rodar o `build_db.py` (ver a DECISÃO acima).
 
 4b. **Estudo da redação sem os zeros** (31/07, a partir dos agregados):
    3,13% zeraram no estado — 3,80% na pública contra 0,80% na privada.
@@ -126,6 +132,9 @@ no que precisa — foi assim que o `build_alternativas.py` foi feito.
    em 5,6, então 16 dos 141,5 pontos de distância entre as redes são taxa de
    anulação, não escrita. A competência 5 é a maior distância (43 pontos,
    o dobro das outras). Entre os 32 NREs, 76 pontos de amplitude.
+   Recorte **ambos os dias** (o `hist_nota`): 586,1 com zeros, 604,8 sem —
+   ~11 pontos acima do recorte dia 1. Quem foi só no primeiro dia tira algo
+   entre 370 e 460 (subtração com 15× de alavancagem, magnitude imprecisa).
 5. **~150 MB de imagens de questão versionadas em git** nos dois repos.
    Vale decidir se saem para LFS ou ficam.
 6. **Linkar o Paraná ao git** pra poder publicar do celular. Só depois de
