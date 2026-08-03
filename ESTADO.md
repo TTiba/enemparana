@@ -1,6 +1,6 @@
 # Estado atual — leia isto primeiro
 
-Atualizado: **2026-07-31**
+Atualizado: **2026-08-01**
 
 Arquivo curto e de manutenção obrigatória. Serve pra retomar o trabalho sem
 reconstruir contexto de memória. Detalhe e histórico ficam no `status.md`
@@ -102,9 +102,30 @@ no que precisa — foi assim que o `build_alternativas.py` foi feito.
    vira 2PL no item sem `c`, melhor que perder o item. Não aplicado.
 3. **Publicar o nacional.** Calibração conferida. Falta commitar o `deploy/`
    reconstruído, dar push e mergear o PR #2.
-4. **Redação zerada.** `build_hist_nota_pr.py` filtra `> 0`, excluindo quem
-   zerou a redação do histograma — mas `media_geral` os inclui.
-   Inconsistência conhecida, nunca decidida.
+4. **Redação: três populações diferentes nos dados publicados.** Medido em
+   31/07 no `pr2_deploy` (UF/PR, rede T):
+
+   | fonte | n | zeros |
+   |---|---|---|
+   | `resumo.n_red` (base do `media_red` = 575,2) | 68.990 | inclui, sem contar |
+   | `hist_nota` da entidade | 64.685 | 2.027 no bucket 0 |
+   | `data/hist_nota_pr.json` | 66.134 | exclui (filtro `> 0`) |
+
+   Nenhuma bate com a outra, e a média reconstruída do histograma não
+   reproduz o `media_red` publicado. Só o `hist_nota` da entidade é
+   internamente consistente (as seis áreas têm exatamente o mesmo total).
+   **Consequência prática:** não se pode comparar número de uma base com
+   número de outra, e a média de redação publicada não é reprodutível a
+   partir dos histogramas. Conserto: uma passada nos microdados com
+   `TP_STATUS_REDACAO`, em script separado (não pode rodar o `build_db.py`
+   — ver a DECISÃO acima).
+
+4b. **Estudo da redação sem os zeros** (31/07, a partir dos agregados):
+   3,13% zeraram no estado — 3,80% na pública contra 0,80% na privada.
+   Tirar os zeros levanta a média da pública em 21,5 pontos e a da privada
+   em 5,6, então 16 dos 141,5 pontos de distância entre as redes são taxa de
+   anulação, não escrita. A competência 5 é a maior distância (43 pontos,
+   o dobro das outras). Entre os 32 NREs, 76 pontos de amplitude.
 5. **~150 MB de imagens de questão versionadas em git** nos dois repos.
    Vale decidir se saem para LFS ou ficam.
 6. **Linkar o Paraná ao git** pra poder publicar do celular. Só depois de
