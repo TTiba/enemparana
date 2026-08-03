@@ -414,30 +414,88 @@ function serieHist(hist, campo) {
   });
 }
 
+/* ---------- recorte alternativo da redação ---------------------------------
+ * O painel publica media_red sobre quem esteve presente no 1º dia, contando o
+ * zero como nota. api/redacao/index.json (gerado por build_redacao.py) traz o
+ * recorte "fez os dois dias e não zerou". Se o arquivo não existir, REDACAO
+ * fica {} e nada muda na tela — o padrão continua sendo o valor publicado.
+ */
+let REDACAO = null;          // null = ainda não tentou carregar
+let RED_SZ = false;          // recorte alternativo ligado?
+let _dadosResumo = null;     // pra re-renderizar sem refazer o fetch
+
+async function carregarRedacao() {
+  if (REDACAO !== null) return;
+  REDACAO = await fetch("api/redacao/index.json")
+    .then((r) => (r.ok ? r.json() : {})).catch(() => ({}));
+}
+
+/* Média ponderada dos municípios do NRE — o arquivo traz UF/MUN/ESC, e o NRE
+ * é agregação de cliente, igual ao resto do painel. */
+function redAgregaNRE(nre, rede) {
+  const muns = municipiosDoNRE(nre) || [];
+  let n = 0, sn = 0, s = 0, ssz = 0, nsz = 0;
+  for (const m of muns) {
+    const d = REDACAO[`MUN/${m.chave ?? m}`]?.[rede];
+    if (!d) continue;
+    n += d.n; sn += d.n0; s += d.media * d.n;
+    if (d.media_sz != null) { ssz += d.media_sz * (d.n - d.n0); nsz += d.n - d.n0; }
+  }
+  if (!n) return null;
+  return { n, n0: sn, media: s / n, media_sz: nsz ? ssz / nsz : null };
+}
+
+function redAlt() {
+  if (!REDACAO) return null;
+  const { nivel, chave } = nivelChave();
+  const rede = state.rede || "PUB";
+  const d = nivel === "NRE" ? redAgregaNRE(chave, rede)
+                            : REDACAO[`${nivel}/${chave}`]?.[rede];
+  return d && d.media_sz != null ? d : null;
+}
+
 function kpiCard(sigla, alvo, ctx, hist) {
   const campo = sigla === "GERAL" ? "media_geral"
               : sigla === "RED"   ? "media_red"
                                   : `media_${sigla.toLowerCase()}`;
   const info = sigla === "GERAL"
     ? { nome: "Média geral", cor: "var(--pink)" } : AREA_INFO[sigla];
-  const val = alvo[campo];
-  const ref = ctx.length ? ctx[ctx.length - 1][campo] : null;
+  // Redação: o alternativo troca só o número desta carta. A comparação "vs
+  // Brasil" fica de fora quando ligado — o contexto nacional não tem o mesmo
+  // recorte, e comparar recortes diferentes é pior que não comparar.
+  const alt = sigla === "RED" ? redAlt() : null;
+  const usaAlt = alt && RED_SZ;
+  const val = usaAlt ? alt.media_sz : alvo[campo];
+  const ref = usaAlt ? null : (ctx.length ? ctx[ctx.length - 1][campo] : null);
   let cmp = "";
   if (ref != null && val != null) {
     const d = val - ref;
     const cls = d >= 0 ? "up" : "down";
     cmp = `<span class="${cls}">${d >= 0 ? "+" : ""}${fmt(d)}</span> vs Brasil`;
   }
-  const serie = hist && hist.length ? serieHist(hist, campo) : null;
+  // a série histórica é sempre do recorte publicado; esconde quando o
+  // alternativo está ligado pra não sugerir que a linha acompanha o número
+  const serie = (hist && hist.length && !usaAlt) ? serieHist(hist, campo) : null;
   const sparkHtml = serie && serie.filter((v) => v != null).length >= 2
     ? window.Charts.sparkline(serie, { cor: info.cor, anos: ANOS })
     : "";
+  let extra = "";
+  if (alt) {
+    const pct = alt.n ? (alt.n0 / alt.n) * 100 : 0;
+    extra = `<label class="kpi-alt${RED_SZ ? " on" : ""}" data-tip="Publicado: presentes no 1º dia,${
+      ""} com o zero contando como nota.&#10;Alternativo: só quem fez os dois${
+      ""} dias e não zerou.&#10;${fmtInt(alt.n)} fizeram as duas provas · ${
+      fmtInt(alt.n0)} zeraram (${pct.toFixed(1).replace(".", ",")}%).">
+      <input type="checkbox" id="chk-red-sz"${RED_SZ ? " checked" : ""}>
+      2 dias, sem zeros</label>`;
+  }
   return `<div class="kpi">
     <div class="kpi-top" style="background:${info.cor}">${info.nome}</div>
     <div class="kpi-body">
       <div class="kpi-num">${fmt(val)}</div>
       <div class="kpi-cmp">${cmp}</div>
       ${sparkHtml ? `<div class="kpi-spark" title="2021–2025">${sparkHtml}</div>` : ""}
+      ${extra}
     </div></div>`;
 }
 
@@ -491,6 +549,7 @@ async function renderEvolucao(hist, alvoNome, nivel) {
 }
 
 function renderResumo(data) {
+  _dadosResumo = data;
   const { alvo, contexto, hist_resumo } = data;
   $("#ent-nome").textContent = alvo.nome;
   $("#ent-chip").textContent = NIVEL_NOME[alvo.nivel];
@@ -1056,11 +1115,20 @@ async function refresh() {
       `<tr><td colspan="7" class="skeleton">Sem dados para esta seleção.</td></tr>`;
     return;
   }
+  await carregarRedacao();
   renderResumo(data);
   loadItens();
   renderCompetencias();
   writeStateToURL();
 }
+
+/* toggle do recorte de redação — delegado, porque as cartas são recriadas */
+document.addEventListener("change", (e) => {
+  if (e.target && e.target.id === "chk-red-sz") {
+    RED_SZ = e.target.checked;
+    if (_dadosResumo) renderResumo(_dadosResumo);
+  }
+});
 
 readStateFromURL();
 

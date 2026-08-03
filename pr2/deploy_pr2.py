@@ -34,7 +34,8 @@ GUARDA = OUT + ".questoes_tmp"
 if os.path.exists(GUARDA):
     shutil.rmtree(GUARDA)
 preservados = []
-for rel in ("questoes", os.path.join("api", "questoes")):
+for rel in ("questoes", os.path.join("api", "questoes"),
+            os.path.join("api", "redacao")):
     orig = os.path.join(OUT, rel)
     if os.path.isdir(orig):
         dest = os.path.join(GUARDA, rel)
