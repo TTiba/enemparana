@@ -122,6 +122,14 @@ async function api(rota, params = {}) {
     return lst.filter((e) =>
       rede === "PRIV" ? e.dependencia === 4 : e.dependencia !== 4);
   }
+  if (rota === "historico_br") {
+    // usado pelo lineChart de evolução — carregado uma vez.
+    if (!historicoBrCache) {
+      historicoBrCache = j("api/entidade/BR/BR.json").then((d) =>
+        d?.[rede]?.hist_resumo || []);
+    }
+    return historicoBrCache;
+  }
   const k = `${params.nivel}/${params.chave}`;
   if (!cacheEntidade[k]) cacheEntidade[k] = j(`api/entidade/${k}.json`);
   const ent = await cacheEntidade[k];
@@ -194,14 +202,6 @@ async function api(rota, params = {}) {
       tp_lingua: lingua,
       p_uf: ru[item] ?? null, p_br: rb[item] ?? null,
     }));
-  }
-  if (rota === "historico_br") {
-    // usado pelo lineChart de evolução — carregado uma vez.
-    if (!historicoBrCache) {
-      historicoBrCache = j("api/entidade/BR/BR.json").then((d) =>
-        d?.[rede]?.hist_resumo || []);
-    }
-    return historicoBrCache;
   }
 }
 
