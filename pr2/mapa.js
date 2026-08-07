@@ -478,21 +478,7 @@ async function renderTopEscolas(alvo) {
 /* ============================================================ handlers == */
 $("#btn-brasil").addEventListener("click", () => abreParana());
 $("#chk-minn").addEventListener("change", pinta);
-document.querySelectorAll("#tabs-rede button").forEach((b) => {
-  b.addEventListener("click", () => {
-    document.querySelectorAll("#tabs-rede button").forEach((x) => x.classList.remove("on"));
-    b.classList.add("on");
-    rede = b.dataset.rede;
-    histBRcache = {};
-    if (window.Filtros) window.Filtros.salvar({ ...globais, rede });
-    vista.nivel === "NRE" ? abreParana() : abreNREDrill(vista.nre);
-  });
-});
-if (rede !== "PUB") {
-  document.querySelectorAll("#tabs-rede button").forEach((x) => {
-    x.classList.toggle("on", x.dataset.rede === rede);
-  });
-}
+// Sem handler de troca de rede: só "Pública" existe (ver ESTADO.md).
 document.querySelectorAll("#tabs-metrica button").forEach((b) => {
   b.addEventListener("click", () => {
     document.querySelectorAll("#tabs-metrica button").forEach((x) => x.classList.remove("on"));

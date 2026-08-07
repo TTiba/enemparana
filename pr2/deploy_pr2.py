@@ -131,15 +131,26 @@ with open(os.path.join(api_out, "municipios", "PR.json"), encoding="utf-8") as f
     muns_pr = {m["chave"] for lst in json.load(f).values() for m in lst}
 log(f"  {len(muns_pr)} municípios do PR")
 
-# escolas/{cd_mun}.json
+# escolas/{cd_mun}.json — sem as particulares (decisão: painel PR não
+# apresenta rede privada; ver ESTADO.md). Filtramos aqui em vez de só
+# escondida no front porque o dado tem que sumir, não só o botão — senão
+# ?rede=T ou um código INEP direto na URL continuariam expondo a escola.
 os.makedirs(os.path.join(api_out, "escolas"))
 n_esc_arq = 0
+privadas_inep = set()
 for cd in muns_pr:
     src = os.path.join(API_ORIG, "escolas", f"{cd}.json")
-    if os.path.exists(src):
-        shutil.copy(src, os.path.join(api_out, "escolas", f"{cd}.json"))
-        n_esc_arq += 1
-log(f"  {n_esc_arq} arquivos de escolas por município")
+    if not os.path.exists(src):
+        continue
+    with open(src, encoding="utf-8") as f:
+        lst = json.load(f)
+    privadas_inep.update(e["chave"] for e in lst if e.get("dependencia") == 4)
+    lst_pub = [e for e in lst if e.get("dependencia") != 4]
+    with open(os.path.join(api_out, "escolas", f"{cd}.json"), "w", encoding="utf-8") as f:
+        json.dump(lst_pub, f, ensure_ascii=False, separators=(",", ":"))
+    n_esc_arq += 1
+log(f"  {n_esc_arq} arquivos de escolas por município "
+    f"({len(privadas_inep)} escolas privadas excluídas)")
 
 # entidade/UF/PR.json + BR/BR.json (referência)
 os.makedirs(os.path.join(api_out, "entidade", "UF"))
@@ -166,11 +177,13 @@ log(f"  {len(inep_pr)} escolas do PR no banco")
 os.makedirs(os.path.join(api_out, "entidade", "ESC"))
 n_esc_ent = 0
 for inep in inep_pr:
+    if inep in privadas_inep:
+        continue
     src = os.path.join(API_ORIG, "entidade", "ESC", f"{inep}.json")
     if os.path.exists(src):
         shutil.copy(src, os.path.join(api_out, "entidade", "ESC", f"{inep}.json"))
         n_esc_ent += 1
-log(f"  {n_esc_ent} JSONs de entidade/ESC copiados")
+log(f"  {n_esc_ent} JSONs de entidade/ESC copiados (privadas excluídas)")
 
 # refs/PR.json + BR.json
 os.makedirs(os.path.join(api_out, "refs"))
@@ -222,7 +235,23 @@ else:
     log("  refs_hist/ ausente — pulando")
 
 # top_escolas/UF/PR.json + BR/BR.json + MUN/{cd}.json
+# PR.json e MUN/{cd}.json são recortes desta UF: sem a chave PRIV, e a lista
+# "T" (todas as redes juntas) sem as escolas privadas. BR.json fica intacto —
+# é referência nacional, fora do escopo da decisão de retirar as particulares
+# do PR.
 log("Copiando top_escolas/…")
+
+
+def sem_privadas_top(caminho):
+    with open(caminho, encoding="utf-8") as f:
+        d = json.load(f)
+    d.pop("PRIV", None)
+    if "T" in d:
+        d["T"] = [e for e in d["T"] if e.get("dependencia") != 4]
+    with open(caminho, "w", encoding="utf-8") as f:
+        json.dump(d, f, ensure_ascii=False, separators=(",", ":"))
+
+
 te_orig = os.path.join(API_ORIG, "top_escolas")
 if os.path.exists(te_orig):
     os.makedirs(os.path.join(api_out, "top_escolas", "UF"), exist_ok=True)
@@ -235,13 +264,16 @@ if os.path.exists(te_orig):
     ]:
         if os.path.exists(src):
             shutil.copy(src, os.path.join(api_out, "top_escolas", rel))
+    sem_privadas_top(os.path.join(api_out, "top_escolas", "UF", "PR.json"))
     n_te_mun = 0
     for cd in muns_pr:
         src = os.path.join(te_orig, "MUN", f"{cd}.json")
         if os.path.exists(src):
-            shutil.copy(src, os.path.join(api_out, "top_escolas", "MUN", f"{cd}.json"))
+            dst = os.path.join(api_out, "top_escolas", "MUN", f"{cd}.json")
+            shutil.copy(src, dst)
+            sem_privadas_top(dst)
             n_te_mun += 1
-    log(f"  {n_te_mun} arquivos top_escolas/MUN")
+    log(f"  {n_te_mun} arquivos top_escolas/MUN (sem PRIV, T sem particulares)")
 
 # top_escolas_full/UF/PR.json + BR.json
 log("Copiando top_escolas_full/…")
@@ -254,6 +286,15 @@ if os.path.exists(tef_orig):
     ]:
         if os.path.exists(src):
             shutil.copy(src, os.path.join(api_out, "top_escolas_full", rel))
+    # PR.json é lista plana (todas as redes juntas) — mesma exclusão do
+    # ranking. BR.json não é tocado, mesmo motivo do top_escolas/ acima.
+    pr_full = os.path.join(api_out, "top_escolas_full", "UF", "PR.json")
+    if os.path.exists(pr_full):
+        with open(pr_full, encoding="utf-8") as f:
+            lst = json.load(f)
+        lst = [e for e in lst if e.get("dependencia") != 4]
+        with open(pr_full, "w", encoding="utf-8") as f:
+            json.dump(lst, f, ensure_ascii=False, separators=(",", ":"))
 
 # habilidades/ (BR-wide, copiado como está)
 log("Copiando habilidades/ (BR-wide)…")

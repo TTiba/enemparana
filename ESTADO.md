@@ -1,6 +1,6 @@
 # Estado atual — leia isto primeiro
 
-Atualizado: **2026-08-03**
+Atualizado: **2026-08-06**
 
 Arquivo curto e de manutenção obrigatória. Serve pra retomar o trabalho sem
 reconstruir contexto de memória. Detalhe e histórico ficam no `status.md`
@@ -82,23 +82,58 @@ o `build_db.py`**, porque ele recalcula o `p_esp` e traria o D=1 junto sem
 pedir licença. Features novas têm que entrar por script separado que só escreva
 no que precisa — foi assim que o `build_alternativas.py` foi feito.
 
-## Redação saiu do painel (02/08)
+## Escolas particulares removidas do painel (06/08)
 
-Decisão do cliente: o painel PR não exibe mais redação — só as quatro áreas.
-Removido de KPI, comparação por área, card de competências C1–C5, métrica do
-mapa e coluna do ranking; as duas seções sobre redação saíram do Entenda os
-dados. Sobrou só `charts.js` com a cor `RED`, inofensiva.
+Decisão do cliente: o painel PR não apresenta mais rede privada — nem
+agregado, nem escola nomeada, nem por link direto. "Esconder o botão" não
+bastava: havia três vazamentos (aba "Todas as redes" misturando privada no
+agregado; filtro "Todas" do ranking listando privada por padrão,
+independente das abas T/PUB/PRIV; e `?rede=T`/`?rede=PRIV` na URL sendo
+honrado mesmo com o botão escondido). A remoção foi feita na origem do dado,
+não só na tela:
 
-O que **não** foi apagado, porque é análise válida e pode voltar:
-`pipeline/build_redacao_uf.py` (aqui) e `pipeline/build_redacao.py` (no
-`painelenem`), mais os achados nos itens 4 e 4b abaixo. `api/redacao/` saiu do
-`pr2_deploy` e da lista de preservação do `deploy_pr2.py` — se a redação
-voltar, os dois precisam voltar juntos.
+- `escolas/{mun}.json` e `entidade/ESC/{inep}.json`: nunca mais incluem
+  escola com `dependencia==4`. Testado com controle positivo: busca por
+  "militar" (pública) encontra normal, busca por uma escola particular
+  conhecida dá "Nenhuma escola encontrada" — o dado não existe, não é só
+  filtro de tela.
+- `historico/ESC/`: mesmo filtro na consulta SQL de
+  `pipeline/build_historico_esc_pr.py` (`AND dependencia != 4`).
+- `top_escolas_full/UF/PR.json` (ranking) e `top_escolas/{UF,MUN}/*.json`
+  (mapa): particulares fora da lista `T`; chave `PRIV` removida. Ranking foi
+  de 789 para 624 escolas.
+- `pr2/filtros.js`: `REDES = new Set(["PUB"])` — único ponto que lê `rede`
+  da URL em todas as páginas; qualquer outro valor cai no default. Fecha o
+  vazamento por link mesmo com todos os botões escondidos.
+- Botões "Todas as redes" e "Privadas" saíram de index/mapa/criticas;
+  "Privada" saiu do filtro de dependência do ranking.
 
-Contexto da decisão: o número que faz sentido pedagogicamente (sem os zeros)
-usa denominador diferente do que o Inep divulga, e apresentá-lo sem rótulo
-induziria a erro na comparação com outras fontes. Tirar foi preferido a
-publicar com ressalva.
+**Residual documentado, não tocado por decisão de escopo:** `entidade/UF/`,
+`entidade/MUN/`, `historico/UF`, `historico/MUN`, `refs/PR.json`,
+`data/nre_agg.json`, `data/hist_nota_pr.json` continuam com as chaves `T` e
+`PRIV` — são agregados do estado/município, não escola nomeada, e o app
+nunca os busca depois da remoção dos botões + filtros.js travado. Continuam
+tecnicamente buscáveis batendo direto na URL do JSON. Se quiser blindagem
+total até esse nível, é um trabalho separado (tirar/igualar essas chaves em
+cada arquivo) — não fiz porque é maior, mais arriscado de testar sem
+rebuild completo, e não expõe nome de escola nenhuma.
+
+BR.json (referência nacional) não foi tocado — fora do escopo (não é
+particular do Paraná).
+
+## Redação: trocando de rumo — tira do painel geral, isola numa aba própria (06/08)
+
+A decisão de 02/08 (remover a redação de todo canto) **mudou**: agora é
+trazer de volta, mas isolada. Pedido do cliente: aba própria com o número
+oficial do INEP e o recorte "2 dias, sem zeros" lado a lado, com rótulo
+claro dos dois, filtro por NRE/município/escola e ranking de escolas.
+Trabalho em andamento — ver seção seguinte antes de continuar.
+
+O que a decisão de 02/08 deixou registrado (ainda válido, é a base do que
+vem agora): `pipeline/build_redacao_uf.py` (aqui) e `pipeline/build_redacao.py`
+(no `painelenem`) calculam o recorte sem zeros; achados nos itens 4 e 4b
+abaixo. `api/redacao/` não existe hoje no `pr2_deploy` — precisa ser
+regerado.
 
 ## Em aberto
 

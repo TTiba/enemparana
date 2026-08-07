@@ -48,7 +48,7 @@ chipH.style.background = info.cor;
 document.getElementById("hab-desc").textContent = desc || `Habilidade ${h}`;
 
 // Bloco "Alvo": exibe filtro atual (UF/MUN/ESC × rede) se veio da página inicial
-const REDE_NOME = { T: "todas as redes", PUB: "rede pública", PRIV: "rede privada" };
+const REDE_NOME = { PUB: "rede pública" };  // só existe essa opção agora
 const alvoEl = document.getElementById("hab-alvo");
 if (F.uf || F.mun || F.esc || F.rede !== "T") {
   const partes = [];

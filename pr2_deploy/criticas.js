@@ -9,7 +9,7 @@ const AREA_INFO = {
   MT: { nome: "Matemática", cor: "var(--lime)",  chip: "MT" },
 };
 const ANOS = [2021, 2022, 2023, 2024, 2025];
-const REDE_NOME = { T: "todas as redes", PUB: "rede pública", PRIV: "rede privada" };
+const REDE_NOME = { PUB: "rede pública" };  // só existe essa opção agora
 
 const $ = (s) => document.querySelector(s);
 const params = new URLSearchParams(location.search);
@@ -304,32 +304,7 @@ function render() {
 }
 
 /* ----------- handlers --------------------------------------------------- */
-document.querySelectorAll("#crit-rede button").forEach((b) => {
-  b.addEventListener("click", async () => {
-    document.querySelectorAll("#crit-rede button").forEach((x) => x.classList.remove("on"));
-    b.classList.add("on");
-    state.rede = b.dataset.rede;
-    // pr2: UF fixa em PR — só re-popula MUN e ESC por rede
-    const munsAll = await apiMuns(state.uf);
-    const muns = state.nre ? filtrarMunsPorNRE(munsAll, state.nre) : munsAll;
-    fillSelect($("#sel-mun"), muns, "Todos os municípios", "chave", "nome");
-    if (state.mun && muns.some((m) => String(m.chave) === state.mun)) {
-      $("#sel-mun").value = state.mun;
-      const escs = await apiEscolas(state.mun);
-      montarEscolas(escs);
-      if (state.esc && !escolasMun.some((e) => String(e.chave) === state.esc)) {
-        state.esc = "";
-      } else if (state.esc) {
-        const e = escolasMun.find((x) => String(x.chave) === state.esc);
-        if (e) $("#inp-esc").value = e.rotulo;
-      }
-    } else {
-      state.mun = ""; state.esc = ""; montarEscolas([]);
-    }
-    atualizarURL();
-    await recarregarAlvo();
-  });
-});
+// Sem handler de troca de rede: só "Pública" existe (ver ESTADO.md).
 document.querySelectorAll("#crit-area button").forEach((b) => {
   b.addEventListener("click", () => {
     document.querySelectorAll("#crit-area button").forEach((x) => x.classList.remove("on"));

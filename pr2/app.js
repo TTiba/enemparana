@@ -28,7 +28,7 @@ const state = {
   comp_modo: "atual",   // "atual" | "evolucao"
   comp_filtro: null,    // número da competência ativa como filtro da tabela (1..9)
 };
-const REDE_NOME = { T: "todas as redes", PUB: "rede pública", PRIV: "rede privada" };
+const REDE_NOME = { PUB: "rede pública" };  // só existe essa opção agora
 
 /* -------- Sincronização state ↔ URL ↔ localStorage -------------------------
  * Filtros globais (uf/mun/esc/rede) usam Filtros.carregar/salvar pra persistir
@@ -365,38 +365,9 @@ comboList.addEventListener("click", (e) => {
   refresh();
 });
 
-document.querySelectorAll("#tabs-rede button").forEach((b) => {
-  b.addEventListener("click", async () => {
-    document.querySelectorAll("#tabs-rede button").forEach((x) => x.classList.remove("on"));
-    b.classList.add("on");
-    state.rede = b.dataset.rede;
-    // ao trocar rede, o histórico global do BR muda também
-    historicoBrCache = null;
-    // Recarrega MUNS_ALL na rede corrente e reaplica filtro NRE se ativo
-    MUNS_ALL = await api("municipios", { uf: state.uf });
-    const munsAtual = state.nre ? municipiosDoNRE(state.nre) : MUNS_ALL;
-    fillSelect($("#sel-mun"), munsAtual, "Todos os municípios", "chave", "nome");
-    if (state.mun && munsAtual.some((m) => String(m.chave) === state.mun)) {
-      $("#sel-mun").value = state.mun;
-    } else {
-      state.mun = ""; state.esc = ""; setEscolas([]);
-    }
-    if (state.mun) {
-      const rotuloAtual = inpEsc.value;
-      const escs = await api("escolas", { municipio: state.mun });
-      setEscolas(escs.map((x) => ({
-        chave: x.chave, rotulo: x.rotulo, n: x.n_participantes,
-        busca: `${x.rotulo} ${x.chave}`.toLowerCase(),
-      })));
-      if (state.esc && escolasMun.some((e) => String(e.chave) === state.esc)) {
-        inpEsc.value = rotuloAtual;
-      } else {
-        state.esc = "";
-      }
-    }
-    refresh();
-  });
-});
+// Sem handler de troca de rede: só "Pública" existe (decisão de retirar as
+// escolas particulares do painel — ver ESTADO.md). O botão que sobrou em
+// #tabs-rede não tem listener porque não há nada pra alternar.
 
 $("#btn-limpar").addEventListener("click", () => {
   state.nre = state.mun = state.esc = "";

@@ -32,12 +32,14 @@ ANOS = ("2024", "2025")
 
 
 def main():
-    # 1) INEPs das escolas do PR
+    # 1) INEPs das escolas públicas do PR — sem as particulares (decisão:
+    # painel PR não apresenta rede privada; ver ESTADO.md). dependencia=4 é
+    # privada, mesmo código usado em escolas/{mun}.json e no resto do pipeline.
     con25 = sqlite3.connect(DB_2025)
     ineps_pr = {str(r[0]) for r in con25.execute(
-        "SELECT chave FROM escolas WHERE uf='PR'")}
+        "SELECT chave FROM escolas WHERE uf='PR' AND dependencia != 4")}
     con25.close()
-    print(f"escolas PR: {len(ineps_pr):,}", flush=True)
+    print(f"escolas PR (sem particulares): {len(ineps_pr):,}", flush=True)
 
     # 2) itens_meta_all — indexa por CO_ITEM
     con_h = sqlite3.connect(DB_HIST)

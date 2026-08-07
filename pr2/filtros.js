@@ -8,7 +8,13 @@
 (function () {
   const KEY = "enem.filtros.pr2";
   const LOCK_UF = window.LOCK_UF || "PR";
-  const REDES = new Set(["T", "PUB", "PRIV"]);
+  // Só "PUB" é aceito — decisão de retirar as escolas particulares do painel
+  // (ver ESTADO.md). Isto é o único lugar que lê `rede` da URL; travando
+  // aqui, nenhuma página aceita mais ?rede=T ou ?rede=PRIV, mesmo que a
+  // pessoa monte o link à mão. As demais páginas nem mostram mais o botão,
+  // mas isso por si só não impediria o parâmetro na URL — por isso o corte
+  // fica aqui, não só na tela.
+  const REDES = new Set(["PUB"]);
   const DEFAULTS = { uf: LOCK_UF, nre: "", mun: "", esc: "", rede: "PUB" };
 
   function lerLS() {
