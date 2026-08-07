@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Redação · Painel ENEM · Paraná</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..1000&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles_pr.css">
+<script>window.LOCK_UF = "PR"; window.LOCK_UF_NOME = "Paraná"; window.API_STATIC = 1;</script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <div class="brand">
+      <img src="brasao_pr.webp" alt="Brasão do Paraná" class="brasao-pr">
+      <span class="brand-name">Painel ENEM · <b>Paraná</b></span>
+    </div>
+    <div class="topbar-links">
+      <a href="index.html">Painel</a>
+      <a href="mapa.html">Mapa</a>
+      <a href="ranking_escolas.html">Ranking</a>
+      <a href="criticas.html">Análise</a>
+      <a href="redacao.html" class="on">Redação</a>
+      <a href="entenda.html">Entenda os dados</a>
+      <span class="brand-by">um produto <b>Wayground</b></span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="card selector">
+    <h1>Redação · Paraná ✍️</h1>
+    <p class="sub">Duas leituras da mesma prova, lado a lado: o número que o
+       Inep divulga e um recorte que só considera quem fez as duas provas e
+       não zerou. <span class="sub-hist">Rede pública, ENEM 2025.</span></p>
+    <div class="tabs tabs-rede" id="tabs-rede">
+      <button class="on">Pública</button>
+    </div>
+    <div class="selects">
+      <label>Estado
+        <div class="uf-chip">Paraná</div>
+      </label>
+      <label>Núcleo Regional
+        <select id="sel-nre"><option value="">Todos (PR inteiro)</option></select>
+      </label>
+      <label>Município
+        <select id="sel-mun"><option value="">Todos os municípios</option></select>
+      </label>
+      <label>Escola
+        <span class="combo">
+          <input id="inp-esc" type="text" autocomplete="off" disabled
+                 placeholder="Digite para buscar…">
+          <div id="combo-list" class="combo-list" hidden></div>
+        </span>
+      </label>
+      <button id="btn-limpar" class="btn-ghost" type="button">Limpar</button>
+    </div>
+  </section>
+
+  <section id="entidade" class="entidade">
+    <div>
+      <h2 id="ent-nome">Paraná</h2>
+      <div id="ent-meta" class="meta"></div>
+    </div>
+    <div id="ent-chip" class="chip-nivel">Estado</div>
+  </section>
+
+  <section class="duo">
+    <div class="kpi">
+      <div class="kpi-top" style="background:var(--rose)">Redação · oficial (Inep)</div>
+      <div class="kpi-body">
+        <div class="kpi-num" id="red-of-num">–</div>
+        <div class="kpi-cmp" id="red-of-sub"></div>
+      </div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-top" style="background:var(--lilac)">Redação · 2 dias, sem zeros</div>
+      <div class="kpi-body">
+        <div class="kpi-num" id="red-sz-num">–</div>
+        <div class="kpi-cmp" id="red-sz-sub"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h3>Competências</h3>
+      <span class="hint">valores oficiais (Inep), escala 0–200</span>
+    </div>
+    <div id="red-comps"></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h3>Ranking por redação</h3>
+      <span class="hint" id="red-rk-resumo">carregando…</span>
+    </div>
+    <div class="crit-controls">
+      <div class="crit-ctrl">
+        <label>Núcleo Regional</label>
+        <select id="rk-nre" class="rk-select">
+          <option value="">Todos (PR inteiro)</option>
+        </select>
+      </div>
+      <div class="crit-ctrl">
+        <label>Rede (dependência administrativa)</label>
+        <div class="tabs" id="rk-rede">
+          <button data-dep="0"  class="on">Todas</button>
+          <button data-dep="1">Federal</button>
+          <button data-dep="2">Estadual</button>
+          <button data-dep="3">Municipal</button>
+        </div>
+      </div>
+      <div class="crit-ctrl" style="flex:1">
+        <label>Buscar escola ou município</label>
+        <input id="rk-busca" type="text" class="rk-busca"
+               placeholder="Ex.: Objetivo, São Paulo…">
+      </div>
+    </div>
+    <div class="tbl-scroll">
+      <table class="tbl" id="rk-tabela">
+        <thead>
+          <tr>
+            <th style="width:44px">#</th>
+            <th class="rk-sort" data-sort="nome">Escola</th>
+            <th class="rk-sort" data-sort="municipio">Município</th>
+            <th class="rk-sort" data-sort="dependencia_nome" style="width:96px">Rede</th>
+            <th class="rk-sort" data-sort="n_red" style="width:80px;text-align:right"
+                title="Alunos com nota de redação (presentes no 1º dia)">Alunos</th>
+            <th class="rk-sort" data-sort="media_red" style="text-align:right">Redação (oficial)</th>
+          </tr>
+        </thead>
+        <tbody id="rk-tbody">
+          <tr><td colspan="6" class="skeleton" style="padding:24px;text-align:center">Carregando…</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="foot-note">Ranking na leitura oficial (presença no 1º dia, zero
+       conta como nota) — o recorte "2 dias, sem zeros" ainda não está
+       calculado por escola, só para o Paraná inteiro (ver nota abaixo).
+       Escolas com menos de 30 alunos presentes no 1º dia ficam de fora, e
+       escolas particulares não entram no painel.</p>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h3>Por que dois números</h3></div>
+    <div class="info-body">
+      <p><b>Oficial (Inep):</b> a média de redação sobre todos os alunos
+      presentes no <b>1º dia de prova</b> — a mesma base que os relatórios
+      oficiais usam. Quem tirou zero (por fuga ao tema, anulação ou folha em
+      branco) entra na conta como 0, não como ausência.</p>
+      <p><b>2 dias, sem zeros:</b> considera só quem fez <b>as duas provas</b>
+      (então já é comparável às notas de Matemática e Natureza, que exigem
+      presença no 2º dia) e <b>não zerou</b> a redação. É o número que isola
+      qualidade de escrita de taxa de anulação/ausência — dois problemas com
+      soluções diferentes.</p>
+      <p><b>O efeito medido</b> no Paraná (ENEM 2025, rede pública): tirar os
+      zeros levanta a média em <b>21,5 pontos</b>; considerar só quem fez os
+      dois dias soma outros <b>~11 pontos</b>. Juntos, a diferença entre o
+      número oficial e o recorte passa de <b>30 pontos</b> no agregado do
+      estado.</p>
+      <p><b>Nenhum dos dois está "errado"</b> — medem populações diferentes.
+      Para comparar com dados de outras fontes (Inep, outros estados), use o
+      número oficial. Para decisão pedagógica interna, o recorte sem zeros
+      separa melhor o que é ensino do que é instrução de prova.</p>
+    </div>
+  </section>
+
+  <footer class="rodape">
+    Fonte: Microdados ENEM 2025 (INEP). Concluintes com escola identificada,
+    rede pública.
+  </footer>
+</main>
+
+<script src="filtros.js"></script>
+<script src="tooltip.js"></script>
+<script src="redacao.js"></script>
+</body>
+</html>

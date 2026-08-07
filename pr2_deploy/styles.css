@@ -883,3 +883,13 @@ a.chip-hab:hover { background: var(--pink); color: var(--card); transform: trans
   font-size: 9px; font-weight: 800;
 }
 .kpi-alt a:hover { color: var(--ink); border-color: var(--ink-40); }
+
+/* ===== Competências da redação (coluna de rótulo mais larga, com quebra) == */
+.bar-row-larga {
+  grid-template-columns: 190px 1fr 40px;
+}
+.bar-row-larga .lbl {
+  white-space: normal;
+  line-height: 1.25;
+  font-size: 12.5px;
+}

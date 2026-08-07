@@ -12,6 +12,7 @@ import json
 import os
 import shutil
 import sqlite3
+import subprocess
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PR2 = os.path.join(BASE, "pr2")
@@ -59,9 +60,9 @@ if os.path.exists(GUARDA):
 log("Copiando front pr2/…")
 copiar = [
     "index.html", "mapa.html", "criticas.html", "ranking_escolas.html",
-    "priorizacao.html", "habilidade.html", "entenda.html",
+    "priorizacao.html", "habilidade.html", "entenda.html", "redacao.html",
     "app.js", "mapa.js", "criticas.js", "ranking_escolas.js",
-    "priorizacao.js", "habilidade.js", "habilidades.js",
+    "priorizacao.js", "habilidade.js", "habilidades.js", "redacao.js",
     "competencias.js", "charts.js", "filtros.js", "tooltip.js",
     "styles.css", "styles_pr.css", "brasao_pr.webp",
 ]
@@ -89,7 +90,7 @@ def inject_static(caminho):
 
 
 for pag in ("index.html", "mapa.html", "criticas.html", "ranking_escolas.html",
-            "priorizacao.html", "habilidade.html", "entenda.html"):
+            "priorizacao.html", "habilidade.html", "entenda.html", "redacao.html"):
     p = os.path.join(OUT, pag)
     if os.path.exists(p):
         inject_static(p)
@@ -159,6 +160,22 @@ shutil.copy(os.path.join(API_ORIG, "entidade", "UF", "PR.json"),
             os.path.join(api_out, "entidade", "UF", "PR.json"))
 shutil.copy(os.path.join(API_ORIG, "entidade", "BR", "BR.json"),
             os.path.join(api_out, "entidade", "BR", "BR.json"))
+
+# api/redacao/index.json — recorte "2 dias, sem zeros" no nível UF, a partir
+# do hist_nota que acabou de ser copiado (pipeline/build_redacao_uf.py). Só
+# cobre o estado; município e escola vêm de pipeline/build_redacao.py (no
+# painelenem), que precisa dos microdados e roda à parte — se você já
+# rodou aquele script, RODE-O DE NOVO DEPOIS deste deploy, senão este passo
+# aqui sobrescreve o arquivo com a versão só-UF.
+log("Gerando api/redacao/ (recorte de redação sem zeros, nível UF)…")
+r = subprocess.run(["python3", os.path.join(BASE, "pipeline", "build_redacao_uf.py")],
+                    capture_output=True, text=True)
+if r.returncode != 0:
+    log("  ! build_redacao_uf.py falhou:")
+    log(r.stderr)
+else:
+    for linha in r.stdout.strip().splitlines()[-2:]:
+        log("  " + linha)
 
 # entidade/MUN/{cd}.json (só PR)
 os.makedirs(os.path.join(api_out, "entidade", "MUN"))
@@ -344,7 +361,6 @@ else:
 
 # historico/ESC/{inep}.json — chama script que agrega hist_item por escola PR
 log("Gerando historico/ESC/ (2024+2025 por escola do PR)…")
-import subprocess
 script_esc = os.path.join(BASE, "pipeline", "build_historico_esc_pr.py")
 r = subprocess.run(["python3", script_esc], capture_output=True, text=True)
 if r.returncode != 0:

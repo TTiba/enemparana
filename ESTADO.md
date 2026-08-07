@@ -121,19 +121,47 @@ rebuild completo, e não expõe nome de escola nenhuma.
 BR.json (referência nacional) não foi tocado — fora do escopo (não é
 particular do Paraná).
 
-## Redação: trocando de rumo — tira do painel geral, isola numa aba própria (06/08)
+## Redação ganhou aba própria — `redacao.html` (06/08)
 
-A decisão de 02/08 (remover a redação de todo canto) **mudou**: agora é
-trazer de volta, mas isolada. Pedido do cliente: aba própria com o número
-oficial do INEP e o recorte "2 dias, sem zeros" lado a lado, com rótulo
-claro dos dois, filtro por NRE/município/escola e ranking de escolas.
-Trabalho em andamento — ver seção seguinte antes de continuar.
+A decisão de 02/08 (remover a redação de todo canto) **mudou**: em vez de
+ficar fora do painel, ganhou página própria — `pr2/redacao.html` +
+`pr2/redacao.js`, linkada no menu de todas as páginas com nav (index, mapa,
+criticas, ranking_escolas). Conteúdo:
 
-O que a decisão de 02/08 deixou registrado (ainda válido, é a base do que
-vem agora): `pipeline/build_redacao_uf.py` (aqui) e `pipeline/build_redacao.py`
-(no `painelenem`) calculam o recorte sem zeros; achados nos itens 4 e 4b
-abaixo. `api/redacao/` não existe hoje no `pr2_deploy` — precisa ser
-regerado.
+- **Dois números lado a lado**, cada um com o rótulo explícito no próprio
+  cartão (`.kpi`, reaproveitado de `#kpis`): "Redação · oficial (Inep)" —
+  presença no 1º dia, zero conta como nota — e "Redação · 2 dias, sem
+  zeros" — só quem fez as duas provas e não zerou. Nenhum dos dois some ou
+  fica sem legenda, ao contrário do que a versão de 31/07 fazia no painel
+  geral.
+- **Filtro NRE/município/escola**, igual ao do `index.html` (mesma cópia
+  adaptada do padrão — este repo não compartilha módulo de filtro entre
+  páginas, ver `habilidade.js`/`criticas.js`). Sem seletor de rede: só
+  pública existe (ver decisão de escolas particulares acima).
+- **Competências C1–C5**: valores oficiais, disponíveis em qualquer nível
+  (UF/NRE/MUN/ESC já trazem `media_comp1..5`).
+- **Ranking por redação**: cópia de `ranking_escolas.js` ordenada por
+  `media_red`, consumindo o mesmo `api/top_escolas_full/UF/PR.json` (já sem
+  particulares). Filtro por NRE e por dependência (sem "Privada", mesmo
+  motivo).
+- **O recorte "sem zeros" só existe hoje no nível UF** — `api/redacao/`
+  (via `pipeline/build_redacao_uf.py`, que `deploy_pr2.py` agora chama a
+  cada build, depois de copiar `entidade/UF/PR.json`) cobre só o estado.
+  Ao filtrar por NRE/município/escola, o cartão degrada graciosamente:
+  mostra "indisponível para esta seleção" em vez de número errado ou
+  ausente sem explicação.
+
+**Para cobrir município e escola no recorte sem zeros**, roda
+`pipeline/build_redacao.py --deploy pr2_deploy --uf PR` (no `painelenem`,
+precisa dos microdados) **depois** do `deploy_pr2.py`, nunca antes — o
+`deploy_pr2.py` regenera `api/redacao/index.json` do zero a cada build
+(só UF) e sobrescreveria a versão fina. Depois de rodar, o cartão passa a
+funcionar em qualquer nível sem tocar no frontend.
+
+Testado com Playwright: UF (543,1 oficial / 576,1 sem zeros, bate com os
+números já registrados abaixo), município (oficial funciona, sem zeros
+degrada), escola (oficial funciona), busca e ordenação do ranking. Zero
+erro de JS; nav consistente nas 4 páginas.
 
 ## Em aberto
 
