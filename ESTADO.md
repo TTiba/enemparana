@@ -231,6 +231,32 @@ Residual: o agrupamento aumenta a contagem de páginas em troca de
 organização — é o trade-off esperado de não fragmentar uma competência
 entre páginas. Não replicado no `painelenem` (mesma nota do item acima).
 
+## Análise ganhou botão "Baixar Excel" (07/08)
+
+Ao lado do "Baixar PDF" (renomeei a classe CSS `.btn-pdf` → `.btn-download`,
+compartilhada pelos dois botões). Gera um `.csv` client-side (`Blob` +
+`<a download>`, sem lib externa) com a tabela plana — mesmo filtro, mesma
+ordenação da tela — e dispara o download; não passa pelo `window.print()`.
+
+Formato: `;` como separador e BOM UTF-8 no início (mesma convenção do CSV
+de escolas/NRE gerado antes nesta sessão), porque assim o Excel em pt-BR
+abre direto, sem passar pelo assistente de importação. As colunas de
+percentual saem como número puro (sem "%") pra continuar somável/filtrável
+na planilha — a unidade fica só no cabeçalho da coluna ("2021 (%)",
+"Δ vs esperado (pp)"). Nome do arquivo usa o alvo do filtro
+(`rotuloAlvo()`) fatiado em slug, ex.: `analise_habilidades_curitiba_rede_publica.csv`.
+
+Reaproveita as mesmas linhas computadas pelo `render()` (`ultimasLinhas`,
+guardada a cada render) — nenhuma lógica de agregação duplicada.
+
+Testado com Playwright (`page.waitForEvent('download')` + parse do CSV
+salvo): município com 120 habilidades → 121 linhas (cabeçalho + 120), BOM
+presente, campo de descrição com vírgula interna sai entre aspas
+corretamente, ordem bate com a tabela em tela (delta ascendente, o default).
+
+Só existe no `enemparana` — não replicado no `painelenem` (mesma nota dos
+itens de PDF acima).
+
 ## Em aberto
 
 1. **`pr2_deploy` do rebuild ficou sem dado avaliável.** *Adiado* — deixou de

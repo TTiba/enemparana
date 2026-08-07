@@ -894,15 +894,15 @@ a.chip-hab:hover { background: var(--pink); color: var(--card); transform: trans
   font-size: 12.5px;
 }
 
-/* ===== Download de PDF (página Análise) =================================== */
+/* ===== Download de PDF/Excel (página Análise) ============================= */
 .card-head-right { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
-.btn-pdf {
+.btn-download {
   font: inherit; font-weight: 800; font-size: 12.5px; color: var(--ink);
   background: transparent; border: 1.5px solid var(--ink-12);
   border-radius: 999px; padding: 7px 16px; cursor: pointer;
   transition: transform .1s, background .15s, border-color .15s;
 }
-.btn-pdf:hover { background: var(--lime); border-color: var(--ink); transform: translateY(-1px); }
+.btn-download:hover { background: var(--lime); border-color: var(--ink); transform: translateY(-1px); }
 
 /* Só existe no impresso/PDF — na tela fica sempre oculto. */
 .print-only { display: none; }
@@ -918,7 +918,7 @@ a.chip-hab:hover { background: var(--pink); color: var(--card); transform: trans
 
   /* fora do relatório: navegação, controles interativos, botão do próprio PDF */
   header.topbar, .selector .sub, #tabs-rede, .selects, #btn-limpar,
-  .crit-controls .hint, .card-head-right .hint, .btn-pdf, #crit-alvo,
+  .crit-controls .hint, .card-head-right .hint, .btn-download, #crit-alvo,
   th.sortable[data-sort]::after, .foot-note, footer.rodape {
     display: none !important;
   }

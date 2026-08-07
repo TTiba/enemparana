@@ -69,6 +69,7 @@ function rotuloAlvo() {
 
 let habIndex = null;   // api/habilidades/index.json (descrições + habilidades cobrando)
 let dataAlvo = null;   // computação {area: {h: {anos:[5], media, esp}}}
+let ultimasLinhas = [];   // linhas do último render(), na ordem em tela — usado pelo export Excel
 
 /* ----------- fetches --------------------------------------------------- */
 async function carregarDados() {
@@ -361,6 +362,49 @@ function render() {
   // PDF: mesmas linhas, agrupadas por área/competência
   const printEl = $("#crit-print-agrupado");
   if (printEl) printEl.innerHTML = montarPrintAgrupado(linhas);
+
+  // guarda a ordem em tela pro export Excel (mesmo filtro, mesma ordenação)
+  ultimasLinhas = linhasOrdenadas;
+}
+
+/* ----------- export Excel (CSV) ------------------------------------------ */
+// ";" como separador e BOM UTF-8 porque o Excel em pt-BR abre assim direto,
+// sem passar pelo assistente de importação (mesma convenção já usada no CSV
+// de escolas/NRE gerado antes). Vira número puro (sem "%") pra continuar
+// somável/filtrável na planilha; unidade vai no cabeçalho da coluna.
+function csvCel(v) {
+  const s = v == null ? "" : String(v);
+  return /[;"\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+function slug(s) {
+  return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9]+/g, "_").replace(/^_+|_+$/g, "").toLowerCase();
+}
+function baixarExcel(linhas, alvoTxt) {
+  const pct = (p) => (p == null ? "" : Math.round(p * 100));
+  const pp = (d) => (d == null ? "" : Math.round(d * 100));
+  const header = [
+    "Área", "Habilidade", "Descrição",
+    "2021 (%)", "2022 (%)", "2023 (%)", "2024 (%)", "2025 (%)",
+    "Média (%)", "Esperado TRI (%)", "Δ vs esperado (pp)",
+  ];
+  const linhasCsv = linhas.map((l) => [
+    l.area, `H${l.h}`, l.desc,
+    ...l.anos.map(pct),
+    pct(l.media), pct(l.esperado), pp(l.delta),
+  ]);
+  const csv = "\uFEFF" + [header, ...linhasCsv]
+    .map((row) => row.map(csvCel).join(";"))
+    .join("\r\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `analise_habilidades_${slug(alvoTxt)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }
 
 /* ----------- handlers --------------------------------------------------- */
@@ -372,6 +416,12 @@ $("#btn-pdf").addEventListener("click", () => {
   const el = $("#crit-print-data");
   if (el) el.textContent = `Gerado em ${new Date().toLocaleString("pt-BR")}`;
   window.print();
+});
+
+// "Baixar Excel": mesma tabela em tela (mesmo filtro, mesma ordenação),
+// como .csv com BOM+";" pra abrir direto no Excel em pt-BR.
+$("#btn-excel").addEventListener("click", () => {
+  baixarExcel(ultimasLinhas, rotuloAlvo());
 });
 
 // Sem handler de troca de rede: só "Pública" existe (ver ESTADO.md).
