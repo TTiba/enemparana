@@ -44,12 +44,20 @@
       esperado indicam gaps consistentes.
     </p>
     <p id="crit-alvo" class="hab-alvo" hidden></p>
+    <p id="crit-print-meta" class="print-only">
+      Painel ENEM ·
+      <span id="crit-print-filtros"></span> ·
+      <span id="crit-print-data"></span>
+    </p>
   </section>
 
   <section class="card">
     <div class="card-head">
       <h3>Filtros</h3>
-      <span class="hint" id="crit-resumo">calculando…</span>
+      <div class="card-head-right">
+        <span class="hint" id="crit-resumo">calculando…</span>
+        <button id="btn-pdf" class="btn-pdf" type="button" title="Abre o diálogo de impressão do navegador — escolha 'Salvar como PDF' no destino">⬇ Baixar PDF</button>
+      </div>
     </div>
     <div class="tabs tabs-rede" id="crit-rede">
       <button data-rede="PUB" class="on">Públicas</button>

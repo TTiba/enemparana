@@ -48,10 +48,21 @@ let NRE_TO_MUNS = {};
 const LOCK_UF_NOME = window.LOCK_UF_NOME || "Paraná";
 function rotuloAlvo() {
   const partes = [];
-  if (state.esc) partes.push(`Escola INEP ${state.esc}`);
-  else if (state.mun) partes.push(`Município ${state.mun}`);
-  else if (state.nre) partes.push(`NRE ${state.nre}`);
-  else partes.push(LOCK_UF_NOME);
+  // nome amigável, não o código: reaproveita o texto já selecionado nos
+  // campos (option do <select>, ou o valor digitado no combo de escola) em
+  // vez de refazer uma chamada só pra resolver nome — os dois já refletem a
+  // seleção corrente sempre que render() roda.
+  if (state.esc) {
+    const rotulo = $("#inp-esc")?.value;
+    partes.push(rotulo ? rotulo : `Escola INEP ${state.esc}`);
+  } else if (state.mun) {
+    const opt = $("#sel-mun")?.selectedOptions?.[0];
+    partes.push(opt && opt.value === state.mun ? opt.textContent : `Município ${state.mun}`);
+  } else if (state.nre) {
+    partes.push(`NRE ${state.nre}`);
+  } else {
+    partes.push(LOCK_UF_NOME);
+  }
   partes.push(REDE_NOME[state.rede]);
   return partes.join(" · ");
 }
@@ -245,17 +256,27 @@ function render() {
 
   // atualiza rótulo da coluna Média conforme anos ativos
   const anosSel = ANOS.filter((a) => state.anos_ativos.has(a));
+  let anosLbl;
+  if (anosSel.length === ANOS.length) {
+    anosLbl = "2021 – 2025";
+  } else if (anosSel.length === 1) {
+    anosLbl = String(anosSel[0]);
+  } else if (anosSel.length && anosSel[anosSel.length-1] - anosSel[0] === anosSel.length - 1) {
+    anosLbl = `${anosSel[0]} – ${anosSel[anosSel.length-1]}`;
+  } else {
+    anosLbl = anosSel.join(" · ");
+  }
   const lblMed = $("#crit-media-lbl");
-  if (lblMed) {
-    if (anosSel.length === ANOS.length) {
-      lblMed.textContent = "2021 – 2025";
-    } else if (anosSel.length === 1) {
-      lblMed.textContent = String(anosSel[0]);
-    } else if (anosSel.length && anosSel[anosSel.length-1] - anosSel[0] === anosSel.length - 1) {
-      lblMed.textContent = `${anosSel[0]} – ${anosSel[anosSel.length-1]}`;
-    } else {
-      lblMed.textContent = anosSel.join(" · ");
-    }
+  if (lblMed) lblMed.textContent = anosLbl;
+
+  // resumo estático do PDF — a data/hora só é preenchida no clique do botão,
+  // pra refletir quando o relatório foi de fato gerado, não quando a página
+  // carregou. O resto (alvo, área, anos, contagem) já muda a cada render().
+  const areaNome = state.area ? AREA_INFO[state.area].nome : "Todas as áreas";
+  const filtrosEl = $("#crit-print-filtros");
+  if (filtrosEl) {
+    filtrosEl.textContent =
+      `${alvoTxt} · ${areaNome} · anos ${anosLbl} · ${linhas.length} habilidades`;
   }
 
   // linhas
@@ -304,6 +325,16 @@ function render() {
 }
 
 /* ----------- handlers --------------------------------------------------- */
+// "Baixar PDF" abre o diálogo de impressão do navegador (destino "Salvar como
+// PDF") em vez de gerar o arquivo em JS — sem dependência externa, e a tabela
+// já está inteira no DOM (sem paginação/virtualização), então o que sai no
+// PDF é exatamente o filtro em tela. Ver @media print em styles.css.
+$("#btn-pdf").addEventListener("click", () => {
+  const el = $("#crit-print-data");
+  if (el) el.textContent = `Gerado em ${new Date().toLocaleString("pt-BR")}`;
+  window.print();
+});
+
 // Sem handler de troca de rede: só "Pública" existe (ver ESTADO.md).
 document.querySelectorAll("#crit-area button").forEach((b) => {
   b.addEventListener("click", () => {

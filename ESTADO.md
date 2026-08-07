@@ -1,6 +1,6 @@
 # Estado atual — leia isto primeiro
 
-Atualizado: **2026-08-06**
+Atualizado: **2026-08-07**
 
 Arquivo curto e de manutenção obrigatória. Serve pra retomar o trabalho sem
 reconstruir contexto de memória. Detalhe e histórico ficam no `status.md`
@@ -162,6 +162,38 @@ Testado com Playwright: UF (543,1 oficial / 576,1 sem zeros, bate com os
 números já registrados abaixo), município (oficial funciona, sem zeros
 degrada), escola (oficial funciona), busca e ordenação do ranking. Zero
 erro de JS; nav consistente nas 4 páginas.
+
+## Análise ganhou botão "Baixar PDF" (07/08)
+
+`criticas.html` (página Análise) tem um botão **⬇ Baixar PDF** no card de
+Filtros, ao lado do resumo. Não gera arquivo em JS — chama
+`window.print()`; o navegador abre o diálogo nativo e o usuário escolhe
+"Salvar como PDF" no destino. Zero dependência externa, e a tabela inteira
+já está no DOM sem paginação/virtualização, então o que sai no PDF é
+exatamente o filtro em tela (NRE/município/escola, área, anos ativos,
+ordenação corrente).
+
+`@media print` em `styles.css`: esconde nav/filtros interativos/botão do
+PDF, tira o `overflow` do `.tbl-scroll`, poe a página em A4 paisagem,
+repete o `<thead>` em cada página (`display: table-header-group`) e evita
+quebrar uma linha no meio (`page-break-inside: avoid`). Um parágrafo
+`.print-only` (`#crit-print-meta`, invisível na tela) mostra o resumo
+completo do filtro + timestamp — só existe no papel, porque a tela já tem
+o `#crit-alvo` (que o print, por sua vez, esconde pra não duplicar).
+
+De caminho, `rotuloAlvo()` passou a mostrar o nome do município/escola em
+vez do código/INEP cru (lê o texto já selecionado em `#sel-mun`/`#inp-esc`,
+sem chamada nova) — bug pré-existente que ficava mais visível agora que o
+nome vai pro cabeçalho do PDF.
+
+Testado com Playwright gerando PDF de verdade (`page.pdf()`, A4 paisagem):
+120 habilidades sem filtro vira 10 páginas, cabeçalho repete em todas,
+nenhuma linha cortada no meio, última página termina limpa. Testado nos
+três níveis (UF, município, escola) e com filtro de área/anos.
+
+Só existe no `enemparana` — não replicado ainda no `painelenem` (painel
+nacional). Se quiser lá também, é a mesma receita em `web/criticas.js` +
+`web/styles.css`.
 
 ## Em aberto
 
