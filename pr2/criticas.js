@@ -367,15 +367,10 @@ function render() {
   ultimasLinhas = linhasOrdenadas;
 }
 
-/* ----------- export Excel (CSV) ------------------------------------------ */
-// ";" como separador e BOM UTF-8 porque o Excel em pt-BR abre assim direto,
-// sem passar pelo assistente de importação (mesma convenção já usada no CSV
-// de escolas/NRE gerado antes). Vira número puro (sem "%") pra continuar
-// somável/filtrável na planilha; unidade vai no cabeçalho da coluna.
-function csvCel(v) {
-  const s = v == null ? "" : String(v);
-  return /[;"\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-}
+/* ----------- export Excel (.xlsx) ----------------------------------------- */
+// Arquivo .xlsx de verdade (não .csv) — gerado por xlsx_lite.js, sem
+// dependência externa. Número puro (sem "%") pra continuar somável/filtrável
+// na planilha; a unidade vai só no cabeçalho da coluna.
 function slug(s) {
   return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-zA-Z0-9]+/g, "_").replace(/^_+|_+$/g, "").toLowerCase();
@@ -388,25 +383,17 @@ function baixarExcel(linhas, alvoTxt) {
     "2021 (%)", "2022 (%)", "2023 (%)", "2024 (%)", "2025 (%)",
     "Média (%)", "Esperado TRI (%)", "Δ vs esperado (pp)",
   ];
-  const linhasCsv = linhas.map((l) => [
+  const linhasXlsx = linhas.map((l) => [
     l.area, `H${l.h}`, l.desc,
     ...l.anos.map(pct),
     pct(l.media), pct(l.esperado), pp(l.delta),
   ]);
-  const csv = "\uFEFF" + [header, ...linhasCsv]
-    .map((row) => row.map(csvCel).join(";"))
-    .join("\r\n");
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `analise_habilidades_${slug(alvoTxt)}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  const larguras = [7, 11, 60, 9, 9, 9, 9, 9, 10, 14, 14];
+  window.XlsxLite.baixar(
+    `analise_habilidades_${slug(alvoTxt)}.xlsx`,
+    "Análise", header, linhasXlsx, larguras,
+  );
 }
-
 /* ----------- handlers --------------------------------------------------- */
 // "Baixar PDF" abre o diálogo de impressão do navegador (destino "Salvar como
 // PDF") em vez de gerar o arquivo em JS — sem dependência externa, e a tabela

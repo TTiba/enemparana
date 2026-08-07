@@ -63,7 +63,7 @@ copiar = [
     "priorizacao.html", "habilidade.html", "entenda.html", "redacao.html",
     "app.js", "mapa.js", "criticas.js", "ranking_escolas.js",
     "priorizacao.js", "habilidade.js", "habilidades.js", "redacao.js",
-    "competencias.js", "charts.js", "filtros.js", "tooltip.js",
+    "competencias.js", "charts.js", "filtros.js", "tooltip.js", "xlsx_lite.js",
     "styles.css", "styles_pr.css", "brasao_pr.webp",
 ]
 for f in copiar:
