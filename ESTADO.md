@@ -195,6 +195,42 @@ Só existe no `enemparana` — não replicado ainda no `painelenem` (painel
 nacional). Se quiser lá também, é a mesma receita em `web/criticas.js` +
 `web/styles.css`.
 
+## PDF da Análise agora agrupa por área/competência (07/08)
+
+Feedback direto: a tabela plana (120 linhas) "ficou mto longo" no PDF.
+A tela continua **idêntica** — tabela plana, ordenável por qualquer coluna,
+sem nenhuma mudança visual. Só o conteúdo impresso mudou.
+
+`criticas.js`: extraí as células/linha (`cel`, `celEsp`, `celAno`,
+`celDelta`, `linhaHtml`) e a ordenação (`ordenarLinhas`) pra funções de
+topo de arquivo — antes viviam inline dentro do único `.map()` do
+`render()`, duplicadas. `montarPrintAgrupado(linhas)` usa essas mesmas
+funções: separa por área (`AREA_ORDER`, ou só a área filtrada), e dentro de
+cada área por competência usando `window.COMPETENCIAS` (de
+`competencias.js` — já estava carregado na página mas sem uso até agora).
+Cada grupo de competência sai como uma mini-tabela própria, reusando o
+`<thead>` real via `outerHTML` (mesmo cabeçalho, mesmas colunas).
+
+HTML: novo `<div id="crit-print-agrupado" class="print-only">` dentro do
+card da tabela, populado a cada `render()`. CSS: no `@media print`,
+`#crit-tabela` (a plana) fica `display:none`, e o agrupado ganha estilo
+próprio (título de área com borda colorida por área, subtítulo de
+competência, `page-break-inside: avoid` nas mini-tabelas e
+`page-break-after: avoid` nos títulos pra não sobrar cabeçalho órfão no
+fim da página).
+
+Testado com Playwright (`page.pdf()` real + render em PNG via pymupdf):
+município com 120 habilidades → 15 páginas (mais que as 10 da versão
+plana, porque cada competência não quebra no meio — algumas páginas
+terminam com espaço em branco), 4 áreas e 30 competências aparecem, total
+de linhas bate 120=120 (nada se perde no agrupamento). Testado também só
+com área (MT): 1 título de área, 7 competências, 30 linhas. Sem erro de
+JS.
+
+Residual: o agrupamento aumenta a contagem de páginas em troca de
+organização — é o trade-off esperado de não fragmentar uma competência
+entre páginas. Não replicado no `painelenem` (mesma nota do item acima).
+
 ## Em aberto
 
 1. **`pr2_deploy` do rebuild ficou sem dado avaliável.** *Adiado* — deixou de

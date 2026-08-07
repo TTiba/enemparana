@@ -197,6 +197,104 @@ function corDelta(d) {
   return `rgba(${base[0]},${base[1]},${base[2]},${alfa.toFixed(2)})`;
 }
 
+/* ----------- células e linha (compartilhado entre tela e PDF) ------------ */
+function cel(p, extraCls = "") {
+  if (p == null) return `<td class="crit-cel-vazio ${extraCls}">—</td>`;
+  const pct = Math.round(p * 100);
+  return `<td class="crit-cel ${extraCls}" style="background:${corAcerto(p)}">${pct}%</td>`;
+}
+function celEsp(p) {
+  if (p == null) return `<td class="crit-cel-vazio crit-col-esp">—</td>`;
+  const pct = Math.round(p * 100);
+  return `<td class="crit-cel crit-col-esp" style="background:${corAcerto(p)}">${pct}%</td>`;
+}
+function celAno(p, i) {
+  const inativo = !state.anos_ativos.has(ANOS[i]) ? "crit-ano-inativo" : "";
+  return cel(p, inativo);
+}
+function celDelta(l) {
+  if (l.delta == null) return `<td class="crit-cel-vazio">—</td>`;
+  const pp = l.delta * 100;
+  const arr = Math.round(pp);
+  const sign = arr > 0 ? "+" : arr < 0 ? "−" : "";
+  return `<td class="crit-cel crit-delta" style="background:${corDelta(l.delta)}">${sign}${Math.abs(arr)} pp</td>`;
+}
+function linhaHtml(l) {
+  const info = AREA_INFO[l.area];
+  const desc = l.desc.length > 80 ? l.desc.slice(0, 78) + "…" : l.desc;
+  const linkQs = new URLSearchParams({
+    area: l.area, h: l.h,
+    ...(state.uf ? { uf: state.uf } : {}),
+    ...(state.mun ? { mun: state.mun } : {}),
+    ...(state.esc ? { esc: state.esc } : {}),
+    ...(state.rede !== "T" ? { rede: state.rede } : {}),
+  }).toString();
+  return `<tr>
+    <td class="crit-col-area"><span class="chip-area-tag" style="background:${info.cor}">${info.chip}</span></td>
+    <td class="crit-col-h"><a class="chip-hab" href="habilidade.html?${linkQs}" target="_blank">H${l.h}</a></td>
+    <td class="crit-col-desc" title="${l.desc.replace(/"/g,"&quot;")}">${desc}</td>
+    ${l.anos.map(celAno).join("")}
+    ${cel(l.media)}
+    ${celEsp(l.esperado)}
+    ${celDelta(l)}
+  </tr>`;
+}
+
+/* Ordena uma cópia da lista pela coluna/direção correntes (mesma lógica que
+ * os cliques no <th> já usam). Reaproveitada pela tabela em tela e por cada
+ * mini-tabela do PDF, pra manter o critério de ordem que a pessoa escolheu
+ * mesmo dentro de cada grupo de competência. */
+const AREA_ORDER = ["LC", "CH", "CN", "MT"];
+function ordenarLinhas(lista) {
+  const col = state.sort_col;
+  const dir = state.sort_dir === "desc" ? -1 : 1;
+  function chave(l) {
+    if (col === "area") return AREA_ORDER.indexOf(l.area) * 100 + l.h;
+    if (col === "h") return l.h;
+    if (col === "desc") return (l.desc || "").toLowerCase();
+    if (col.startsWith("a")) return l.anos[parseInt(col.slice(1), 10)];
+    return l[col];
+  }
+  return [...lista].sort((a, b) => {
+    const va = chave(a), vb = chave(b);
+    const nullA = va == null || va === "";
+    const nullB = vb == null || vb === "";
+    if (nullA && nullB) return 0;
+    if (nullA) return 1;
+    if (nullB) return -1;
+    if (typeof va === "string" && typeof vb === "string") {
+      return va.localeCompare(vb, "pt-BR") * dir;
+    }
+    return (va - vb) * dir;
+  });
+}
+
+/* PDF: mesmas linhas, agrupadas por área e depois por competência da Matriz
+ * de Referência (window.COMPETENCIAS, de competencias.js) — pedido porque a
+ * tabela única, plana, ficava longa demais pra ler de um jeito organizado.
+ * Dentro de cada competência, mantém a ordenação escolhida na tela. */
+function montarPrintAgrupado(linhas) {
+  const areasOrdem = state.area ? [state.area] : AREA_ORDER;
+  const theadHtml = document.getElementById("crit-thead").outerHTML;
+  let html = "";
+  for (const area of areasOrdem) {
+    const porArea = linhas.filter((l) => l.area === area);
+    if (!porArea.length) continue;
+    html += `<h4 class="print-area-tit" style="border-color:${AREA_INFO[area].cor}">${AREA_INFO[area].nome}</h4>`;
+    const comps = window.COMPETENCIAS?.[area] || [];
+    for (const c of comps) {
+      const porComp = ordenarLinhas(porArea.filter((l) => c.hs.includes(l.h)));
+      if (!porComp.length) continue;
+      html += `<h5 class="print-comp-tit">Competência ${c.n} · ${c.titulo}</h5>
+        <table class="tbl crit-tabela print-tabela-comp">
+          <thead>${theadHtml}</thead>
+          <tbody>${porComp.map(linhaHtml).join("")}</tbody>
+        </table>`;
+    }
+  }
+  return html;
+}
+
 /* ----------- render ----------------------------------------------------- */
 function render() {
   if (!dataAlvo || !habIndex) return;
@@ -205,7 +303,7 @@ function render() {
   alvoEl.innerHTML = `Analisando: <b>${alvoTxt}</b>`;
   alvoEl.hidden = false;
 
-  const areas = state.area ? [state.area] : ["LC", "CH", "CN", "MT"];
+  const areas = state.area ? [state.area] : AREA_ORDER;
   const linhas = [];
   for (const area of areas) {
     const cells = habIndex.areas[area] || {};
@@ -220,35 +318,13 @@ function render() {
     }
   }
 
-  // ordena conforme coluna clicada
-  const col = state.sort_col;
-  const dir = state.sort_dir === "desc" ? -1 : 1;
-  const AREA_ORDER = ["LC", "CH", "CN", "MT"];
-  function chave(l) {
-    if (col === "area") return AREA_ORDER.indexOf(l.area) * 100 + l.h;   // preserva Hs dentro da área
-    if (col === "h") return l.h;
-    if (col === "desc") return (l.desc || "").toLowerCase();
-    if (col.startsWith("a")) return l.anos[parseInt(col.slice(1), 10)];
-    return l[col];
-  }
-  linhas.sort((a, b) => {
-    const va = chave(a), vb = chave(b);
-    // null/undefined sempre no fim
-    const nullA = va == null || va === "";
-    const nullB = vb == null || vb === "";
-    if (nullA && nullB) return 0;
-    if (nullA) return 1;
-    if (nullB) return -1;
-    if (typeof va === "string" && typeof vb === "string") {
-      return va.localeCompare(vb, "pt-BR") * dir;
-    }
-    return (va - vb) * dir;
-  });
+  const linhasOrdenadas = ordenarLinhas(linhas);
 
   // atualiza indicadores nos <th>
+  const dir = state.sort_dir === "desc" ? -1 : 1;
   document.querySelectorAll("#crit-thead th.sortable").forEach((th) => {
     th.classList.remove("sort-asc", "sort-desc");
-    if (th.dataset.sort === col) th.classList.add(dir === 1 ? "sort-asc" : "sort-desc");
+    if (th.dataset.sort === state.sort_col) th.classList.add(dir === 1 ? "sort-asc" : "sort-desc");
   });
 
   // sumário
@@ -279,49 +355,12 @@ function render() {
       `${alvoTxt} · ${areaNome} · anos ${anosLbl} · ${linhas.length} habilidades`;
   }
 
-  // linhas
-  const tb = document.getElementById("crit-tbody");
-  tb.innerHTML = linhas.map((l) => {
-    const info = AREA_INFO[l.area];
-    const cel = (p, extraCls = "") => {
-      if (p == null) return `<td class="crit-cel-vazio ${extraCls}">—</td>`;
-      const pct = Math.round(p * 100);
-      return `<td class="crit-cel ${extraCls}" style="background:${corAcerto(p)}">${pct}%</td>`;
-    };
-    const celEsp = (p) => {
-      if (p == null) return `<td class="crit-cel-vazio crit-col-esp">—</td>`;
-      const pct = Math.round(p * 100);
-      return `<td class="crit-cel crit-col-esp" style="background:${corAcerto(p)}">${pct}%</td>`;
-    };
-    const celAno = (p, i) => {
-      const inativo = !state.anos_ativos.has(ANOS[i]) ? "crit-ano-inativo" : "";
-      return cel(p, inativo);
-    };
-    const celDelta = () => {
-      if (l.delta == null) return `<td class="crit-cel-vazio">—</td>`;
-      const pp = l.delta * 100;
-      const arr = Math.round(pp);
-      const sign = arr > 0 ? "+" : arr < 0 ? "−" : "";
-      return `<td class="crit-cel crit-delta" style="background:${corDelta(l.delta)}">${sign}${Math.abs(arr)} pp</td>`;
-    };
-    const desc = l.desc.length > 80 ? l.desc.slice(0, 78) + "…" : l.desc;
-    const linkQs = new URLSearchParams({
-      area: l.area, h: l.h,
-      ...(state.uf ? { uf: state.uf } : {}),
-      ...(state.mun ? { mun: state.mun } : {}),
-      ...(state.esc ? { esc: state.esc } : {}),
-      ...(state.rede !== "T" ? { rede: state.rede } : {}),
-    }).toString();
-    return `<tr>
-      <td class="crit-col-area"><span class="chip-area-tag" style="background:${info.cor}">${info.chip}</span></td>
-      <td class="crit-col-h"><a class="chip-hab" href="habilidade.html?${linkQs}" target="_blank">H${l.h}</a></td>
-      <td class="crit-col-desc" title="${l.desc.replace(/"/g,"&quot;")}">${desc}</td>
-      ${l.anos.map(celAno).join("")}
-      ${cel(l.media)}
-      ${celEsp(l.esperado)}
-      ${celDelta()}
-    </tr>`;
-  }).join("");
+  // tabela em tela: plana, ordenável por qualquer coluna — inalterada
+  document.getElementById("crit-tbody").innerHTML = linhasOrdenadas.map(linhaHtml).join("");
+
+  // PDF: mesmas linhas, agrupadas por área/competência
+  const printEl = $("#crit-print-agrupado");
+  if (printEl) printEl.innerHTML = montarPrintAgrupado(linhas);
 }
 
 /* ----------- handlers --------------------------------------------------- */
