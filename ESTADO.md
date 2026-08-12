@@ -21,13 +21,21 @@ reconstruir contexto de memória. Detalhe e histórico ficam no `status.md`
 | source | `pr2/` | `web/` |
 | build servido | `pr2_deploy/` (commitado) | `deploy/` (commitado) |
 | produção | https://enemparana.netlify.app | https://microdadosenem.netlify.app |
-| **como publica** | **`netlify deploy --prod --dir=pr2_deploy`** — manual, **NÃO** ligado ao git | **push/merge na `main`** — Netlify ligado ao GitHub, deploy automático |
+| **como publica** | **os dois:** ligado ao git (produção = `main`) **e** `netlify deploy --prod --dir=pr2_deploy` manual | **push/merge na `main`** — Netlify ligado ao GitHub, deploy automático |
 
-Isto já foi confundido duas vezes. O Paraná é manual; o nacional é
-automático. Há também um Cloudflare Workers secundário
-(`enemparana.pages.dev`, `wrangler.toml`, `CLOUDFLARE-SETUP.md`) marcado como
-**em configuração** — auto-deploy a cada push em `main`; nunca confirmado
-funcionando.
+**Corrigido em 12/08 — este ponto estava errado aqui e no `CLAUDE.md`.**
+Estava escrito que o Paraná "NÃO é ligado ao git"; está sim. O que
+acontecia é que só o deploy manual vinha sendo usado, então a `main` ficou
+parada em `f639294` (26/07) enquanto o ar seguia adiante pelos deploys
+manuais. Consequência prática, que me fez errar um diagnóstico: **o card
+"Production: main@sha" do painel do Netlify mostra o último deploy vindo do
+git, não o que está no ar** — deploy manual publica em produção sem ficar
+amarrado a commit nenhum. Para saber o que está em produção, abra o site.
+
+Há também um Cloudflare Workers secundário (`enemparana.pages.dev`,
+`wrangler.toml` → `directory = "./pr2_deploy"`, `CLOUDFLARE-SETUP.md`) —
+auto-deploy a cada push em `main`; nunca confirmado funcionando. Mergear na
+`main` dispara Netlify e Cloudflare juntos.
 
 ## O dado desce em cascata
 
@@ -355,9 +363,12 @@ itens de PDF acima).
    entre 370 e 460 (subtração com 15× de alavancagem, magnitude imprecisa).
 5. **~150 MB de imagens de questão versionadas em git** nos dois repos.
    Vale decidir se saem para LFS ou ficam.
-6. **Linkar o Paraná ao git** pra poder publicar do celular. Só depois de
-   mergear o PR #1 — a `main` está 21 commits atrás e linkar agora
-   republicaria a versão velha.
+6. ~~**Linkar o Paraná ao git** pra poder publicar do celular.~~
+   **FEITO** — já está ligado (produção = `main`). E em 12/08 a `main` foi
+   posta em dia com o merge do branch `claude/enem-canal-bug-5g78e7`, então
+   o risco de "republicar versão velha" que travava este item deixou de
+   existir: `main` e produção passaram a ser a mesma coisa. Manter assim —
+   se voltar a publicar só pelo manual, a divergência volta.
 
 ## PRs abertos
 
