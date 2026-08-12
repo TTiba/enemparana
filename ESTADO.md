@@ -1,6 +1,6 @@
 # Estado atual — leia isto primeiro
 
-Atualizado: **2026-08-07**
+Atualizado: **2026-08-12**
 
 Arquivo curto e de manutenção obrigatória. Serve pra retomar o trabalho sem
 reconstruir contexto de memória. Detalhe e histórico ficam no `status.md`
@@ -162,6 +162,33 @@ Testado com Playwright: UF (543,1 oficial / 576,1 sem zeros, bate com os
 números já registrados abaixo), município (oficial funciona, sem zeros
 degrada), escola (oficial funciona), busca e ordenação do ranking. Zero
 erro de JS; nav consistente nas 4 páginas.
+
+### Correção 12/08 — duas afirmações sem lastro no card "Por que dois números"
+
+Um usuário perguntou de onde saíam. Não saíam de lugar nenhum; foram
+escritas por mim como se fossem propriedade medida do dado. **Removidas:**
+
+1. *"— a mesma base que os relatórios oficiais usam"*. Afirmação sobre a
+   metodologia de divulgação do INEP, sem nenhuma fonte consultada. Pior:
+   provavelmente falsa. Nossa base filtra `CO_ESCOLA IS NOT NULL`, ou seja,
+   só candidato com escola identificada — mais estreita que a base de
+   divulgação do INEP, que não exige vínculo com escola.
+2. *"(por fuga ao tema, anulação ou folha em branco)"*. Separar motivo de
+   zero exige `TP_STATUS_REDACAO`, que o `build_db.py` lê para dentro da
+   tabela (linha 108) e **nunca usa em cálculo** — está listado como aberto
+   no item 4 de *Em aberto*. A lista ainda estava incompleta (o edital tem
+   cópia, texto insuficiente, não atendimento ao tipo textual).
+
+Ficou o que é medido: base = presentes no 1º dia (`n_lc = n_ch = n_red`,
+54.062 na pública — os três batem exatamente) e zero entra como 0, não como
+ausência (é o que produz os 21,5 pontos do recorte sem zeros).
+
+**Em aberto:** a etiqueta "Redação · oficial (Inep)" (`redacao.html:76`,
+`:144`, `:154`) ainda sugere que o número coincide com o publicado pelo
+INEP — que é justamente o que não foi confirmado. O número vem de microdado
+do INEP, então a atribuição de fonte é honesta; o adjetivo "oficial" é que
+promete demais. Trocar exige mexer em card, footnote e no texto — decisão
+de produto, não aplicada.
 
 ## Análise ganhou botão "Baixar PDF" (07/08)
 
