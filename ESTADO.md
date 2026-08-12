@@ -208,6 +208,25 @@ do arquivo dizendo explicitamente pra não voltar a rotular como
 Testado com Playwright: cartões em 543,1 e 576,1 (batem com os números já
 registrados acima), 5 competências, 624 linhas no ranking, zero erro de JS.
 
+**Segunda passada, no mesmo dia** — o usuário achou mais duas, que eu tinha
+dado como limpas. Minha varredura buscou `oficial` e concluiu "nada no
+HTML"; só que **"oficiais" não contém a substring "oficial"** (o 7º
+caractere é `i`, não `l`). Verificar ausência com padrão estreito demais dá
+falso negativo. Para varrer isto, use o radical: `grep -i "ofici\|divulg"`.
+
+Removidas: o subtítulo da página (*"o número que o **Inep divulga**"* →
+descrição da população) e o hint das competências (*"valores **oficiais
+(Inep)**"* → *"média por competência · escala 0–200"*). As notas de cada
+competência são atribuídas pelo INEP, mas a **média** é nossa.
+
+**Critério, pra não errar de novo:** "oficial" descrevendo **insumo que o
+INEP publica** está certo — gabarito, parâmetros TRI a/b/c, Matriz de
+Referência, cadernos de prova, e o "Fonte: Microdados (INEP)" dos rodapés.
+Está errado quando qualifica **agregado que nós calculamos**. Auditei as
+outras páginas com esse critério: `criticas.html`, `entenda.html`,
+`habilidade.html` e `index.html` usam a palavra só no sentido correto —
+nada a mudar lá.
+
 ## Análise ganhou botão "Baixar PDF" (07/08)
 
 `criticas.html` (página Análise) tem um botão **⬇ Baixar PDF** no card de
