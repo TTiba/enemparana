@@ -183,12 +183,22 @@ Ficou o que é medido: base = presentes no 1º dia (`n_lc = n_ch = n_red`,
 54.062 na pública — os três batem exatamente) e zero entra como 0, não como
 ausência (é o que produz os 21,5 pontos do recorte sem zeros).
 
-**Em aberto:** a etiqueta "Redação · oficial (Inep)" (`redacao.html:76`,
-`:144`, `:154`) ainda sugere que o número coincide com o publicado pelo
-INEP — que é justamente o que não foi confirmado. O número vem de microdado
-do INEP, então a atribuição de fonte é honesta; o adjetivo "oficial" é que
-promete demais. Trocar exige mexer em card, footnote e no texto — decisão
-de produto, não aplicada.
+**Resolvido no mesmo dia:** a palavra "oficial" saiu de toda a página, a
+pedido — ela passava a ideia de que o INEP tinha calculado o número, quando
+na verdade ele é calculado aqui a partir do microdado. O rótulo virou
+**"1º dia, com zeros"**, que descreve a população e fica paralelo ao
+"2 dias, sem zeros" do outro cartão. Trocado em 6 pontos: cartão
+(`kpi-top`), cabeçalho da coluna do ranking, footnote do ranking, título do
+parágrafo e mais duas menções no corpo do texto ("o número oficial" →
+"o número do 1º dia, que é a leitura mais comum").
+
+No `redacao.js`, `alvoOficial()` virou `alvoDia1()` e os comentários
+acompanharam, pra não sobrar a palavra em lugar nenhum. Há um aviso no topo
+do arquivo dizendo explicitamente pra não voltar a rotular como
+"oficial (Inep)" — foi o que gerou a confusão.
+
+Testado com Playwright: cartões em 543,1 e 576,1 (batem com os números já
+registrados acima), 5 competências, 624 linhas no ranking, zero erro de JS.
 
 ## Análise ganhou botão "Baixar PDF" (07/08)
 

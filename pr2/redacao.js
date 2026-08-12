@@ -1,6 +1,10 @@
-/* Redação isolada — dois números lado a lado (oficial Inep vs recorte "2 dias,
- * sem zeros") + competências + ranking de escolas. Rede sempre pública (ver
- * ESTADO.md: escolas particulares removidas do painel).
+/* Redação isolada — dois números lado a lado ("1º dia, com zeros" vs recorte
+ * "2 dias, sem zeros") + competências + ranking de escolas. Rede sempre
+ * pública (ver ESTADO.md: escolas particulares removidas do painel).
+ *
+ * NÃO rotular o primeiro número como "oficial (Inep)": ele é calculado aqui a
+ * partir do microdado, não é um número divulgado pelo INEP, e o rótulo antigo
+ * dava a entender que o órgão o havia calculado (ver ESTADO.md, correção 12/08).
  *
  * Cópia adaptada do padrão de filtro de app.js/ranking_escolas.js — este repo
  * não compartilha módulo de página, cada uma tem sua cópia (ver habilidade.js,
@@ -124,7 +128,7 @@ const COMP_NOME = {
 };
 
 /* ---------- carrega o alvo selecionado ------------------------------------ */
-async function alvoOficial() {
+async function alvoDia1() {
   const { nivel, chave } = nivelChave();
   if (nivel === "UF") {
     const d = await fetch(`api/entidade/UF/${LOCK_UF}.json`).then((r) => r.json());
@@ -147,7 +151,7 @@ async function alvoOficial() {
 }
 
 async function refresh() {
-  const alvo = await alvoOficial();
+  const alvo = await alvoDia1();
   const { nivel } = nivelChave();
 
   if (!alvo) {
@@ -167,7 +171,7 @@ async function refresh() {
   meta.push("rede pública");
   $("#ent-meta").textContent = meta.join(" · ");
 
-  // -------- oficial
+  // -------- 1º dia, com zeros
   $("#red-of-num").textContent = fmt1(alvo.media_red);
   $("#red-of-sub").textContent = alvo.n_red != null
     ? `${fmtInt(alvo.n_red)} alunos · presentes no 1º dia, zero conta como nota`
@@ -187,7 +191,7 @@ async function refresh() {
       "até rodar o script com os microdados por escola/município (ver Entenda os dados)";
   }
 
-  // -------- competências (sempre oficial — disponível em qualquer nível)
+  // -------- competências (mesma base do 1º dia — existem em qualquer nível)
   $("#red-comps").innerHTML = [1, 2, 3, 4, 5].map((i) =>
     barRowComp(COMP_NOME[i], alvo[`media_comp${i}`], 200, "var(--rose)", fmt0(alvo[`media_comp${i}`]))
   ).join("");
