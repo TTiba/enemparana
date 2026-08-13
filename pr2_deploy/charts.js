@@ -268,4 +268,132 @@ function escalaDiverging(centro, corBaixa, corAlta) {
   });
 })();
 
-window.Charts = { sparkline, lineChart, heatmap, escalaSequencial, escalaDiverging };
+/* ---------------- radar ---------------------------------------------------
+ * radar(eixos, series, opts) → string SVG.
+ *
+ *   eixos  = [{ lbl, cor? }, …]          um vértice por eixo
+ *   series = [{ id, nome, cor, valores: [n|null], on }, …]
+ *
+ * O domínio NÃO começa em zero: numa escala 0–1000 as diferenças entre
+ * escola e estado (tipicamente 30–80 pontos) somem. Ele é derivado dos
+ * dados, e por isso os anéis vêm **rotulados com o valor** — sem isso o
+ * gráfico exagera diferença, que é a crítica clássica ao radar com base
+ * deslocada. `opts.dominio = [min, max]` fixa a escala à mão.
+ */
+function radar(eixos, series, opts = {}) {
+  const w = opts.width || 340;
+  const h = opts.height || 300;
+  const cx = w / 2;
+  const cy = h / 2 + 6;
+  const r = Math.min(w, h) / 2 - (opts.margem || 54);
+  const n = eixos.length;
+  if (!n) return "";
+
+  const vivos = series.filter((s) => s.on !== false);
+  const todos = vivos.flatMap((s) => s.valores).filter((v) => v != null);
+  if (!todos.length) {
+    return `<svg viewBox="0 0 ${w} ${h}" class="radar"><text x="${cx}" y="${cy}"
+      text-anchor="middle" font-size="12" fill="var(--ink-40)">sem dados</text></svg>`;
+  }
+
+  let [lo, hi] = opts.dominio || [];
+  if (lo == null || hi == null) {
+    const mn = Math.min(...todos), mx = Math.max(...todos);
+    const folga = Math.max((mx - mn) * 0.35, mx * 0.04) || 10;
+    const passo = opts.passo || 25;
+    lo = Math.max(0, Math.floor((mn - folga) / passo) * passo);
+    hi = Math.ceil((mx + folga) / passo) * passo;
+  }
+  if (hi === lo) hi = lo + 1;
+  const rr = (v) => ((v - lo) / (hi - lo)) * r;
+  const ang = (i) => (Math.PI * 2 * i) / n - Math.PI / 2;
+  const px = (i, raio) => cx + Math.cos(ang(i)) * raio;
+  const py = (i, raio) => cy + Math.sin(ang(i)) * raio;
+
+  const ANEIS = 4;
+  let g = "";
+
+  // teia + rótulo de valor de cada anel
+  for (let k = 1; k <= ANEIS; k++) {
+    const raio = (r * k) / ANEIS;
+    const pts = Array.from({ length: n }, (_, i) => `${px(i, raio)},${py(i, raio)}`).join(" ");
+    g += `<polygon points="${pts}" fill="none" stroke="var(--ink-12)" stroke-width="1"/>`;
+    const val = Math.round(lo + ((hi - lo) * k) / ANEIS);
+    g += `<text x="${cx + 4}" y="${cy - raio + 4}" font-size="9" fill="var(--ink-40)">${val}</text>`;
+  }
+  // raios
+  for (let i = 0; i < n; i++) {
+    g += `<line x1="${cx}" y1="${cy}" x2="${px(i, r)}" y2="${py(i, r)}"
+           stroke="var(--ink-12)" stroke-width="1"/>`;
+  }
+  // rótulos dos eixos
+  for (let i = 0; i < n; i++) {
+    const a = ang(i);
+    const lx = cx + Math.cos(a) * (r + 20);
+    const ly = cy + Math.sin(a) * (r + 20);
+    const anchor = Math.abs(Math.cos(a)) < 0.3 ? "middle" : (Math.cos(a) > 0 ? "start" : "end");
+    g += `<text x="${lx}" y="${ly + 4}" text-anchor="${anchor}" font-size="11"
+           font-weight="800" fill="var(--ink)">${eixos[i].lbl}</text>`;
+  }
+  // polígonos das séries
+  for (const s of vivos) {
+    const pts = [];
+    for (let i = 0; i < n; i++) {
+      const v = s.valores[i];
+      if (v == null) continue;
+      pts.push(`${px(i, rr(v))},${py(i, rr(v))}`);
+    }
+    if (pts.length < 2) continue;
+    g += `<polygon points="${pts.join(" ")}" fill="${s.cor}" fill-opacity="${s.preenche === false ? 0 : 0.18}"
+           stroke="${s.cor}" stroke-width="2.5" stroke-linejoin="round"/>`;
+    for (let i = 0; i < n; i++) {
+      const v = s.valores[i];
+      if (v == null) continue;
+      g += `<circle cx="${px(i, rr(v))}" cy="${py(i, rr(v))}" r="3.5" fill="${s.cor}"
+             stroke="var(--card)" stroke-width="1.5"
+             title="${s.nome} · ${eixos[i].lbl}: ${v.toLocaleString("pt-BR", {minimumFractionDigits:1, maximumFractionDigits:1})}"/>`;
+    }
+  }
+  return `<svg viewBox="0 0 ${w} ${h}" class="radar" preserveAspectRatio="xMidYMid meet">${g}</svg>`;
+}
+
+/* ---------------- histograma (distribuição por faixa) ---------------------
+ * histograma(buckets, opts) → string SVG. `buckets` = {valor: contagem}.
+ * opts.marca desenha uma linha vertical (usada pra situar a média da escola
+ * dentro da distribuição do município/NRE/estado).
+ */
+function histograma(buckets, opts = {}) {
+  const w = opts.width || 300;
+  const h = opts.height || 120;
+  const padB = 20, padL = 4, padT = 8;
+  const chaves = Object.keys(buckets).map(Number).sort((a, b) => a - b);
+  if (!chaves.length) return "";
+  const max = Math.max(...chaves.map((k) => buckets[k]));
+  const lo = chaves[0], hi = chaves[chaves.length - 1];
+  const span = (hi - lo) || 1;
+  const bw = Math.max(1, ((w - padL * 2) / (chaves.length)) - 1);
+  const x = (v) => padL + ((v - lo) / span) * (w - padL * 2 - bw);
+  const alt = h - padB - padT;
+
+  let g = "";
+  for (const k of chaves) {
+    const bh = (buckets[k] / max) * alt;
+    g += `<rect x="${x(k).toFixed(1)}" y="${(padT + alt - bh).toFixed(1)}" width="${bw.toFixed(1)}"
+           height="${bh.toFixed(1)}" fill="${opts.cor || "var(--lilac)"}" rx="1"
+           title="${k}–${k + 24}: ${buckets[k].toLocaleString("pt-BR")} alunos"/>`;
+  }
+  g += `<line x1="0" y1="${padT + alt}" x2="${w}" y2="${padT + alt}" stroke="var(--ink-12)"/>`;
+  g += `<text x="0" y="${h - 6}" font-size="9" fill="var(--ink-40)">${lo}</text>`;
+  g += `<text x="${w}" y="${h - 6}" font-size="9" fill="var(--ink-40)" text-anchor="end">${hi}</text>`;
+
+  if (opts.marca != null && opts.marca >= lo && opts.marca <= hi) {
+    const mx = x(opts.marca) + bw / 2;
+    g += `<line x1="${mx.toFixed(1)}" y1="${padT - 4}" x2="${mx.toFixed(1)}" y2="${padT + alt}"
+           stroke="var(--pink)" stroke-width="2" stroke-dasharray="3 2"/>`;
+    g += `<text x="${mx.toFixed(1)}" y="${h - 6}" font-size="9" font-weight="800"
+           fill="var(--pink)" text-anchor="middle">${Math.round(opts.marca)}</text>`;
+  }
+  return `<svg viewBox="0 0 ${w} ${h}" class="histo" preserveAspectRatio="none">${g}</svg>`;
+}
+
+window.Charts = { sparkline, lineChart, heatmap, radar, histograma, escalaSequencial, escalaDiverging };

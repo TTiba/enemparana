@@ -59,9 +59,9 @@ if os.path.exists(GUARDA):
 # ---------------------------------------------------------------- front
 log("Copiando front pr2/…")
 copiar = [
-    "index.html", "mapa.html", "criticas.html", "ranking_escolas.html",
+    "index.html", "mapa.html", "criticas.html", "escola.html",
     "priorizacao.html", "habilidade.html", "entenda.html", "redacao.html",
-    "app.js", "mapa.js", "criticas.js", "ranking_escolas.js",
+    "app.js", "mapa.js", "criticas.js", "escola.js",
     "priorizacao.js", "habilidade.js", "habilidades.js", "redacao.js",
     "competencias.js", "charts.js", "filtros.js", "tooltip.js", "xlsx_lite.js",
     "styles.css", "styles_pr.css", "brasao_pr.webp",
@@ -89,7 +89,7 @@ def inject_static(caminho):
     open(caminho, "w", encoding="utf-8").write(html)
 
 
-for pag in ("index.html", "mapa.html", "criticas.html", "ranking_escolas.html",
+for pag in ("index.html", "mapa.html", "criticas.html", "escola.html",
             "priorizacao.html", "habilidade.html", "entenda.html", "redacao.html"):
     p = os.path.join(OUT, pag)
     if os.path.exists(p):

@@ -954,3 +954,40 @@ a.chip-hab:hover { background: var(--pink); color: var(--card); transform: trans
   }
   table.print-tabela-comp { margin: 0 0 8px; page-break-inside: avoid; break-inside: avoid; }
 }
+
+/* ===== Sua Escola: radares, alunos e distribuição ========================= */
+.radar-wrap { display: flex; justify-content: center; padding: 4px 0 2px; }
+.radar-wrap svg.radar { width: 100%; max-width: 440px; height: auto; }
+
+.radar-leg { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 6px; }
+.leg-item {
+  font: inherit; font-size: 12px; font-weight: 800; color: var(--ink);
+  background: transparent; border: 1.5px solid var(--ink-12);
+  border-radius: 999px; padding: 5px 12px; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 7px;
+  transition: background .15s, border-color .15s, opacity .15s;
+}
+.leg-item:hover { border-color: var(--ink); }
+/* série desligada: some a cor e apaga o texto, mas o botão continua legível */
+.leg-item.off { opacity: .45; }
+.leg-item.off .leg-dot { background: transparent !important; box-shadow: inset 0 0 0 2px var(--ink-40); }
+.leg-dot { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+
+.alunos-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+.aluno-cel { border: 1.5px solid var(--ink-12); border-radius: var(--radius-sm); overflow: hidden; }
+.aluno-top { font-size: 11.5px; font-weight: 800; padding: 6px 10px; }
+.aluno-num { font-size: 26px; font-weight: 900; letter-spacing: -.02em; padding: 10px 10px 0; }
+.aluno-sub { font-size: 11.5px; color: var(--ink-40); padding: 2px 10px 10px; }
+.aluno-cel-nota .aluno-num { color: var(--ink-40); }
+
+.dist-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 18px; }
+.dist-cel { min-width: 0; }
+.dist-top { font-size: 12.5px; font-weight: 800; display: flex; align-items: center; gap: 7px; margin-bottom: 4px; }
+.dist-dot { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+.dist-cel svg.histo { width: 100%; height: 120px; display: block; }
+.dist-sub { font-size: 11.5px; color: var(--ink-40); margin-top: 2px; }
+
+@media (max-width: 900px) {
+  .duo { grid-template-columns: 1fr; }
+}
+.dist-alerta { color: var(--ink-40); font-style: italic; }

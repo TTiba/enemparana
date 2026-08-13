@@ -275,13 +275,9 @@ async function renderTopEscolasNRE(nre) {
       <span class="top-esc-val">${fmt0(e.media_geral)}</span>
     </a>`;
   }).join("");
-  const linkFull = `ranking_escolas.html?nre=${encodeURIComponent(nre)}`;
-  const verTodas = escolas.length > 10
-    ? `<a class="top-esc-vermais" href="${linkFull}">
-         Ver todas as ${fmtInt(escolas.length)}+ escolas do NRE →
-       </a>`
-    : "";
-  $("#top-esc-body").innerHTML = linhas + verTodas;
+  // sem link "ver todas": a página de ranking foi substituída por "Sua
+  // Escola", que não lista escolas (ver ESTADO.md).
+  $("#top-esc-body").innerHTML = linhas;
 }
 
 async function carregarDetalhesMUN(alvo) {
@@ -466,13 +462,8 @@ async function renderTopEscolas(alvo) {
       <span class="top-esc-val">${fmt0(e.media_geral)}</span>
     </a>`;
   }).join("");
-  const linkFull = nivel === "UF" ? `ranking_escolas.html` : "";
-  const verTodas = (nivel !== "MUN" && lst.length > 10)
-    ? `<a class="top-esc-vermais" href="${linkFull}">
-         Ver todas as ${fmtInt(lst.length)}+ escolas →
-       </a>`
-    : "";
-  $("#top-esc-body").innerHTML = linhas + verTodas;
+  // idem: sem link "ver todas" desde a remoção do ranking.
+  $("#top-esc-body").innerHTML = linhas;
 }
 
 /* ============================================================ handlers == */

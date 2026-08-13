@@ -1,6 +1,6 @@
 # Estado atual — leia isto primeiro
 
-Atualizado: **2026-08-12**
+Atualizado: **2026-08-13**
 
 Arquivo curto e de manutenção obrigatória. Serve pra retomar o trabalho sem
 reconstruir contexto de memória. Detalhe e histórico ficam no `status.md`
@@ -61,7 +61,7 @@ editar `pr2/` **e** copiar para `pr2_deploy/`, senão o site não muda).
 |---|---|---|
 | Painel | `index.html` / `app.js` | KPIs, evolução, habilidades |
 | Mapa | `mapa.html` / `mapa.js` | único que usa d3/topojson |
-| Ranking | `ranking_escolas.html` / `ranking_escolas.js` | lê `top_escolas_full/UF/PR.json` |
+| Sua Escola | `escola.html` / `escola.js` | radares + distribuição; **sem ranking** |
 | Análise | `criticas.html` / `criticas.js` | heatmap hab.×ano + downloads PDF/Excel |
 | Redação | `redacao.html` / `redacao.js` | dois recortes, competências, ranking |
 | Habilidade | `habilidade.html` / `habilidade.js` | drill-down de um item |
@@ -163,6 +163,52 @@ agregados. Os números não mudaram, só os rótulos: os cartões agora são
 > `oficial` dá falso negativo — **"oficiais" não contém "oficial"** (7º
 > caractere é `i`, não `l`). Foi assim que dei a página por limpa e deixei
 > duas passarem.
+
+## Ranking virou "Sua Escola" — `escola.html` (13/08)
+
+A página de ranking foi **refeita do zero** a pedido. `ranking_escolas.html`
+e `ranking_escolas.js` foram **apagados**; entraram `pr2/escola.html` +
+`pr2/escola.js`. O menu agora diz "Sua Escola" em todas as páginas.
+
+- **A tabela de classificação saiu inteira.** Consequência: os links "Ver
+  todas as N escolas →" do `mapa.js` (painel de top-escolas, em NRE e UF)
+  ficaram sem destino e foram removidos — o top-10 do mapa continua.
+  O ranking **por redação** do `redacao.html` **não** foi tocado.
+- **Dois radares lado a lado**, comparando escola × município × NRE ×
+  Paraná: um com as 4 áreas do conhecimento, outro com as 5 competências da
+  redação (recorte 1º dia, com zeros). **Legenda clicável** liga/desliga
+  série; nunca deixa o gráfico vazio (bloqueia desligar a última).
+  Em níveis acima da escola as séries inexistentes somem da legenda em vez
+  de aparecer achatadas em zero.
+- **`Charts.radar()` e `Charts.histograma()`** são novos em `charts.js`,
+  SVG à mão como o resto (sem lib externa).
+- **Contagem de alunos por área** + a diferença 1º/2º dia rotulada como
+  abandono entre as provas.
+- **Distribuição por faixa de nota** por área, de `data/hist_nota_pr.json`.
+
+> **Duas ressalvas honestas nessa página, ambas visíveis na tela:**
+>
+> 1. **Não existe distribuição por escola.** O `hist_nota_pr.json` cobre
+>    UF, NRE e MUN — não ESC. Então o histograma mostra o nível mais fino
+>    disponível e **marca a média da escola dentro dele** ("onde minha
+>    escola cai nessa distribuição"). O `escopoHist()` já prefere
+>    `ESC/{inep}` se existir: se um dia o `build_hist_nota_pr.py` passar a
+>    emitir esse nível, a página usa sozinha, sem mudar o frontend.
+> 2. **O histograma exclui quem tirou zero** (`build_hist_nota_pr.py` filtra
+>    `nota > 0`). Medido: nas quatro áreas isso descarta 0,03–0,22% dos
+>    alunos, irrelevante; **na redação descarta 4,97%**, que são os zeros.
+>    Como o `media_red` da escola **inclui** zeros, marcar essa média sobre
+>    um histograma sem zeros compararia populações diferentes — por isso a
+>    **redação mostra a distribuição mas não recebe a marca**, e diz o
+>    porquê na legenda.
+
+Sobre o radar: a escala **não começa em zero** (numa régua 0–1000 as
+diferenças de 30–80 pontos somem). Por isso os anéis são **rotulados com o
+valor** e há nota na página — sem isso o gráfico exagera diferença, que é a
+crítica clássica ao radar de base deslocada.
+
+Testado com Playwright nos quatro níveis (UF, NRE, MUN, ESC), com toggle da
+legenda e "Limpar": zero erro de JS.
 
 ## Em aberto
 

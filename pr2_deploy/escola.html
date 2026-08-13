@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sua Escola · Painel ENEM · Paraná</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..1000&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles_pr.css">
+<meta name="robots" content="noindex, nofollow">
+<script>window.LOCK_UF = "PR"; window.LOCK_UF_NOME = "Paraná"; window.API_STATIC = 1;</script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <div class="brand">
+      <img src="brasao_pr.webp" alt="Brasão do Paraná" class="brasao-pr">
+      <span class="brand-name">Painel ENEM · <b>Paraná</b></span>
+    </div>
+    <div class="topbar-links">
+      <a href="index.html">Painel</a>
+      <a href="mapa.html">Mapa</a>
+      <a href="escola.html">Sua Escola</a>
+      <a href="criticas.html">Análise</a>
+      <a href="redacao.html">Redação</a>
+      <a href="entenda.html">Entenda os dados</a>
+      <span class="brand-by">um produto <b>Wayground</b></span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap wrap-wide">
+
+  <section class="card selector">
+    <h1>Sua Escola 🏫</h1>
+    <p class="sub">Escolha a escola e compare o desempenho dela com o
+       município, o Núcleo Regional e o Paraná.
+       <span class="sub-hist">Rede pública, ENEM 2025.</span></p>
+    <div class="tabs tabs-rede" id="tabs-rede">
+      <button class="on">Pública</button>
+    </div>
+    <div class="selects">
+      <label>Núcleo Regional
+        <select id="sel-nre"><option value="">Todos (PR inteiro)</option></select>
+      </label>
+      <label>Município
+        <select id="sel-mun"><option value="">Todos os municípios</option></select>
+      </label>
+      <label>Escola
+        <span class="combo">
+          <input id="inp-esc" type="text" autocomplete="off" disabled
+                 placeholder="Digite para buscar…">
+          <div id="combo-list" class="combo-list" hidden></div>
+        </span>
+      </label>
+      <button id="btn-limpar" class="btn-ghost" type="button">Limpar</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2 id="ent-nome" style="margin:0">Paraná</h2>
+      <span class="chip" id="ent-chip"></span>
+    </div>
+    <p class="hint" id="ent-meta" style="margin:2px 0 0"></p>
+  </section>
+
+  <section class="duo">
+    <div class="card">
+      <div class="card-head">
+        <h3>Áreas do conhecimento</h3>
+        <span class="hint">escala ENEM 0–1000</span>
+      </div>
+      <div id="radar-areas" class="radar-wrap"></div>
+      <div id="leg-areas" class="radar-leg"></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <h3>Competências da redação</h3>
+        <span class="hint">escala 0–200 · 1º dia, com zeros</span>
+      </div>
+      <div id="radar-comps" class="radar-wrap"></div>
+      <div id="leg-comps" class="radar-leg"></div>
+    </div>
+  </section>
+
+  <p class="foot-note" id="nota-radar">
+    Clique num item da legenda para incluir ou tirar do gráfico. Os anéis são
+    rotulados com o valor porque a escala <b>não começa em zero</b> — ela se
+    ajusta aos dados para que diferenças de algumas dezenas de pontos fiquem
+    visíveis. Leia as distâncias com essa ressalva.
+  </p>
+
+  <section class="card">
+    <div class="card-head">
+      <h3>Alunos que fizeram a prova</h3>
+      <span class="hint" id="alunos-sub"></span>
+    </div>
+    <div id="alunos-grid" class="alunos-grid"></div>
+    <p class="foot-note" style="margin-top:12px">
+      O ENEM tem dois dias: <b>1º dia</b> = Linguagens, Humanas e Redação;
+      <b>2º dia</b> = Natureza e Matemática. A diferença entre os dois é
+      abandono entre as provas — por isso cada área tem seu próprio total.
+    </p>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h3>Distribuição dos alunos por faixa de nota</h3>
+      <span class="hint" id="dist-escopo"></span>
+    </div>
+    <div id="dist-grid" class="dist-grid"></div>
+    <p class="foot-note" id="dist-nota" style="margin-top:12px"></p>
+  </section>
+
+  <footer class="rodape">
+    Fonte: Microdados ENEM 2025 (INEP). Concluintes com escola identificada,
+    rede pública.
+  </footer>
+</main>
+
+<script src="filtros.js"></script>
+<script src="tooltip.js"></script>
+<script src="charts.js"></script>
+<script src="escola.js"></script>
+</body>
+</html>
