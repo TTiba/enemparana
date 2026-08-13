@@ -4,7 +4,7 @@ Atualizado: **2026-08-12**
 
 Arquivo curto e de manutenção obrigatória. Serve pra retomar o trabalho sem
 reconstruir contexto de memória. Detalhe e histórico ficam no `status.md`
-(370 linhas) e no `status.md` do `painelenem`.
+e no `status.md` do `painelenem`.
 
 > Regra: ao terminar uma tanda de trabalho, atualize as seções **Onde está
 > cada coisa**, **Em aberto** e a data acima. Se um fato aqui contradiz o
@@ -52,6 +52,36 @@ derivado do nacional**. Um rebuild corrige os dois. `pr2/` é editado no repo
 `enemparana` e entra na plataforma por `rsync -a pr2/ .../plataforma/pr2/`
 (sem `--delete`).
 
+## Onde está cada coisa
+
+Fonte do painel PR em `pr2/`; o build servido é `pr2_deploy/` (commitado —
+editar `pr2/` **e** copiar para `pr2_deploy/`, senão o site não muda).
+
+| página | arquivos | observação |
+|---|---|---|
+| Painel | `index.html` / `app.js` | KPIs, evolução, habilidades |
+| Mapa | `mapa.html` / `mapa.js` | único que usa d3/topojson |
+| Ranking | `ranking_escolas.html` / `ranking_escolas.js` | lê `top_escolas_full/UF/PR.json` |
+| Análise | `criticas.html` / `criticas.js` | heatmap hab.×ano + downloads PDF/Excel |
+| Redação | `redacao.html` / `redacao.js` | dois recortes, competências, ranking |
+| Habilidade | `habilidade.html` / `habilidade.js` | drill-down de um item |
+| Entenda | `entenda.html` | metodologia |
+
+Módulos compartilhados: `filtros.js` (persistência de filtro entre páginas —
+**único ponto que lê `rede` da URL**, travado em `PUB`), `habilidades.js`,
+`competencias.js` (Matriz de Referência; usado pelo agrupamento do PDF),
+`charts.js`, `tooltip.js`, `xlsx_lite.js` (gerador de `.xlsx`, sem
+dependência externa), `styles.css` + `styles_pr.css`.
+
+Scripts que **não** passam pelo `build_db.py` (portanto seguros sob a
+decisão do D=1,7): `pipeline/build_historico_esc_pr.py`,
+`build_redacao_uf.py`, `build_hist_nota_pr.py`, `build_nre_hist.py`,
+`build_questoes_ano.py`, `build_alternativas.py`.
+
+Arquivos novos e onde precisam ser registrados: qualquer `.js`/`.html` novo
+em `pr2/` tem que entrar na lista `copiar` do `pr2/deploy_pr2.py`, senão
+some no próximo rebuild.
+
 ## Correção do D da TRI (o assunto principal)
 
 `build_db.py` calculava a 3PL com o fator `D=1,7`. Os parâmetros do INEP já
@@ -90,242 +120,49 @@ o `build_db.py`**, porque ele recalcula o `p_esp` e traria o D=1 junto sem
 pedir licença. Features novas têm que entrar por script separado que só escreva
 no que precisa — foi assim que o `build_alternativas.py` foi feito.
 
-## Escolas particulares removidas do painel (06/08)
+## O que mudou na semana de 06–12/08
 
-Decisão do cliente: o painel PR não apresenta mais rede privada — nem
-agregado, nem escola nomeada, nem por link direto. "Esconder o botão" não
-bastava: havia três vazamentos (aba "Todas as redes" misturando privada no
-agregado; filtro "Todas" do ranking listando privada por padrão,
-independente das abas T/PUB/PRIV; e `?rede=T`/`?rede=PRIV` na URL sendo
-honrado mesmo com o botão escondido). A remoção foi feita na origem do dado,
-não só na tela:
+Narrativa completa, com o porquê de cada decisão, em `status.md`
+§"Tanda 06–12/08". Aqui só o estado corrente e o que continua valendo.
 
-- `escolas/{mun}.json` e `entidade/ESC/{inep}.json`: nunca mais incluem
-  escola com `dependencia==4`. Testado com controle positivo: busca por
-  "militar" (pública) encontra normal, busca por uma escola particular
-  conhecida dá "Nenhuma escola encontrada" — o dado não existe, não é só
-  filtro de tela.
-- `historico/ESC/`: mesmo filtro na consulta SQL de
-  `pipeline/build_historico_esc_pr.py` (`AND dependencia != 4`).
-- `top_escolas_full/UF/PR.json` (ranking) e `top_escolas/{UF,MUN}/*.json`
-  (mapa): particulares fora da lista `T`; chave `PRIV` removida. Ranking foi
-  de 789 para 624 escolas.
-- `pr2/filtros.js`: `REDES = new Set(["PUB"])` — único ponto que lê `rede`
-  da URL em todas as páginas; qualquer outro valor cai no default. Fecha o
-  vazamento por link mesmo com todos os botões escondidos.
-- Botões "Todas as redes" e "Privadas" saíram de index/mapa/criticas;
-  "Privada" saiu do filtro de dependência do ranking.
+**Escolas particulares fora do painel** (pedido do cliente, 06/08). Removidas
+na origem do dado, não na tela: `escolas/`, `entidade/ESC/`,
+`historico/ESC/`, `top_escolas*`. Ranking foi de 789 para 624 escolas.
+`pr2/filtros.js` trava `REDES` em `PUB` — fecha o vazamento por
+`?rede=T`/`?rede=PRIV` na URL em todas as páginas de uma vez.
 
-**Residual documentado, não tocado por decisão de escopo:** `entidade/UF/`,
-`entidade/MUN/`, `historico/UF`, `historico/MUN`, `refs/PR.json`,
-`data/nre_agg.json`, `data/hist_nota_pr.json` continuam com as chaves `T` e
-`PRIV` — são agregados do estado/município, não escola nomeada, e o app
-nunca os busca depois da remoção dos botões + filtros.js travado. Continuam
-tecnicamente buscáveis batendo direto na URL do JSON. Se quiser blindagem
-total até esse nível, é um trabalho separado (tirar/igualar essas chaves em
-cada arquivo) — não fiz porque é maior, mais arriscado de testar sem
-rebuild completo, e não expõe nome de escola nenhuma.
+> **Residual vivo, decisão de escopo:** `entidade/UF/`, `entidade/MUN/`,
+> `historico/UF`, `historico/MUN`, `refs/PR.json`, `data/nre_agg.json` e
+> `data/hist_nota_pr.json` ainda têm as chaves `T` e `PRIV`. São agregados
+> de estado/município, não escola nomeada, e o app não os busca mais — mas
+> continuam acessíveis batendo direto na URL do JSON. Blindar até esse nível
+> é trabalho à parte. `BR.json` não foi tocado (é referência nacional).
 
-BR.json (referência nacional) não foi tocado — fora do escopo (não é
-particular do Paraná).
+**Redação em página própria** (06/08): `redacao.html` + `redacao.js`, dois
+recortes lado a lado, competências C1–C5 e ranking por `media_red`. O
+recorte "sem zeros" **só existe em nível UF**; abaixo disso a página degrada
+com aviso explícito. Como cobrir os demais níveis: item 7 de *Em aberto*.
 
-## Redação ganhou aba própria — `redacao.html` (06/08)
+**Downloads na Análise** (07/08): "Baixar PDF" (`window.print()` + `@media
+print`, agrupado por área e competência via `competencias.js`) e "Baixar
+Excel" (`.xlsx` de verdade, via `pr2/xlsx_lite.js`, sem dependência
+externa). A tabela em tela não mudou — só o impresso é agrupado.
 
-A decisão de 02/08 (remover a redação de todo canto) **mudou**: em vez de
-ficar fora do painel, ganhou página própria — `pr2/redacao.html` +
-`pr2/redacao.js`, linkada no menu de todas as páginas com nav (index, mapa,
-criticas, ranking_escolas). Conteúdo:
+**Auditoria de atribuição ao INEP** (12/08): saíram do `redacao.html` quatro
+afirmações que davam a entender que o INEP calculou ou divulgou nossos
+agregados. Os números não mudaram, só os rótulos: os cartões agora são
+"1º dia, com zeros" e "2 dias, sem zeros".
 
-- **Dois números lado a lado**, cada um com o rótulo explícito no próprio
-  cartão (`.kpi`, reaproveitado de `#kpis`): "Redação · oficial (Inep)" —
-  presença no 1º dia, zero conta como nota — e "Redação · 2 dias, sem
-  zeros" — só quem fez as duas provas e não zerou. Nenhum dos dois some ou
-  fica sem legenda, ao contrário do que a versão de 31/07 fazia no painel
-  geral.
-- **Filtro NRE/município/escola**, igual ao do `index.html` (mesma cópia
-  adaptada do padrão — este repo não compartilha módulo de filtro entre
-  páginas, ver `habilidade.js`/`criticas.js`). Sem seletor de rede: só
-  pública existe (ver decisão de escolas particulares acima).
-- **Competências C1–C5**: valores oficiais, disponíveis em qualquer nível
-  (UF/NRE/MUN/ESC já trazem `media_comp1..5`).
-- **Ranking por redação**: cópia de `ranking_escolas.js` ordenada por
-  `media_red`, consumindo o mesmo `api/top_escolas_full/UF/PR.json` (já sem
-  particulares). Filtro por NRE e por dependência (sem "Privada", mesmo
-  motivo).
-- **O recorte "sem zeros" só existe hoje no nível UF** — `api/redacao/`
-  (via `pipeline/build_redacao_uf.py`, que `deploy_pr2.py` agora chama a
-  cada build, depois de copiar `entidade/UF/PR.json`) cobre só o estado.
-  Ao filtrar por NRE/município/escola, o cartão degrada graciosamente:
-  mostra "indisponível para esta seleção" em vez de número errado ou
-  ausente sem explicação.
+> **Critério, pra não errar de novo:** "oficial" descrevendo **insumo que o
+> INEP publica** está certo — gabarito, parâmetros TRI a/b/c, Matriz de
+> Referência, cadernos de prova, "Fonte: Microdados (INEP)". Está errado
+> quando qualifica **agregado que nós calculamos**. As outras páginas foram
+> auditadas com esse critério e estão corretas.
 
-**Para cobrir município e escola no recorte sem zeros**, roda
-`pipeline/build_redacao.py --deploy pr2_deploy --uf PR` (no `painelenem`,
-precisa dos microdados) **depois** do `deploy_pr2.py`, nunca antes — o
-`deploy_pr2.py` regenera `api/redacao/index.json` do zero a cada build
-(só UF) e sobrescreveria a versão fina. Depois de rodar, o cartão passa a
-funcionar em qualquer nível sem tocar no frontend.
-
-Testado com Playwright: UF (543,1 oficial / 576,1 sem zeros, bate com os
-números já registrados abaixo), município (oficial funciona, sem zeros
-degrada), escola (oficial funciona), busca e ordenação do ranking. Zero
-erro de JS; nav consistente nas 4 páginas.
-
-### Correção 12/08 — duas afirmações sem lastro no card "Por que dois números"
-
-Um usuário perguntou de onde saíam. Não saíam de lugar nenhum; foram
-escritas por mim como se fossem propriedade medida do dado. **Removidas:**
-
-1. *"— a mesma base que os relatórios oficiais usam"*. Afirmação sobre a
-   metodologia de divulgação do INEP, sem nenhuma fonte consultada. Pior:
-   provavelmente falsa. Nossa base filtra `CO_ESCOLA IS NOT NULL`, ou seja,
-   só candidato com escola identificada — mais estreita que a base de
-   divulgação do INEP, que não exige vínculo com escola.
-2. *"(por fuga ao tema, anulação ou folha em branco)"*. Separar motivo de
-   zero exige `TP_STATUS_REDACAO`, que o `build_db.py` lê para dentro da
-   tabela (linha 108) e **nunca usa em cálculo** — está listado como aberto
-   no item 4 de *Em aberto*. A lista ainda estava incompleta (o edital tem
-   cópia, texto insuficiente, não atendimento ao tipo textual).
-
-Ficou o que é medido: base = presentes no 1º dia (`n_lc = n_ch = n_red`,
-54.062 na pública — os três batem exatamente) e zero entra como 0, não como
-ausência (é o que produz os 21,5 pontos do recorte sem zeros).
-
-**Resolvido no mesmo dia:** a palavra "oficial" saiu de toda a página, a
-pedido — ela passava a ideia de que o INEP tinha calculado o número, quando
-na verdade ele é calculado aqui a partir do microdado. O rótulo virou
-**"1º dia, com zeros"**, que descreve a população e fica paralelo ao
-"2 dias, sem zeros" do outro cartão. Trocado em 6 pontos: cartão
-(`kpi-top`), cabeçalho da coluna do ranking, footnote do ranking, título do
-parágrafo e mais duas menções no corpo do texto ("o número oficial" →
-"o número do 1º dia, que é a leitura mais comum").
-
-No `redacao.js`, `alvoOficial()` virou `alvoDia1()` e os comentários
-acompanharam, pra não sobrar a palavra em lugar nenhum. Há um aviso no topo
-do arquivo dizendo explicitamente pra não voltar a rotular como
-"oficial (Inep)" — foi o que gerou a confusão.
-
-Testado com Playwright: cartões em 543,1 e 576,1 (batem com os números já
-registrados acima), 5 competências, 624 linhas no ranking, zero erro de JS.
-
-**Segunda passada, no mesmo dia** — o usuário achou mais duas, que eu tinha
-dado como limpas. Minha varredura buscou `oficial` e concluiu "nada no
-HTML"; só que **"oficiais" não contém a substring "oficial"** (o 7º
-caractere é `i`, não `l`). Verificar ausência com padrão estreito demais dá
-falso negativo. Para varrer isto, use o radical: `grep -i "ofici\|divulg"`.
-
-Removidas: o subtítulo da página (*"o número que o **Inep divulga**"* →
-descrição da população) e o hint das competências (*"valores **oficiais
-(Inep)**"* → *"média por competência · escala 0–200"*). As notas de cada
-competência são atribuídas pelo INEP, mas a **média** é nossa.
-
-**Critério, pra não errar de novo:** "oficial" descrevendo **insumo que o
-INEP publica** está certo — gabarito, parâmetros TRI a/b/c, Matriz de
-Referência, cadernos de prova, e o "Fonte: Microdados (INEP)" dos rodapés.
-Está errado quando qualifica **agregado que nós calculamos**. Auditei as
-outras páginas com esse critério: `criticas.html`, `entenda.html`,
-`habilidade.html` e `index.html` usam a palavra só no sentido correto —
-nada a mudar lá.
-
-## Análise ganhou botão "Baixar PDF" (07/08)
-
-`criticas.html` (página Análise) tem um botão **⬇ Baixar PDF** no card de
-Filtros, ao lado do resumo. Não gera arquivo em JS — chama
-`window.print()`; o navegador abre o diálogo nativo e o usuário escolhe
-"Salvar como PDF" no destino. Zero dependência externa, e a tabela inteira
-já está no DOM sem paginação/virtualização, então o que sai no PDF é
-exatamente o filtro em tela (NRE/município/escola, área, anos ativos,
-ordenação corrente).
-
-`@media print` em `styles.css`: esconde nav/filtros interativos/botão do
-PDF, tira o `overflow` do `.tbl-scroll`, poe a página em A4 paisagem,
-repete o `<thead>` em cada página (`display: table-header-group`) e evita
-quebrar uma linha no meio (`page-break-inside: avoid`). Um parágrafo
-`.print-only` (`#crit-print-meta`, invisível na tela) mostra o resumo
-completo do filtro + timestamp — só existe no papel, porque a tela já tem
-o `#crit-alvo` (que o print, por sua vez, esconde pra não duplicar).
-
-De caminho, `rotuloAlvo()` passou a mostrar o nome do município/escola em
-vez do código/INEP cru (lê o texto já selecionado em `#sel-mun`/`#inp-esc`,
-sem chamada nova) — bug pré-existente que ficava mais visível agora que o
-nome vai pro cabeçalho do PDF.
-
-Testado com Playwright gerando PDF de verdade (`page.pdf()`, A4 paisagem):
-120 habilidades sem filtro vira 10 páginas, cabeçalho repete em todas,
-nenhuma linha cortada no meio, última página termina limpa. Testado nos
-três níveis (UF, município, escola) e com filtro de área/anos.
-
-Só existe no `enemparana` — não replicado ainda no `painelenem` (painel
-nacional). Se quiser lá também, é a mesma receita em `web/criticas.js` +
-`web/styles.css`.
-
-## PDF da Análise agora agrupa por área/competência (07/08)
-
-Feedback direto: a tabela plana (120 linhas) "ficou mto longo" no PDF.
-A tela continua **idêntica** — tabela plana, ordenável por qualquer coluna,
-sem nenhuma mudança visual. Só o conteúdo impresso mudou.
-
-`criticas.js`: extraí as células/linha (`cel`, `celEsp`, `celAno`,
-`celDelta`, `linhaHtml`) e a ordenação (`ordenarLinhas`) pra funções de
-topo de arquivo — antes viviam inline dentro do único `.map()` do
-`render()`, duplicadas. `montarPrintAgrupado(linhas)` usa essas mesmas
-funções: separa por área (`AREA_ORDER`, ou só a área filtrada), e dentro de
-cada área por competência usando `window.COMPETENCIAS` (de
-`competencias.js` — já estava carregado na página mas sem uso até agora).
-Cada grupo de competência sai como uma mini-tabela própria, reusando o
-`<thead>` real via `outerHTML` (mesmo cabeçalho, mesmas colunas).
-
-HTML: novo `<div id="crit-print-agrupado" class="print-only">` dentro do
-card da tabela, populado a cada `render()`. CSS: no `@media print`,
-`#crit-tabela` (a plana) fica `display:none`, e o agrupado ganha estilo
-próprio (título de área com borda colorida por área, subtítulo de
-competência, `page-break-inside: avoid` nas mini-tabelas e
-`page-break-after: avoid` nos títulos pra não sobrar cabeçalho órfão no
-fim da página).
-
-Testado com Playwright (`page.pdf()` real + render em PNG via pymupdf):
-município com 120 habilidades → 15 páginas (mais que as 10 da versão
-plana, porque cada competência não quebra no meio — algumas páginas
-terminam com espaço em branco), 4 áreas e 30 competências aparecem, total
-de linhas bate 120=120 (nada se perde no agrupamento). Testado também só
-com área (MT): 1 título de área, 7 competências, 30 linhas. Sem erro de
-JS.
-
-Residual: o agrupamento aumenta a contagem de páginas em troca de
-organização — é o trade-off esperado de não fragmentar uma competência
-entre páginas. Não replicado no `painelenem` (mesma nota do item acima).
-
-## Análise ganhou botão "Baixar Excel" (07/08)
-
-Ao lado do "Baixar PDF" (renomeei a classe CSS `.btn-pdf` → `.btn-download`,
-compartilhada pelos dois botões). Baixa a tabela plana — mesmo filtro,
-mesma ordenação da tela — sem passar pelo `window.print()`.
-
-Primeira versão gerava `.csv`; troquei por `.xlsx` de verdade a pedido
-("o CSV pouca gente sabe trabalhar") — arquivo `xlsx_lite.js` (novo,
-`pr2/`) monta o zip/OOXML na mão: zip em modo "store" (sem compressão, pra
-não ter que reimplementar DEFLATE — CRC32 + estrutura de zip local/central
-directory em ~90 linhas) + XML mínimo de planilha (uma aba, cabeçalho em
-negrito, larguras de coluna fixas, primeira linha congelada). Zero
-dependência externa, mesmo espírito do resto do site. Precisa estar na
-lista `copiar` do `deploy_pr2.py` (adicionei).
-
-Colunas de percentual saem como número puro (sem "%") pra continuar
-somável/filtrável na planilha — a unidade fica só no cabeçalho da coluna
-("2021 (%)", "Δ vs esperado (pp)"). Nome do arquivo usa o alvo do filtro
-(`rotuloAlvo()`) fatiado em slug, ex.:
-`analise_habilidades_curitiba_rede_publica.xlsx`. Reaproveita as mesmas
-linhas computadas pelo `render()` (`ultimasLinhas`, guardada a cada
-render) — nenhuma lógica de agregação duplicada.
-
-Testado com Playwright (`page.waitForEvent('download')`) + `openpyxl` pra
-validar de verdade a estrutura OOXML (não só que o zip abre): município
-com 120 habilidades → planilha 121 linhas × 11 colunas, cabeçalho em
-negrito, `A1:K121`, congelamento em `A2`, larguras aplicadas, sem warning
-de style — abre limpo, sem diálogo de "reparo" do Excel.
-
-Só existe no `enemparana` — não replicado no `painelenem` (mesma nota dos
-itens de PDF acima).
+> **Ao varrer isso, use o radical:** `grep -i "ofici\|divulg"`. Buscar
+> `oficial` dá falso negativo — **"oficiais" não contém "oficial"** (7º
+> caractere é `i`, não `l`). Foi assim que dei a página por limpa e deixei
+> duas passarem.
 
 ## Em aberto
 
@@ -388,15 +225,39 @@ itens de PDF acima).
    o risco de "republicar versão velha" que travava este item deixou de
    existir: `main` e produção passaram a ser a mesma coisa. Manter assim —
    se voltar a publicar só pelo manual, a divergência volta.
+7. **Redação sem zeros por município/escola.** Hoje só existe em nível UF; o
+   frontend já está pronto e degrada com aviso enquanto não houver dado.
+   Falta rodar, na máquina com microdados:
+   `python3 pipeline/build_redacao.py --deploy pr2_deploy --uf PR`,
+   **depois** do `deploy_pr2.py` (ele regenera o `index.json` só com UF e
+   sobrescreveria a versão fina).
+8. **Estratificação: integrais, parceiras e cívico-militares.** *Bloqueado
+   por dado que não existe.* Conferido: os microdados do ENEM **não** trazem
+   essa classificação. Depende de a SEED mandar a lista de INEPs por
+   categoria; com ela, é um `join` e nada mais.
+9. **`TP_STATUS_REDACAO` é lido e nunca usado** (`build_db.py:108`). É o que
+   permitiria separar motivo de zero (fuga ao tema × folha em branco ×
+   anulação) — hoje o painel não afirma nada sobre isso, justamente por
+   falta desse cálculo. Tem que ser script separado: rodar o `build_db.py`
+   traz o D=1 junto, contra a decisão de 31/07.
+10. **PDF/Excel e a página de Redação só existem no Paraná.** Não foram
+    replicados no `painelenem`. Se quiser lá, é a mesma receita em
+    `web/criticas.js` + `web/styles.css` (mais o `xlsx_lite.js`).
 
-## PRs abertos
+## PRs
 
-- `enemparana` #1 — título sem 2025, questões por habilidade, correções de
-  front. Zero arquivo de dado alterado.
+- `enemparana` **#1 — FECHADO em 12/08**. Não foi fechado pelo botão de
+  merge: publiquei com fast-forward direto (`git push origin
+  claude/enem-canal-bug-5g78e7:main`) e o GitHub fechou o PR sozinho ao ver
+  os commits na `main`. A `main` saiu de `f639294` (26/07) e recebeu 43
+  commits de uma vez.
 - `painelenem` #2 — replicação do PR v2 no nacional + correção do D no
   código. Zero arquivo de dado alterado (o dado vem do rebuild, à parte).
+  **Continua aberto**, mas não foi verificado nesta sessão — o acesso do
+  ambiente estava limitado ao repo `enemparana`. Confirme antes de agir.
 
-Nada foi mergeado na `main` de nenhum dos dois.
+O branch de trabalho segue sendo `claude/enem-canal-bug-5g78e7`, agora no
+mesmo commit da `main`.
 
 ## Comandos que se usa toda hora
 

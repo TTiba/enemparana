@@ -18,12 +18,26 @@ e adiciona uma camada NRE (Núcleo Regional de Educação) em todas as features.
 
 ## URLs em produção
 
-- **Primário (Netlify):** https://enemparana.netlify.app · deploy manual
-  via `netlify deploy --prod --dir=pr2_deploy` (do repo `enemparana`).
+- **Primário (Netlify):** https://enemparana.netlify.app — **dois caminhos
+  de publicação, os dois válidos:** (a) ligado ao repo, produção = branch
+  `main`, deploy automático a cada push; (b) manual, `netlify deploy --prod
+  --dir=pr2_deploy`.
 - **Secundário (Cloudflare Workers):** https://enemparana.pages.dev
   *(em configuração — ver §"Cloudflare setup" e `CLOUDFLARE-SETUP.md`)*
-- **Fonte GitHub:** https://github.com/TTiba/enemparana (auto-deploy do
-  Cloudflare a cada push em `main`).
+- **Fonte GitHub:** https://github.com/TTiba/enemparana (push em `main`
+  dispara Netlify **e** Cloudflare).
+
+> **Corrigido em 12/08.** Aqui (e no `CLAUDE.md`) estava escrito que o
+> Netlify do Paraná era só manual, "não ligado ao git". É ligado. Como na
+> prática só o deploy manual vinha sendo usado, a `main` ficou parada em
+> `f639294` (26/07) enquanto o ar seguia adiante — e daí veio a confusão.
+> **Duas armadilhas que decorrem disso:** (1) o card *"Production:
+> main@sha"* do painel do Netlify mostra o último deploy **vindo do git**,
+> não o que está no ar, porque deploy manual publica sem se amarrar a
+> commit; (2) por isso não dá para inferir o conteúdo de produção lendo a
+> `main`. Para saber o que está no ar, abra o site. Em 12/08 a `main` foi
+> posta em dia e produção passou a sair dela; se voltar a publicar só pelo
+> manual, a divergência volta.
 
 ## Estrutura
 
@@ -257,6 +271,69 @@ não é a média bruta da UF/BR.
   `styles.css` e `styles_pr.css`. A página fica com cobertura no ENEM →
   evolução → questões da prova.
 
+## Tanda 06–12/08 — particulares, redação, downloads e uma auditoria de texto
+
+Resumo; o estado corrente de cada item está no `ESTADO.md`.
+
+**Escolas particulares fora do painel (06/08).** Pedido do cliente. A
+suposição inicial ("esconder o botão resolve") não bastava — havia três
+vazamentos: a aba "Todas as redes" misturava privada no agregado, o filtro
+de dependência do ranking listava privada por padrão independente das abas,
+e `?rede=T`/`?rede=PRIV` na URL era honrado com o botão escondido. A
+remoção foi na origem do dado (`escolas/`, `entidade/ESC/`, `historico/ESC/`,
+`top_escolas*`), não na tela, e `pr2/filtros.js` travou `REDES` em `PUB` —
+único ponto que lê `rede` da URL em todas as páginas. Ranking caiu de 789
+para 624 escolas. Testado com **controle positivo**: buscar "militar"
+(pública) acha; buscar uma particular conhecida dá "Nenhuma escola
+encontrada", provando que o dado sumiu e não é filtro de tela.
+
+**Redação em página própria (06/08).** `redacao.html` + `redacao.js`, dois
+números lado a lado, competências C1–C5 e ranking por `media_red`. O
+recorte "sem zeros" só existe em nível UF; abaixo disso degrada com aviso
+explícito em vez de número errado.
+
+**Downloads na Análise (07/08).** "Baixar PDF" via `window.print()` + bloco
+`@media print` (sem lib externa; a tabela já está inteira no DOM, então o
+PDF sai com o filtro exato da tela). Depois o PDF passou a **agrupar por
+área e competência** usando `competencias.js`, que estava carregado na
+página e sem uso — a tela continua com a tabela plana e ordenável, só o
+impresso muda. E "Baixar Excel", que gera `.xlsx` de verdade via
+`pr2/xlsx_lite.js` — gerador mínimo de OOXML escrito à mão (zip em modo
+"store" pra não precisar de DEFLATE), sem dependência externa. Validado com
+`openpyxl`, não só "o zip abre".
+
+**Bugs pré-existentes achados de passagem.** (1) Em `app.js`, o handler de
+`historico_br` estava **depois** do caminho genérico de entidade no `api()`,
+que casava primeiro e devolvia `{erro}` — a linha "Brasil" nunca renderizava
+no gráfico de Evolução. (2) `rotuloAlvo()` em `criticas.js` mostrava código
+cru em vez do nome do município/escola.
+
+**Auditoria de atribuição ao INEP (12/08).** Um usuário perguntou de onde
+saía a frase "a mesma base que os relatórios oficiais usam". Não saía de
+lugar nenhum. Removidas quatro afirmações do `redacao.html` que davam a
+entender que o INEP calculou ou divulgou nossos agregados: aquela frase, a
+enumeração de motivos de zero ("fuga ao tema, anulação ou folha em branco"
+— exigiria `TP_STATUS_REDACAO`, que o `build_db.py` lê e nunca usa), o
+rótulo "oficial (Inep)" dos cartões, o subtítulo "o número que o Inep
+divulga" e o hint "valores oficiais (Inep)" das competências.
+
+> **Critério que ficou:** "oficial" descrevendo **insumo que o INEP
+> publica** está certo — gabarito, parâmetros TRI a/b/c, Matriz de
+> Referência, cadernos de prova, "Fonte: Microdados (INEP)". Está errado
+> quando qualifica **agregado que nós calculamos**. `criticas.html`,
+> `entenda.html`, `habilidade.html` e `index.html` foram auditados com esse
+> critério e usam a palavra só no sentido correto.
+
+> **Armadilha de método:** a primeira varredura buscou `oficial` e deu a
+> página como limpa — mas **"oficiais" não contém a substring "oficial"**
+> (7º caractere é `i`, não `l`). Verificar ausência com padrão estreito dá
+> falso negativo. Use o radical: `grep -i "ofici\|divulg"`.
+
+**Publicação (12/08).** A `main` estava em `f639294` (26/07), 43 commits
+atrás. Fast-forward do branch para a `main` (`git push origin
+claude/enem-canal-bug-5g78e7:main`), que atualizou o GitHub e disparou o
+deploy. `main` e produção coincidem de novo.
+
 ## Pontos de atenção
 
 - **hist_nota MUN não existe no banco nacional** (só BR/UF). Por isso o
@@ -352,7 +429,22 @@ Continua valendo copiar as imagens pro `deploy/` nacional se quiser que o
   recortaria um `::after`). Mantém `aria-label` pra leitor de tela e funciona
   no foco por teclado. Verificado por screenshot.
 - [ ] Configurar site Cloudflare terminando o setup no dashboard (repo já tem
-  `wrangler.toml`; falta clicar Deploy).
+  `wrangler.toml`; falta clicar Deploy). Atenção: com a `main` em dia desde
+  12/08, o push nela dispara Netlify e Cloudflare juntos.
+- [ ] **Redação sem zeros por município/escola.** Hoje o recorte só existe
+  em nível UF. Precisa rodar, na máquina com microdados:
+  `python3 pipeline/build_redacao.py --deploy pr2_deploy --uf PR` —
+  **depois** do `deploy_pr2.py`, nunca antes, porque ele regenera
+  `api/redacao/index.json` do zero (só UF) e sobrescreveria a versão fina.
+  Frontend já está pronto e degrada sozinho enquanto não roda.
+- [ ] **Estratificação por escolas integrais / parceiras / cívico-militares.**
+  Bloqueado: os microdados do ENEM **não** têm essa classificação (conferido
+  — não existe coluna). Depende de a SEED fornecer a lista de INEPs por
+  categoria; aí é um `join` simples.
+- [ ] **`TP_STATUS_REDACAO` é lido e nunca usado** (`build_db.py:108`). É o
+  que permitiria separar motivo de zero (fuga ao tema × folha em branco ×
+  anulação). Tem que ser script separado: rodar o `build_db.py` traria o
+  D=1 junto, contra a decisão de 31/07.
 - [ ] Considerar filtro NRE na página de priorização.
 - [ ] Rodar `build_hist_nota_pr.py` para os outros anos (2021-2024) se
   quiser histogramas históricos por NRE/MUN.
