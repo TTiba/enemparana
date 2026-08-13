@@ -1,4 +1,4 @@
-/* Painel ENEM 2021–2025 — Wayground · variante Paraná (pr2) -----------------
+/* Microdados ENEM 2021–2025 — Wayground · variante Paraná (pr2) -----------------
  * Diferenças vs. web/app.js:
  *   - LOCK_UF = "PR" (fixo, sem dropdown de UF)
  *   - state.rede default = "PUB"

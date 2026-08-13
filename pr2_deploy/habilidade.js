@@ -36,7 +36,7 @@ const habTag = `H${h}`;
 
 const comp = window.HAB_TO_COMP?.[area]?.[h];
 
-document.title = `${area} · H${h} · Painel ENEM`;
+document.title = `${area} · H${h} · Microdados ENEM`;
 document.getElementById("hab-banda").style.background = info.cor;
 document.getElementById("hab-area").textContent = info.nome;
 document.getElementById("hab-comp").textContent = comp
