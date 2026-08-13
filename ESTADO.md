@@ -17,7 +17,7 @@ e no `status.md` do `painelenem`.
 | | Paraná | Nacional |
 |---|---|---|
 | repo | `TTiba/enemparana` | `TTiba/painelenem` |
-| clone local | `~/Documents/enemparana` | `~/Documents/Microdados ENEM/plataforma` |
+| clone local | `~/dev/enemparana` | `~/Documents/Microdados ENEM/plataforma` *(não conferido)* |
 | source | `pr2/` | `web/` |
 | build servido | `pr2_deploy/` (commitado) | `deploy/` (commitado) |
 | produção | https://enemparana.netlify.app | https://microdadosenem.netlify.app |
@@ -320,7 +320,7 @@ python3 pipeline/verifica_calibracao.py pr2_deploy
 python3 pipeline/diag_deploy.py deploy pr2_deploy
 
 # levar edições de pr2/ do repo enemparana pra plataforma
-rsync -a ~/Documents/enemparana/pr2/ ~/Documents/Microdados\ ENEM/plataforma/pr2/
+rsync -a ~/dev/enemparana/pr2/ ~/Documents/Microdados\ ENEM/plataforma/pr2/
 
 # servir local
 cd pr2_deploy && python3 -m http.server 9000

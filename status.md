@@ -6,13 +6,20 @@ nova sessão de trabalho.
 ## O que é
 
 Variante especializada do [Painel ENEM Nacional](https://microdadosenem.netlify.app)
-focada no Paraná. Herda **todas** as features do painel nacional (série
-histórica 2021–2025, sparklines, ranking de escolas, análise de habilidades)
-e adiciona uma camada NRE (Núcleo Regional de Educação) em todas as features.
+focada no Paraná. Herda a maior parte das features do painel nacional (série
+histórica 2021–2025, sparklines, análise de habilidades) e adiciona uma
+camada NRE (Núcleo Regional de Educação) em todas elas. Já divergiu do
+nacional em três pontos: só rede pública, página própria de redação e
+"Sua Escola" no lugar do ranking.
 
-- **Rede default**: pública (permite alternar pra privada ou todas).
+- **Rede**: **somente pública.** Não há como alternar — as escolas privadas
+  foram removidas do dado, não só da tela (06/08, pedido do cliente).
+- **Ranking de escolas**: **não existe mais.** A página virou "Sua Escola"
+  (13/08), com radares comparativos no lugar da tabela. O ranking *por
+  redação*, dentro de `redacao.html`, continua.
 - **Locked em UF=PR**: não permite trocar de estado.
-- **32 NREs**, **399 municípios**, **~2.085 escolas do PR**.
+- **32 NREs**, **399 municípios**, **~1.640 escolas públicas do PR**
+  (eram ~2.085 antes da remoção das privadas).
 - **Mapa NRE→Município**: nível 1 mostra os 32 NREs; clique num NRE abre os
   municípios daquele NRE; clique num município mostra detalhes.
 
@@ -91,7 +98,7 @@ python3 pr2/deploy_pr2.py                 # ~1 min · gera 5.691 arquivos, 141 M
                                           # (chama build_historico_esc_pr.py ao final)
 
 # 2. no repo enemparana/:
-cd ~/Documents/enemparana
+cd ~/dev/enemparana
 rsync -a --delete ~/Documents/Microdados\ ENEM/plataforma/pr2/       pr2/
 rsync -a --delete ~/Documents/Microdados\ ENEM/plataforma/pr2_deploy/ pr2_deploy/
 git add -A && git commit -m "..." && git push   # dispara Cloudflare
