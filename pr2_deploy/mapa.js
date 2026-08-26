@@ -6,8 +6,11 @@
  *                Dados dos municípios vêm de api/municipios/PR.json[rede],
  *                cross-ref pelo NRE_TO_MUNS.
  * Nível 3 (MUN individual): só o painel lateral muda — carrega KPIs +
- *                histograma + top escolas do município. O mapa permanece
- *                no nível 2 destacando o município. */
+ *                histograma do município. O mapa permanece no nível 2
+ *                destacando o município.
+ *
+ * O card "Top escolas" foi removido a pedido (13/08): o painel não compara
+ * escolas entre si em lugar nenhum desde que o ranking saiu. */
 
 const LOCK_UF = window.LOCK_UF || "PR";
 const LOCK_UF_NOME = window.LOCK_UF_NOME || "Paraná";
@@ -215,7 +218,6 @@ async function carregarDetalhesEstado() {
     $("#det-titulo").textContent = LOCK_UF_NOME;
     $("#det-kpis").innerHTML = `<div class="skeleton">Sem dados na ${REDE_TXT()}.</div>`;
     $("#card-hist").hidden = true;
-    $("#top-esc-body").innerHTML = "";
     return;
   }
   $("#det-titulo").textContent = LOCK_UF_NOME;
@@ -226,7 +228,6 @@ async function carregarDetalhesEstado() {
   const bloco = ent?.[rede];
   await renderHistograma(bloco?.hist_nota, LOCK_UF_NOME,
     { nivel: "UF", chave: LOCK_UF, nome: LOCK_UF_NOME });
-  await renderTopEscolas({ nivel: "UF", chave: LOCK_UF, nome: LOCK_UF_NOME });
 }
 
 async function carregarDetalhesNRE(nre) {
@@ -236,49 +237,14 @@ async function carregarDetalhesNRE(nre) {
   if (!cel) {
     $("#det-kpis").innerHTML = `<div class="skeleton">Sem dados na ${REDE_TXT()}.</div>`;
     $("#card-hist").hidden = true;
-    $("#top-esc-body").innerHTML = "";
     return;
   }
   renderKpis({ ...cel, nivel: "NRE", chave: nre, nome: `NRE ${nre}` }, "NRE", nre);
   const histNRE = HIST_NOTA?.por_rede?.[rede]?.[`NRE/${nre}`] || null;
   await renderHistograma(histNRE, `NRE ${nre}`,
     { nivel: "NRE", chave: nre, nome: `NRE ${nre}` });
-  await renderTopEscolasNRE(nre);
 }
 
-async function renderTopEscolasNRE(nre) {
-  $("#top-esc-titulo").textContent = `Top escolas · NRE ${nre}`;
-  $("#top-esc-body").innerHTML =
-    `<div class="skeleton" style="padding:12px">Carregando…</div>`;
-  const cds = NRE_TO_MUNS[nre] || [];
-  const listas = await Promise.all(cds.map((cd) =>
-    j(`api/top_escolas/MUN/${cd}.json`).then((d) => (d && d[rede]) || [])));
-  const escolas = listas.flat()
-    .filter((e) => e && e.media_geral != null)
-    .sort((a, b) => b.media_geral - a.media_geral);
-  if (!escolas.length) {
-    $("#top-esc-body").innerHTML =
-      `<div class="skeleton" style="padding:12px">Nenhuma escola na ${REDE_TXT()}.</div>`;
-    return;
-  }
-  const linhas = escolas.slice(0, 10).map((e, i) => {
-    const rot = e.nome || `Escola INEP ${e.chave}`;
-    const dep = e.dependencia_nome ? ` · ${e.dependencia_nome}` : "";
-    const loc = e.municipio ? ` · ${e.municipio}` : "";
-    return `<a class="top-esc-row"
-              href="index.html?mun=${e.co_municipio || ""}&esc=${e.chave}"
-              title="${rot}${dep}${loc}">
-      <span class="rank-pos">${i + 1}</span>
-      <span class="top-esc-nome">
-        ${rot}<small>${dep}${loc} · ${fmtInt(e.n_lc != null ? e.n_lc : e.n_participantes)} fizeram a prova</small>
-      </span>
-      <span class="top-esc-val">${fmt0(e.media_geral)}</span>
-    </a>`;
-  }).join("");
-  // sem link "ver todas": a página de ranking foi substituída por "Sua
-  // Escola", que não lista escolas (ver ESTADO.md).
-  $("#top-esc-body").innerHTML = linhas;
-}
 
 async function carregarDetalhesMUN(alvo) {
   try {
@@ -287,13 +253,11 @@ async function carregarDetalhesMUN(alvo) {
     $("#det-sub").textContent = REDE_TXT();
     $("#det-kpis").innerHTML = `<div class="skeleton">Carregando…</div>`;
     $("#card-hist").hidden = true;
-    $("#top-esc-body").innerHTML =
       `<div class="skeleton" style="padding:12px">Carregando…</div>`;
 
     const ent = await j(`api/entidade/${nivel}/${chave}.json`);
     if (!ent) {
       $("#det-kpis").innerHTML = `<div class="skeleton">Sem dados.</div>`;
-      $("#top-esc-body").innerHTML = "";
       return;
     }
     const bloco = ent[rede];
@@ -301,7 +265,6 @@ async function carregarDetalhesMUN(alvo) {
     if (!alvoResumo) {
       $("#det-kpis").innerHTML =
         `<div class="skeleton">Sem dados na ${REDE_TXT()}.</div>`;
-      $("#top-esc-body").innerHTML = "";
       return;
     }
     renderKpis(alvoResumo, nivel, chave);
@@ -310,12 +273,10 @@ async function carregarDetalhesMUN(alvo) {
       || HIST_NOTA?.por_rede?.[rede]?.[`MUN/${chave}`]
       || null;
     await renderHistograma(histMun, nome, alvo);
-    await renderTopEscolas(alvo);
   } catch (err) {
     console.error("carregarDetalhesMUN:", err);
     $("#det-kpis").innerHTML =
       `<div class="skeleton" style="color:var(--red-bad)">Erro: ${err.message}</div>`;
-    $("#top-esc-body").innerHTML = "";
   }
 }
 
@@ -430,41 +391,6 @@ function desenharHistograma(dist, distRef, nomeAlvo) {
     </div>`;
 }
 
-/* -------- top escolas --------------------------------------------------- */
-async function renderTopEscolas(alvo) {
-  const { nivel, chave, nome } = alvo;
-  $("#top-esc-titulo").textContent = `Top escolas · ${nome}`;
-  const url = nivel === "UF" ? `api/top_escolas/UF/${chave}.json`
-            : nivel === "MUN" ? `api/top_escolas/MUN/${chave}.json`
-            : null;
-  if (!url) {
-    $("#top-esc-body").innerHTML = "";
-    return;
-  }
-  const data = await j(url);
-  const lst = (data && data[rede]) || [];
-  if (!lst.length) {
-    $("#top-esc-body").innerHTML =
-      `<div class="skeleton" style="padding:12px">Nenhuma escola na ${REDE_TXT()}.</div>`;
-    return;
-  }
-  const linhas = lst.slice(0, 10).map((e, i) => {
-    const rot = e.nome || `Escola INEP ${e.chave}`;
-    const dep = e.dependencia_nome ? ` · ${e.dependencia_nome}` : "";
-    const loc = nivel === "UF" ? ` · ${e.municipio}` : "";
-    return `<a class="top-esc-row"
-              href="index.html?mun=${e.co_municipio || ""}&esc=${e.chave}"
-              title="${rot}${dep}${loc}">
-      <span class="rank-pos">${i + 1}</span>
-      <span class="top-esc-nome">
-        ${rot}<small>${dep}${loc} · ${fmtInt(e.n_lc != null ? e.n_lc : e.n_participantes)} fizeram a prova</small>
-      </span>
-      <span class="top-esc-val">${fmt0(e.media_geral)}</span>
-    </a>`;
-  }).join("");
-  // idem: sem link "ver todas" desde a remoção do ranking.
-  $("#top-esc-body").innerHTML = linhas;
-}
 
 /* ============================================================ handlers == */
 $("#btn-brasil").addEventListener("click", () => abreParana());

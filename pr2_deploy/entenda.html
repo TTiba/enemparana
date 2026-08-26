@@ -11,6 +11,72 @@
 <link rel="stylesheet" href="styles_pr.css">
 <meta name="robots" content="noindex, nofollow">
 <script>window.LOCK_UF = "PR"; window.LOCK_UF_NOME = "Paraná"; window.API_STATIC = 1;</script>
+<style>
+/* ===== Guia (entenda.html) =============================================== */
+.guia{display:grid;grid-template-columns:212px minmax(0,1fr);gap:48px;align-items:start;margin:24px 0 40px}
+@media(max-width:940px){.guia{grid-template-columns:1fr;gap:0}}
+.guia-toc{position:sticky;top:88px}
+@media(max-width:940px){.guia-toc{position:static;margin:0 0 28px;padding:18px;
+  border:1.5px solid var(--ink-12);border-radius:var(--radius-sm);background:var(--card)}}
+.guia-toc-tit{font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-40);margin:0 0 12px}
+.guia-toc ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px}
+.guia-toc a{display:block;padding:7px 11px;border-radius:8px;text-decoration:none;
+  color:var(--ink);opacity:.72;font-size:14.5px;font-weight:600;border-left:2px solid transparent}
+.guia-toc a:hover{background:var(--card);opacity:1;border-left-color:var(--pink)}
+.guia-toc a:focus-visible{outline:2px solid var(--pink);outline-offset:2px}
+.guia-toc .sub{padding-left:22px;font-size:13.5px;font-weight:500}
+.guia-corpo{min-width:0}
+.guia-corpo section{margin:0 0 60px;scroll-margin-top:88px}
+.guia-corpo h2{margin:0 0 4px;font-size:clamp(25px,3.2vw,33px);font-weight:900;letter-spacing:-.02em}
+.guia-corpo .h2-sub{color:var(--ink-40);font-size:14.5px;margin:0 0 22px}
+.guia-corpo h3{font-size:18.5px;font-weight:800;margin:34px 0 10px;letter-spacing:-.01em}
+.guia-corpo h3:first-of-type{margin-top:0}
+.guia-corpo p{margin:0 0 13px;max-width:68ch;line-height:1.62}
+.bloco{display:flex;flex-direction:column;gap:2px;margin:0 0 15px}
+.rot{font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-40)}
+.cuidado{background:rgba(255,49,159,.06);border-left:3px solid var(--pink);
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:14px 18px;margin:16px 0 0}
+.cuidado .rot{color:var(--pink-dark)}
+.cuidado p{margin:2px 0 0}
+.cuidado p+p{margin-top:10px}
+.guia-corpo figure{margin:20px 0 24px}
+.guia-corpo figure img{display:block;width:100%;height:auto;border:1.5px solid var(--ink-12);
+  border-radius:var(--radius-sm);background:var(--cream-soft);box-shadow:0 6px 18px var(--ink-06)}
+.guia-corpo figure.estreita img{max-width:600px}
+.guia-corpo figcaption{font-size:13px;color:var(--ink-40);margin-top:8px;max-width:70ch}
+.zoom{max-height:520px;overflow:auto;border-radius:var(--radius-sm)}
+ul.limpa{list-style:none;margin:0 0 15px;padding:0;display:flex;flex-direction:column;gap:9px;max-width:68ch}
+ul.limpa li{display:flex;gap:11px;align-items:flex-start;line-height:1.6}
+ul.limpa li::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;
+  background:var(--pink);margin-top:9px}
+.dot{display:inline-block;width:11px;height:11px;border-radius:50%;
+  vertical-align:-1px;margin-right:5px;border:1px solid var(--ink-12)}
+.guia-corpo .tw{overflow-x:auto;margin:18px 0 8px;border:1.5px solid var(--ink-12);
+  border-radius:var(--radius-sm);background:var(--card)}
+.guia-corpo .tw table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:460px}
+.guia-corpo .tw th,.guia-corpo .tw td{padding:11px 15px;text-align:left;border-bottom:1px solid var(--ink-06)}
+.guia-corpo .tw th{font-weight:800;font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--ink-40);background:var(--cream-soft)}
+.guia-corpo .tw tr:last-child td{border-bottom:0}
+.faq-grupo{margin:0 0 30px}
+.faq-grupo-tit{font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--pink-dark);margin:0 0 12px;padding-bottom:8px;border-bottom:1.5px solid var(--ink-12)}
+.guia-corpo details{border:1.5px solid var(--ink-12);border-radius:var(--radius-sm);
+  background:var(--card);margin:0 0 9px;overflow:hidden}
+.guia-corpo summary{cursor:pointer;padding:16px 19px;font-weight:700;font-size:16px;
+  list-style:none;display:flex;gap:12px;align-items:flex-start}
+.guia-corpo summary::-webkit-details-marker{display:none}
+.guia-corpo summary::before{content:"+";flex:none;font-weight:800;color:var(--pink);
+  font-size:19px;line-height:1.3;width:13px}
+.guia-corpo details[open] summary::before{content:"\2013"}
+.guia-corpo summary:hover{background:var(--cream-soft)}
+.guia-corpo summary:focus-visible{outline:2px solid var(--pink);outline-offset:-2px}
+.faq-corpo{padding:0 19px 17px 44px}
+.faq-corpo p{margin:0 0 11px;max-width:66ch}
+.faq-corpo p:last-child{margin-bottom:0}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
 </head>
 <body>
 
@@ -20,173 +86,408 @@
       <img src="brasao_pr.webp" alt="Brasão do Paraná" class="brasao-pr">
       <span class="brand-name">Microdados ENEM · <b>Paraná</b></span>
     </div>
-    <span class="brand-by">um produto <b>Wayground</b></span>
+    <div class="topbar-links">
+      <a href="index.html">Painel</a>
+      <a href="mapa.html">Mapa</a>
+      <a href="escola.html">Sua Escola</a>
+      <a href="criticas.html">Análise</a>
+      <a href="redacao.html">Redação</a>
+      <a href="entenda.html" class="on">Entenda os dados</a>
+      <span class="brand-by">um produto <b>Wayground</b></span>
+    </div>
   </div>
 </header>
 
-<main class="wrap">
-  <p class="volta"><a href="index.html">← Voltar ao painel</a></p>
+<main class="wrap wrap-wide">
 
   <section class="card selector">
-    <h1>Entenda os dados 📊</h1>
-    <p class="sub">O que significa cada número do painel, de onde ele vem e como ler
-       sem cair em armadilhas. Fonte: microdados públicos do ENEM 2025 (INEP).</p>
+    <h1>Como ler cada parte do painel 📖</h1>
+    <p class="sub">Um guia por página, com o que cada gráfico responde, como
+       interpretá-lo e onde ele engana se lido rápido. No fim, as perguntas
+       que mais apareceram até agora.
+       <span class="sub-hist">ENEM 2025 · rede pública · 32 NREs · 1.639 escolas.</span></p>
   </section>
 
-  <div class="info-grid">
+  <div class="guia">
+      <nav class="guia-toc" aria-label="Índice do guia">
+        <p class="guia-toc-tit">Neste guia</p>
+        <ol>
+          <li><a href="#organizacao">Como está organizado</a></li>
+          <li><a href="#filtro">O filtro</a></li>
+          <li><a href="#painel">Painel</a></li>
+          <li><a href="#mapa">Mapa</a></li>
+          <li><a href="#escola">Sua Escola</a></li>
+          <li><a href="#analise">Análise</a></li>
+          <li><a href="#redacao">Redação</a></li>
+          <li><a href="#baixar">Baixar os dados</a></li>
+          <li><a href="#faq">Perguntas frequentes</a></li>
+          <li class="sub"><a href="#faq-escolas">Escolas que não aparecem</a></li>
+          <li class="sub"><a href="#faq-numeros">Números e médias</a></li>
+          <li class="sub"><a href="#faq-uso">Uso e origem</a></li>
+          <li><a href="#referencias">Referências e uso</a></li>
+        </ol>
+      </nav>
 
-    <section class="info-card">
-      <div class="info-band" style="background:var(--pink)">Notas por área</div>
-      <div class="info-body">
-        <p><b>O que é:</b> a média dos alunos da seleção em cada uma das 4 provas —
-        Linguagens, Humanas, Natureza e Matemática. A nota de cada aluno vem pronta
-        dos microdados e é calculada pelo INEP com <b>TRI</b> (Teoria de Resposta ao Item).</p>
-        <p><b>A escala:</b> centrada em 500 com desvio de 100 (referência ENEM 2009).
-        Grosso modo: 400 = um desvio abaixo da média histórica, 600 = um desvio acima.</p>
-        <p><b>Por que TRI e não nº de acertos:</b> a TRI pondera o padrão de respostas —
-        acertar itens difíceis errando os fáceis (padrão de chute) vale menos que um
-        padrão coerente. Por isso dois alunos com o mesmo nº de acertos podem ter notas diferentes.</p>
-      </div>
-    </section>
+    <div class="guia-corpo">
+<section id="organizacao">
+  <h2>Como está organizado</h2>
+  <p class="h2-sub">Cinco páginas, uma pergunta cada</p>
+  <figure><img src="guia/nav.jpg" width="1080" height="55" loading="lazy" decoding="async" alt="Menu do painel"><figcaption>O menu fica no topo de todas as páginas.</figcaption></figure>
+  <div class="tw"><table>
+    <thead><tr><th>Página</th><th>Responde</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Painel</strong></td><td>Como está o desempenho geral e como evoluiu de 2021 a 2025</td></tr>
+      <tr><td><strong>Mapa</strong></td><td>Onde estão as diferenças no território — por NRE e por município</td></tr>
+      <tr><td><strong>Sua Escola</strong></td><td>Como uma escola se compara ao município, ao NRE e ao estado</td></tr>
+      <tr><td><strong>Análise</strong></td><td>Quais habilidades da Matriz vão bem ou mal, ano a ano</td></tr>
+      <tr><td><strong>Redação</strong></td><td>Redação em detalhe, com as cinco competências</td></tr>
+    </tbody>
+  </table></div>
+  <p>O painel mostra apenas a <strong>rede pública</strong>. Escolas particulares foram
+     retiradas em agosto de 2025, a pedido — e retiradas do dado, não apenas escondidas na tela.</p>
+</section>
 
-    <section class="info-card">
-      <div class="info-band" style="background:var(--lime)">% de acerto por item</div>
-      <div class="info-body">
-        <p><b>O que é:</b> a proporção de alunos da seleção que marcou o gabarito de cada
-        questão. Calculado por nós comparando a resposta de cada aluno
-        (microdados) com o gabarito oficial, item a item.</p>
-        <p><b>Atenção:</b> diferente da nota, isso é um indicador <i>clássico</i> — todo
-        item vale igual e chute não é descontado. Com 5 alternativas, ~20% de acerto
-        é o piso do chute, não zero conhecimento.</p>
-        <div class="info-demo">
-          <div class="mini-track" style="max-width:220px"><div class="mini-fill" style="width:45%;background:var(--lime)"></div><div class="mini-mark" style="left:60%"></div></div>
-          <small>barra = observado · traço ▍= esperado pela TRI</small>
-        </div>
-      </div>
-    </section>
+<section id="filtro">
+  <h2>O filtro</h2>
+  <p class="h2-sub">Vale para todas as páginas, e ele se lembra da sua escolha</p>
+  <figure><img src="guia/painel_filtros.jpg" width="1080" height="374" loading="lazy" decoding="async" alt="Card de filtros do Painel"><figcaption>O filtro do Painel. As páginas Sua Escola, Análise e Redação têm o mesmo.</figcaption></figure>
+  <div class="bloco"><span class="rot">Como ler</span>
+    <p>É uma cascata de três níveis: <strong>Núcleo Regional → Município → Escola</strong>.
+       Escolher um NRE reduz a lista de municípios; escolher um município libera a busca de escolas.
+       Deixar tudo em branco mostra o Paraná inteiro.</p></div>
+  <div class="bloco"><span class="rot">Atalho</span>
+    <p>O campo Escola é uma busca por digitação, não uma lista — comece a escrever o nome
+       e ele filtra. Aceita também o código INEP.</p></div>
+  <div class="cuidado"><span class="rot">Cuidado</span>
+    <p>O filtro <strong>viaja com você entre as páginas</strong>. Se escolheu uma escola no
+       Painel e depois abre a Análise, ela continua selecionada. É proposital — evita refazer
+       a seleção — mas explica por que um número às vezes parece diferente do esperado:
+       confira o cabeçalho, que sempre diz qual recorte está ativo. O botão
+       <strong>Limpar</strong> volta ao Paraná inteiro.</p></div>
+</section>
 
-    <section class="info-card">
-      <div class="info-band" style="background:var(--mint)">Dificuldade (b)</div>
-      <div class="info-body">
-        <p><b>O que é:</b> o parâmetro de dificuldade que o INEP calibrou para cada item,
-        na mesma escala θ das proficiências. Publicado nos microdados — não estimamos nada.</p>
-        <p><b>Como ler:</b> um aluno com proficiência igual ao <b>b</b> do item tem ~60%
-        de chance de acertá-lo. No painel: <span class="b-facil">b &lt; 0 fácil</span> ·
-        <span class="b-media">0 a 1,2 média</span> ·
-        <span class="b-dificil">acima de 1,2 difícil</span>.</p>
-        <p><b>Uso prático:</b> errar muito um item de b = 3,5 é esperado para quase
-        qualquer escola; errar muito um item de b = 0 é sinal de alerta.</p>
-      </div>
-    </section>
+<section id="painel">
+  <h2>Painel</h2>
+  <p class="h2-sub">A visão geral e a série histórica</p>
 
-    <section class="info-card">
-      <div class="info-band" style="background:var(--peach)">Δ Brasil (e referências UF)</div>
-      <div class="info-body">
-        <p><b>O que é:</b> a diferença, em pontos percentuais, entre o acerto da sua
-        seleção e o acerto do Brasil <i>nas mesmas questões</i>.</p>
-        <p><span class="delta-up">+6 pp</span> acima do país ·
-           <span class="delta-down">−6 pp</span> abaixo.</p>
-        <p><b>Limite:</b> compara populações diferentes — uma escola seletiva tende a
-        ficar verde em tudo, uma escola de contexto vulnerável tende a ficar vermelha
-        em tudo. Diz <i>onde você está</i>, não <i>quanto você agrega</i>. Para isso
-        existe o Δ esperado. →</p>
-      </div>
-    </section>
+  <h3>Os cartões do topo</h3>
+  <figure><img src="guia/painel_kpis.jpg" width="1080" height="164" loading="lazy" decoding="async" alt="Cartões de média geral e por área"><figcaption>Média geral e média por área, com comparação contra o Brasil.</figcaption></figure>
+  <div class="bloco"><span class="rot">Como ler</span>
+    <p>Cada cartão traz a média do recorte selecionado na escala ENEM de 0 a 1000, e abaixo
+       a diferença contra a referência nacional. A minicurva à direita é a evolução de
+       2021 a 2025 — serve para ver tendência, não para ler valores exatos.</p></div>
+  <div class="cuidado"><span class="rot">Cuidado</span>
+    <p>A <strong>Média geral não é a média das outras colunas.</strong> Ela é calculada por
+       aluno, somando as cinco notas (Linguagens, Humanas, Natureza, Matemática e Redação) e
+       dividindo por cinco — e só entra na conta quem tem nota nas <strong>cinco</strong>, isto
+       é, quem fez os dois dias de prova. As médias por área contam todos os presentes naquela
+       área. São populações diferentes, e por isso os números não fecham por soma.</p></div>
 
-    <section class="info-card destaque-tri">
-      <div class="info-band" style="background:var(--ink);color:var(--cream)">Δ esperado (TRI) — o indicador-chave</div>
-      <div class="info-body">
-        <p><b>O que é:</b> a diferença entre o que a seleção <i>acertou</i> e o que ela
-        <i>deveria acertar dado o nível dos seus próprios alunos</i>. Usamos a curva TRI
-        de cada item (parâmetros oficiais a, b, c) para perguntar: "alunos com essas
-        notas acertam quanto desse item no Brasil?" — e comparamos com o observado.</p>
-        <p><b>Por que importa:</b> desconta o nível da turma e isola a contribuição da
-        escola naquele conteúdo específico.</p>
-        <div class="info-demo info-demo-duo">
-          <div>
-            <b>Escola A · alunos fortes (média 600)</b>
-            <small>esperado 60%</small>
-            <div class="mini-track"><div class="mini-fill" style="width:45%;background:var(--peach)"></div><div class="mini-mark" style="left:60%"></div></div>
-            <small>observado 45% → <span class="delta-down">−15 pp</span> lacuna específica de conteúdo</small>
-          </div>
-          <div>
-            <b>Escola B · alunos com defasagem (média 400)</b>
-            <small>esperado 21%</small>
-            <div class="mini-track"><div class="mini-fill" style="width:26%;background:var(--mint)"></div><div class="mini-mark" style="left:21%"></div></div>
-            <small>observado 26% → <span class="delta-up">+5 pp</span> ensino rendendo acima do nível</small>
-          </div>
-        </div>
-        <p>No % bruto, A (45%) parece melhor que B (26%). No Δ esperado, é o contrário:
-        A tem um buraco escondido; B está agregando valor. <b>Verde = a escola entrega
-        mais do que o nível dos alunos explica.</b></p>
-        <p><b>Como usar — é uma bússola interna:</b> como o nível dos alunos vem das notas
-        desta mesma prova, a média dos Δ esperados de uma escola em todos os itens é
-        aproximadamente zero por construção — ninguém fica "abaixo do esperado em tudo".
-        O que o indicador revela é o <i>desequilíbrio do currículo</i>: um −10 pp em H28
-        compensado por +7 pp em H3 significa que a escola ensina H3 acima do padrão
-        nacional para alunos daquele nível, e H28 abaixo. O ganho prático: <b>H28 é onde
-        uma hora de aula extra rende mais</b> — os alunos têm capacidade demonstrada
-        (o nível global deles prova isso), mas não absorveram aquele conteúdo específico.
-        Fechar esse buraco sobe a nota global.</p>
-        <p><b>Cuidado ao interpretar:</b> um item sozinho é ruidoso — cada prova tem só
-        1 a 3 itens por habilidade. Δ negativo num item isolado é uma <i>hipótese a
-        investigar</i>; Δ negativo consistente em vários itens da mesma habilidade é um
-        <i>diagnóstico acionável</i>.</p>
-      </div>
-    </section>
+  <h3>Evolução</h3>
+  <figure><img src="guia/painel_evolucao.jpg" width="1080" height="438" loading="lazy" decoding="async" alt="Gráfico de evolução 2021–2025"><figcaption>Série 2021–2025 do recorte escolhido, com o Brasil como linha de referência.</figcaption></figure>
+  <div class="bloco"><span class="rot">Como ler</span>
+    <p>Cada linha é uma área; a tracejada é o Brasil. O que importa aqui é a
+       <strong>distância até a referência</strong> e se ela abre ou fecha ao longo dos anos —
+       mais do que a subida ou descida em si, que também depende da prova de cada ano.</p></div>
 
-    <section class="info-card">
-      <div class="info-band" style="background:var(--lilac)">Habilidade</div>
-      <div class="info-body">
-        <p><b>O que é:</b> cada item do ENEM avalia 1 das 30 habilidades da Matriz de
-        Referência do INEP daquela área (H1 a H30). O vínculo item→habilidade vem nos
-        microdados; a descrição, da matriz oficial.</p>
-        <p><b>No painel:</b> passe o mouse no chip para ler a descrição; clique para ver
-        aulas e atividades relacionadas (demo).</p>
-        <p><b>Cuidado estatístico:</b> cada prova tem só 1 a 3 itens por habilidade —
-        conclusões por habilidade num único ano são hipóteses, não veredictos.</p>
-      </div>
-    </section>
+  <h3>Competências e habilidades</h3>
+  <figure><img src="guia/painel_habilidades.jpg" width="1080" height="609" loading="lazy" decoding="async" alt="Barras de acerto por competência"><figcaption>Acerto por competência da Matriz de Referência, com as habilidades por dentro.</figcaption></figure>
+  <div class="bloco"><span class="rot">Como ler</span>
+    <p>As barras mostram o percentual de acerto agrupado pelas competências da Matriz de
+       Referência do INEP. Abaixo, a tabela de itens traz questão por questão do ano
+       selecionado. Cores das áreas, aqui e no resto do painel:
+       <span class="dot" style="background:var(--lc)"></span>Linguagens
+       <span class="dot" style="background:var(--ch)"></span>Humanas
+       <span class="dot" style="background:var(--cn)"></span>Natureza
+       <span class="dot" style="background:var(--mt)"></span>Matemática
+       <span class="dot" style="background:var(--rose)"></span>Redação.</p></div>
+</section>
 
-    <section class="info-card">
-      <div class="info-band" style="background:var(--cream); border-bottom:1.5px solid var(--ink-12)">Quem entra na conta</div>
-      <div class="info-body">
-        <p><b>Só concluintes com escola identificada</b> (1,74 milhão em 2025): os
-        microdados informam a escola apenas de quem estava concluindo o ensino médio.
-        Treineiros e egressos ficam de fora automaticamente.</p>
-        <p><b>Participação é voluntária:</b> em escolas com poucos inscritos, quem fez o
-        ENEM tende a ser o grupo mais engajado — leia médias de escolas pequenas com cautela.</p>
-        <p><b>Itens de reaplicação e provas adaptadas</b> são removidos da tabela quando
-        respondidos por poucos alunos da seleção, para não distorcer as comparações.</p>
-      </div>
-    </section>
+<section id="mapa">
+  <h2>Mapa</h2>
+  <p class="h2-sub">Onde as diferenças estão no território</p>
+  <div class="zoom"><figure style="margin:0"><img src="guia/mapa.jpg" width="1080" height="2136" loading="lazy" decoding="async" alt="Mapa do Paraná por Núcleo Regional"></figure></div>
+  <figcaption style="margin-top:9px">O mapa abre nos 32 NREs; clicar num deles desce para os municípios. Role a imagem para ver a página inteira.</figcaption>
+  <div class="bloco" style="margin-top:22px"><span class="rot">Como ler</span>
+    <p>Dois níveis: primeiro os <strong>32 Núcleos Regionais</strong>, depois os municípios
+       do NRE que você clicar. A intensidade da cor acompanha a média. Ao lado, o painel
+       lateral mostra as dez melhores escolas do recorte aberto.</p></div>
+  <div class="cuidado"><span class="rot">Cuidado</span>
+    <p>Município pequeno tem poucos alunos, e com poucos alunos a média oscila muito.
+       Um município que aparece muito escuro ou muito claro pode estar refletindo o tamanho
+       da amostra, não o ensino. Confira sempre o número de alunos antes de concluir.</p></div>
+</section>
 
-    <section class="info-card">
-      <div class="info-band" style="background:var(--lilac)">Comparações entre anos (2021 – 2025)</div>
-      <div class="info-body">
-        <p><b>Janela de tempo:</b> o painel usa cinco edições do ENEM (2021 a 2025).
-        A escala de notas e os parâmetros TRI dos itens são calibrados pelo próprio
-        INEP para serem <i>comparáveis entre anos</i> — 520 em 2022 e 520 em 2025
-        querem dizer essencialmente a mesma coisa em termos de proficiência.</p>
-        <p><b>Concluintes:</b> o filtro é o mesmo em todos os anos — quem concluiu o
-        ensino médio e tem escola identificável. Isso mantém a comparação limpa.</p>
-        <p><b>Escolas antes de 2024:</b> até o ENEM 2023 o INEP <i>não expunha</i> o
-        código INEP da escola nos microdados (apenas se era pública ou privada). Por
-        isso o drill-down por escola só cobre 2024 e 2025 — a UI mostra um aviso
-        explícito quando esse limite é atingido.</p>
-        <p><b>2021 · pandemia:</b> a prova foi aplicada em janeiro de 2022 com cerca
-        de <b>1 milhão de concluintes</b>, contra os ~2,7 M típicos. O painel mantém
-        o ano na série (para não abrir buracos), mas marca esse ponto com um badge
-        de atenção (⚠). Leia esse ano com contexto — não é uma medida "normal" da
-        educação brasileira.</p>
-        <p><b>Habilidades:</b> a Matriz de Referência do ENEM é a mesma desde 2009
-        (H1–H30 em quatro áreas), então a comparação de <i>cobertura</i> e
-        <i>desempenho</i> por habilidade entre anos é direta. A página
-        <a href="criticas.html">Análise</a> reúne esse cruzamento em tabela.</p>
-      </div>
-    </section>
+<section id="escola">
+  <h2>Sua Escola</h2>
+  <p class="h2-sub">Uma escola contra município, NRE e estado</p>
+  <figure><img src="guia/escola_combo_aberto.jpg" width="1080" height="265" loading="lazy" decoding="async" alt="Filtros da página Sua Escola"><figcaption>Escolha o NRE, o município e a escola.</figcaption></figure>
 
-    <section class="info-card">
+  <h3>Os dois radares</h3>
+  <figure><img src="guia/escola_radares.jpg" width="1080" height="439" loading="lazy" decoding="async" alt="Os dois gráficos de radar"><figcaption>À esquerda as quatro áreas do conhecimento; à direita as cinco competências da redação.</figcaption></figure>
+  <div class="bloco"><span class="rot">Como ler</span>
+    <p>Quatro séries sobrepostas: escola, município, NRE e Paraná. Quanto mais para fora o
+       vértice, maior a nota. O formato importa mais que o tamanho — um polígono
+       "amassado" num eixo mostra a área em que a escola fica atrás dela mesma.</p></div>
+  <div class="bloco"><span class="rot">Atalho</span>
+    <p>A <strong>legenda é clicável.</strong> Clique em "Paraná" para tirá-lo do gráfico e
+       comparar só a escola com o município, por exemplo. Clique de novo para trazer de volta.</p></div>
+  <div class="cuidado"><span class="rot">Cuidado</span>
+    <p>A escala <strong>não começa em zero</strong>. Numa régua de 0 a 1000, diferenças de 30
+       ou 50 pontos ficariam invisíveis, então o gráfico se ajusta aos dados. Por isso os anéis
+       vêm com o valor escrito: leia esses números antes de julgar a distância entre as linhas,
+       porque a base deslocada faz as diferenças parecerem maiores do que são.</p></div>
+
+  <h3>Alunos que fizeram a prova</h3>
+  <figure><img src="guia/escola_alunos.jpg" width="1080" height="98" loading="lazy" decoding="async" alt="Cartões de alunos presentes por área"><figcaption>Presentes por área e a perda entre o primeiro e o segundo dia.</figcaption></figure>
+  <div class="bloco"><span class="rot">Como ler</span>
+    <p>O ENEM tem dois dias: <strong>1º dia</strong> traz Linguagens, Humanas e Redação;
+       <strong>2º dia</strong>, Natureza e Matemática. Cada área tem seu próprio total porque
+       parte dos alunos vai só no primeiro dia. O último cartão mostra exatamente essa perda —
+       é um número de gestão, não de desempenho, e costuma render mais ação do que a média.</p></div>
+
+  <h3>Distribuição por faixa de nota</h3>
+  <figure><img src="guia/escola_dist.jpg" width="1080" height="310" loading="lazy" decoding="async" alt="Histogramas de distribuição de notas"><figcaption>Histograma em faixas de 25 pontos, com a média da escola marcada em rosa.</figcaption></figure>
+  <div class="bloco"><span class="rot">Como ler</span>
+    <p>As barras mostram como os alunos se espalham pelas faixas de nota, e a linha rosa
+       marca onde a média da sua escola cai dentro dessa distribuição. Responde algo que a
+       média sozinha não diz: se a escola tem muitos alunos no meio, ou se tem dois grupos
+       distantes puxando para lados opostos.</p></div>
+  <div class="cuidado"><span class="rot">Cuidado</span>
+    <p>A distribuição é a <strong>do município</strong> (ou do NRE, ou do estado), não a da
+       escola. O INEP publica a média por escola, mas não a distribuição — por isso o pano de
+       fundo é o nível mais fino disponível, e a escola entra como marca.</p>
+    <p>O histograma conta apenas notas <strong>acima de zero</strong>. Nas quatro áreas isso
+       deixa de fora menos de 0,3% dos alunos. Na <strong>redação são cerca de 5%</strong>, que
+       são justamente os zeros — e como a média de redação da escola inclui os zeros, ela não
+       seria comparável a essa distribuição. Por isso a redação aparece sem a marca.</p></div>
+</section>
+
+<section id="analise">
+  <h2>Análise</h2>
+  <p class="h2-sub">As 120 habilidades da Matriz, ano a ano</p>
+  <figure><img src="guia/analise_controles.jpg" width="1080" height="71" loading="lazy" decoding="async" alt="Filtros de área e anos"><figcaption>Filtro por área e escolha dos anos que entram na média.</figcaption></figure>
+  <figure><img src="guia/analise_tabela_topo.jpg" width="1080" height="463" loading="lazy" decoding="async" alt="Tabela de habilidades"><figcaption>Primeiras linhas da tabela. São 30 habilidades por área, 120 no total.</figcaption></figure>
+  <div class="bloco"><span class="rot">Como ler</span>
+    <p>Cada linha é uma habilidade da Matriz de Referência; cada coluna de ano traz o
+       percentual de acerto. A cor vai do vermelho (acerto baixo) ao verde (alto), para você
+       varrer a tabela com o olho antes de ler número.</p></div>
+  <div class="bloco"><span class="rot">As duas últimas colunas</span>
+    <p><strong>Esperado (TRI)</strong> é quanto os alunos <em>deste</em> grupo deveriam acertar
+       naquela habilidade, dada a dificuldade dos itens e o nível de proficiência do grupo.
+       <strong>Δ vs esperado</strong> é a diferença entre o observado e esse esperado.</p>
+    <p>É a coluna mais útil da página: um acerto de 40% pode ser bom ou ruim dependendo de
+       quem fez a prova e de quão difícil era o item. O Δ tira o efeito do nível do grupo e
+       mostra onde há lacuna de fato — negativo grande é onde vale intervir.</p></div>
+  <div class="cuidado"><span class="rot">Cuidado</span>
+    <p>Com uma <strong>escola</strong> selecionada, as colunas de 2021, 2022 e 2023 aparecem
+       com "—". Não é falha: o INEP só passou a publicar o código da escola nos microdados
+       <strong>a partir de 2024</strong>. Antes disso não há como saber de que escola era cada
+       aluno. Para município, NRE e estado, a série completa está lá.</p>
+    <p>Um "—" também aparece quando a habilidade não foi cobrada naquele ano.</p></div>
+</section>
+
+<section id="redacao">
+  <h2>Redação</h2>
+  <p class="h2-sub">Por que há dois números, e quando usar cada um</p>
+  <figure><img src="guia/redacao_cartoes.jpg" width="1080" height="133" loading="lazy" decoding="async" alt="Os dois cartões de redação"><figcaption>Os dois recortes, lado a lado.</figcaption></figure>
+  <div class="bloco"><span class="rot">Como ler</span>
+    <p><strong>1º dia, com zeros</strong> é a média sobre todos os presentes no primeiro dia,
+       com quem zerou entrando na conta como 0. É a leitura mais comum, e a que serve para
+       comparar com números de fora.</p>
+    <p><strong>2 dias, sem zeros</strong> considera só quem fez as duas provas e não zerou.
+       Isola a qualidade da escrita da taxa de anulação e de abandono — dois problemas com
+       soluções diferentes.</p></div>
+  <figure><img src="guia/redacao_porque.jpg" width="1080" height="242" loading="lazy" decoding="async" alt="Card explicativo dos dois recortes"><figcaption>A própria página traz a explicação dos dois recortes, para quem chega nela sem contexto.</figcaption></figure>
+  <div class="bloco"><span class="rot">A diferença medida</span>
+    <p>No Paraná, rede pública, em 2025: tirar os zeros levanta a média em
+       <strong>21,5 pontos</strong>; considerar só quem fez os dois dias soma outros
+       <strong>~11 pontos</strong>. Juntos, mais de 30 pontos entre um número e o outro.
+       Nenhum dos dois está errado — medem populações diferentes.</p></div>
+  <figure><img src="guia/redacao_comps.jpg" width="1080" height="152" loading="lazy" decoding="async" alt="Barras das competências"><figcaption>As cinco competências, na escala 0–200 de cada uma.</figcaption></figure>
+  <div class="bloco"><span class="rot">Como ler</span>
+    <p>Cada competência vale de 0 a 200. A <strong>C5 — proposta de intervenção</strong> é
+       historicamente a mais baixa, e a que mais responde a treino explícito de estrutura.</p></div>
+  <div class="cuidado"><span class="rot">Cuidado</span>
+    <p>O recorte <strong>sem zeros só existe no nível do estado</strong>. Ao filtrar por NRE,
+       município ou escola, o segundo cartão avisa que está indisponível em vez de mostrar
+       número errado. O primeiro cartão funciona em todos os níveis.</p></div>
+</section>
+
+<section id="baixar">
+  <h2>Baixar os dados</h2>
+  <p class="h2-sub">Na página Análise</p>
+  <figure class="estreita"><img src="guia/analise_botoes.jpg" width="609" height="53" loading="lazy" decoding="async" alt="Botões de download"><figcaption>Os dois botões ficam ao lado do resumo, no card de Filtros.</figcaption></figure>
+  <ul class="limpa">
+    <li><strong>Baixar PDF</strong> gera um relatório com o filtro exato que está na tela,
+        agrupado por área do conhecimento e por competência. Abre o diálogo de impressão do
+        navegador — escolha "Salvar como PDF" no destino.</li>
+    <li><strong>Baixar Excel</strong> gera um arquivo <code>.xlsx</code> com a mesma tabela,
+        na mesma ordenação. Os percentuais saem como número, para continuarem somáveis e
+        filtráveis na planilha.</li>
+  </ul>
+  <p>Os dois respeitam tudo o que estiver filtrado: recorte, área e anos ativos.</p>
+</section>
+
+<section id="faq">
+  <h2>Perguntas frequentes</h2>
+  <p class="h2-sub">As que mais apareceram desde o lançamento</p>
+
+  <div class="faq-grupo" id="faq-escolas">
+    <p class="faq-grupo-tit">Escolas que não aparecem</p>
+
+    <details><summary>Procurei minha escola e ela não aparece na busca. É erro do painel?</summary>
+      <div class="faq-corpo">
+        <p>Na maioria dos casos, não. O motivo mais comum é o próprio INEP: quando
+          <strong>poucos alunos de uma escola fizeram a prova</strong>, ele troca o código real
+          por um código genérico, sem nome, justamente para não permitir identificar a escola.
+          O limite é rígido — nenhum desses registros passa de 9 alunos.</p>
+        <p>Os alunos <strong>continuam contando</strong> nos números do município, do NRE e do
+          estado. O que não é possível é dizer de qual escola eles são. São 318 registros assim
+          no Paraná, somando 1.115 alunos — cerca de <strong>2,1%</strong> da rede pública. Ou
+          seja: os agregados estão praticamente completos; a lacuna é só na atribuição por escola.</p>
+      </div></details>
+
+    <details><summary>Por que nem toda escola do Paraná está no painel?</summary>
+      <div class="faq-corpo">
+        <p>São quatro filtros, e só um é nosso:</p>
+        <p><strong>1. A escola precisa ter tido candidato.</strong> Se nenhum aluno se inscreveu
+          informando aquela escola, ela não existe no microdado — não há o que mostrar.</p>
+        <p><strong>2. Código mascarado pelo INEP</strong> quando a turma é pequena: 318 registros,
+          conforme a pergunta acima.</p>
+        <p><strong>3. Escolas particulares: 413 removidas.</strong> Essa foi decisão do cliente,
+          em agosto de 2025, e é a única remoção nossa.</p>
+        <p><strong>4. Inscritos, mas nenhum presente.</strong> Dois casos no estado inteiro —
+          escolas com candidatos inscritos e comparecimento zero. Sem presença não há nota, e
+          sem nota não há média a exibir.</p>
+      </div></details>
+
+    <details><summary>Minha escola aparece na busca mas a página vem vazia. Por quê?</summary>
+      <div class="faq-corpo">
+        <p>É o caso 4 acima: há inscritos vinculados à escola, mas ninguém compareceu. A escola
+          entra na listagem porque existe no cadastro de inscrição, e não tem página de detalhe
+          porque não há nenhuma prova para agregar.</p>
+      </div></details>
+
+    <details><summary>Por que não consigo ver escolas particulares?</summary>
+      <div class="faq-corpo">
+        <p>Foi uma decisão de escopo do cliente. A remoção foi feita na origem do dado, e não
+          só escondendo botões — as escolas privadas não estão nos arquivos que o painel carrega,
+          e nenhum link ou endereço direto as traz de volta.</p>
+      </div></details>
+  </div>
+
+  <div class="faq-grupo" id="faq-numeros">
+    <p class="faq-grupo-tit">Números e médias</p>
+
+    <details><summary>A Média geral não é a média das quatro áreas. Está errado?</summary>
+      <div class="faq-corpo">
+        <p>Não. A Média geral é calculada <strong>por aluno</strong>: soma as cinco notas
+          (as quatro áreas mais a redação), divide por cinco, e depois tira a média disso entre
+          os alunos. Só entra quem tem nota nas cinco — quem fez os dois dias.</p>
+        <p>As médias por área contam todos os presentes <em>naquela</em> área, que é um grupo
+          maior e diferente. Populações diferentes não fecham por soma. É a mesma definição de
+          "nota geral" que o candidato vê, e por isso foi mantida.</p>
+      </div></details>
+
+    <details><summary>Por que o número de alunos muda de uma área para outra?</summary>
+      <div class="faq-corpo">
+        <p>Porque o ENEM tem dois dias. Linguagens, Humanas e Redação são do primeiro dia;
+          Natureza e Matemática, do segundo. Parte dos alunos vai só no primeiro. No Paraná, em
+          2025, foram <strong>54.062</strong> presentes no primeiro dia contra
+          <strong>50.341</strong> no segundo.</p>
+        <p>Essa diferença é abandono entre as provas — vale acompanhar como indicador próprio,
+          separado do desempenho.</p>
+      </div></details>
+
+    <details><summary>Por que a redação tem dois números?</summary>
+      <div class="faq-corpo">
+        <p>Porque respondem perguntas diferentes. O de <strong>1º dia, com zeros</strong> é a
+          leitura comparável com o mundo externo. O de <strong>2 dias, sem zeros</strong> mede
+          qualidade de escrita sem a interferência de anulação e abandono.</p>
+        <p>A distância entre eles é grande — mais de 30 pontos no estado — e é informação, não
+          ruído: mostra quanto do resultado da redação é taxa de zero e não escrita. No Paraná,
+          3,13% dos alunos zeraram a redação.</p>
+      </div></details>
+
+    <details><summary>O que é a coluna "Esperado (TRI)"?</summary>
+      <div class="faq-corpo">
+        <p>É quanto os alunos daquele grupo deveriam acertar em cada habilidade, considerando a
+          dificuldade dos itens e o nível de proficiência que eles demonstraram na prova. Serve
+          para tornar o acerto comparável: 40% de acerto num item difícil, com alunos de
+          proficiência mediana, pode ser um bom resultado.</p>
+        <p>O cálculo usa os parâmetros dos itens publicados pelo próprio INEP, aplicados
+          aluno a aluno e depois agregados.</p>
+      </div></details>
+
+    <details><summary>Esses números são publicados pelo INEP?</summary>
+      <div class="faq-corpo">
+        <p>Não. O que o INEP publica é o <strong>microdado</strong> — a linha de cada aluno, com
+          suas notas e respostas. Todas as médias, percentuais e agregações do painel são
+          calculadas por nós a partir desse microdado.</p>
+        <p>Isso importa na hora de comparar com números de outras fontes: além do cálculo ser
+          nosso, o painel usa um recorte específico — <strong>concluintes com escola
+          identificada, rede pública</strong> — que é mais estreito que a base de divulgação
+          geral do INEP. Divergências pequenas contra outros relatórios costumam vir daí.</p>
+      </div></details>
+
+    <details><summary>Por que a escala do radar não começa em zero?</summary>
+      <div class="faq-corpo">
+        <p>Porque na escala real de 0 a 1000 as diferenças entre uma escola e o estado — que
+          normalmente ficam entre 30 e 80 pontos — seriam invisíveis: os quatro polígonos
+          virariam quase o mesmo desenho.</p>
+        <p>O preço disso é que a base deslocada <strong>exagera</strong> as diferenças. Por isso
+          os anéis do gráfico vêm com o valor escrito: leia esses números antes de concluir que
+          a distância entre duas linhas é grande.</p>
+      </div></details>
+  </div>
+
+  <div class="faq-grupo" id="faq-uso">
+    <p class="faq-grupo-tit">Uso e origem</p>
+
+    <details><summary>Como sei a qual questão da prova uma habilidade corresponde?</summary>
+      <div class="faq-corpo">
+        <p>Clicando no código da habilidade (H1, H2…) na página Análise — abre o detalhe do
+          item, com as questões daquela habilidade reproduzidas das provas oficiais.</p>
+        <p>Nos microdados, a ligação é feita pela <strong>posição da questão no caderno</strong>.
+          O arquivo de itens traz, para cada questão, a área, a habilidade, a posição e o código
+          do caderno; o arquivo de resultados traz a sequência de respostas de cada aluno na
+          mesma ordem. É o cruzamento dos dois que diz qual questão é qual — e é por isso que a
+          cor do caderno importa: a mesma questão ocupa posições diferentes em cadernos diferentes.</p>
+      </div></details>
+
+    <details><summary>Consigo exportar o que estou vendo?</summary>
+      <div class="faq-corpo">
+        <p>Na página Análise, sim: os botões <strong>Baixar PDF</strong> e
+          <strong>Baixar Excel</strong> geram o relatório com o filtro exato da tela — recorte,
+          área e anos ativos. O PDF sai agrupado por área e competência; o Excel sai como
+          <code>.xlsx</code>, com os percentuais em formato numérico.</p>
+        <p>Para outros recortes — por exemplo, todas as escolas de um NRE numa planilha — é
+          possível gerar sob demanda.</p>
+      </div></details>
+
+    <details><summary>Por que 2021, 2022 e 2023 ficam vazios quando escolho uma escola?</summary>
+      <div class="faq-corpo">
+        <p>Porque o INEP só começou a publicar o código da escola nos microdados
+          <strong>em 2024</strong>. Antes disso é impossível saber de que escola era cada aluno,
+          então não existe histórico por escola anterior a 2024.</p>
+        <p>Nos níveis de município, NRE e estado a série de 2021 a 2025 está completa.</p>
+      </div></details>
+
+    <details><summary>De quando são os dados?</summary>
+      <div class="faq-corpo">
+        <p>O painel mostra o <strong>ENEM 2025</strong> nas páginas de desempenho, e a série
+          <strong>2021–2025</strong> na Evolução e na Análise. A fonte são os microdados do INEP,
+          recortados em concluintes com escola identificada, rede pública do Paraná.</p>
+      </div></details>
+  </div>
+</section>
+
+
+      <section id="referencias">
+        <h2>Referências e uso dos dados</h2>
+        <p class="h2-sub">Procedência e como citar</p>
+        <section class="info-card">
       <div class="info-band" style="background:var(--mint)">Referências e uso dos dados</div>
       <div class="info-body">
         <p>Este painel é uma análise independente feita a partir dos microdados
@@ -221,13 +522,14 @@
           Acesso em: 31 jul. 2026.</p>
       </div>
     </section>
-
+      </section>
+    </div>
   </div>
 
   <footer class="rodape">
-    Fontes: Microdados ENEM 2021 – 2025, Matriz de Referência e parâmetros TRI dos itens — INEP.
-    Percentuais de acerto e Δs calculados pela plataforma a partir das respostas item a item.
-    Referência completa e termo de uso na seção <b>Referências e uso dos dados</b> acima.
+    Fontes: Microdados ENEM 2021–2025, Matriz de Referência e parâmetros TRI
+    dos itens — INEP. Médias, percentuais e valores esperados pela TRI são
+    calculados a partir do microdado; não são números divulgados pelo INEP.
   </footer>
 </main>
 

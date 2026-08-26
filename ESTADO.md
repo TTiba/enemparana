@@ -65,7 +65,7 @@ editar `pr2/` **e** copiar para `pr2_deploy/`, senão o site não muda).
 | Análise | `criticas.html` / `criticas.js` | heatmap hab.×ano + downloads PDF/Excel |
 | Redação | `redacao.html` / `redacao.js` | dois recortes, competências, ranking |
 | Habilidade | `habilidade.html` / `habilidade.js` | drill-down de um item |
-| Entenda | `entenda.html` | metodologia |
+| Entenda | `entenda.html` + `guia/*.jpg` | **guia de leitura + FAQ** (13/08) |
 
 Módulos compartilhados: `filtros.js` (persistência de filtro entre páginas —
 **único ponto que lê `rede` da URL**, travado em `PUB`), `habilidades.js`,
@@ -209,6 +209,41 @@ crítica clássica ao radar de base deslocada.
 
 Testado com Playwright nos quatro níveis (UF, NRE, MUN, ESC), com toggle da
 legenda e "Limpar": zero erro de JS.
+
+## "Entenda os dados" virou guia de leitura + FAQ (13/08)
+
+`entenda.html` foi **reescrito**: em vez dos cartões de metodologia, agora é um
+guia por página do painel com **16 capturas de tela** (`pr2/guia/*.jpg`, 672 KB)
+e um **FAQ de 14 perguntas** — todas tiradas de dúvidas reais que apareceram no
+uso, não inventadas.
+
+Cada elemento segue a mesma estrutura: **O que é → Como ler → Cuidado**. O
+"Cuidado" é onde ficam as ressalvas medidas (média geral ≠ média das colunas,
+escala do radar deslocada, histograma sem zeros, 2021–23 sem código de escola).
+
+**A seção "Referências e uso dos dados" foi preservada** — ela não é explicação,
+é procedência: diz que a análise é independente, que o INEP não responde por
+ela, e traz as 6 citações ABNT dos microdados. Descartar isso junto com o resto
+seria perda de conteúdo legal, não de texto.
+
+O `deploy_pr2.py` ganhou uma cópia de diretório para `pr2/guia/` — imagens não
+entram na lista `copiar`, que é arquivo a arquivo. **Se essa cópia falhar, o
+guia vai ao ar sem as capturas.**
+
+Existe também uma versão do guia como artifact, publicada à parte
+(claude.ai/code/artifact/ce570437) — mesmo conteúdo, para compartilhar fora do
+painel.
+
+## Mapa: sai o card "Top escolas" (13/08)
+
+A pedido: o painel não compara escolas entre si em lugar nenhum desde que o
+ranking saiu, e esse card era o último resquício. Removidos o
+`#card-top-esc` do `mapa.html`, as funções `renderTopEscolasNRE()` e
+`renderTopEscolas()` do `mapa.js` (503 → 426 linhas) e o CSS `.top-esc-*`,
+que ficou morto.
+
+**Continua no mapa:** o ranking lateral de **NREs e municípios** — comparação
+entre regionais e cidades, não entre escolas. Não foi tocado.
 
 ## Em aberto
 

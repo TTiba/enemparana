@@ -73,6 +73,15 @@ for f in copiar:
     else:
         log(f"  ! ausente: {f}")
 
+# guia/ — capturas de tela usadas pelo entenda.html (o guia de leitura).
+# É diretório, não entra na lista `copiar` acima.
+src_guia = os.path.join(PR2, "guia")
+if os.path.isdir(src_guia):
+    shutil.copytree(src_guia, os.path.join(OUT, "guia"), dirs_exist_ok=True)
+    log(f"  guia/: {len(os.listdir(src_guia))} imagens")
+else:
+    log("  ! guia/ ausente — entenda.html ficará sem as capturas")
+
 
 def inject_static(caminho):
     html = open(caminho, encoding="utf-8").read()

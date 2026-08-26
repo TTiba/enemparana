@@ -561,27 +561,6 @@ a.chip-hab:hover { background: var(--pink); color: var(--card); transform: trans
   content: " ↓"; opacity: 1; color: var(--pink); font-weight: 900;
 }
 
-/* "Ver todas" no card do mapa */
-.top-esc-vermais {
-  display: block; text-align: center; padding: 10px;
-  margin-top: 6px; font-size: 13px; font-weight: 700; color: var(--pink);
-  text-decoration: none; border-top: 1px dashed var(--ink-12);
-}
-.top-esc-vermais:hover { color: var(--pink-dark); text-decoration: underline; }
-
-/* Top escolas */
-.top-esc-row {
-  display: grid; grid-template-columns: 24px 1fr auto;
-  gap: 10px; align-items: center; padding: 8px 4px;
-  text-decoration: none; color: inherit;
-  border-bottom: 1px dashed var(--ink-12);
-}
-.top-esc-row:last-child { border-bottom: none; }
-.top-esc-row:hover { background: var(--cream-soft); }
-.top-esc-nome { font-size: 13px; font-weight: 700; line-height: 1.2; }
-.top-esc-nome small { display: block; font-weight: 500; color: var(--ink-40); font-size: 11.5px; margin-top: 2px; }
-.top-esc-val { font-size: 15px; font-weight: 900; color: var(--ink); }
-
 /* Habilidades críticas ---------------------------------------------------- */
 .crit-controls {
   display: flex; flex-wrap: wrap; gap: 22px; align-items: flex-start;
