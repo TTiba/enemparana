@@ -144,8 +144,9 @@
     <div class="tbl-scroll">
       <table class="tbl" id="tbl-itens">
         <thead><tr>
+          <th class="col-q" title="Número da questão no caderno azul — clique para ver o enunciado">Questão</th>
           <th>Habilidade</th>
-          <th title="Número de itens desta habilidade nesta prova">Nº itens</th>
+          <th title="Quantas questões desta prova cobram esta mesma habilidade (não é o número da linha)">Itens da hab.</th>
           <th>Dificuldade (b)</th>
           <th class="col-bar">% acerto (seleção)</th>
           <th title="% de acerto neste item na UF (quando aplica) e no Brasil — é a referência pra comparar o desempenho da sua seleção">Acerto UF · BR</th>
@@ -155,8 +156,15 @@
         <tbody></tbody>
       </table>
     </div>
-    <p class="foot-note">Habilidades exibidas conforme a matriz de referência do INEP (H1–H30 por área).
-       Quando o mapa próprio de habilidades por item for carregado, ele substitui esta coluna.</p>
+    <p class="foot-note"><b>Cada linha é uma questão.</b> A coluna <b>Questão</b> traz o
+       número dela no <b>caderno azul</b> — em outra cor da prova o mesmo enunciado recebe
+       outro número. Clique no número para ver o enunciado. Quando duas questões cobram a
+       mesma habilidade, elas aparecem como duas linhas com o mesmo H — é a coluna Questão
+       que as distingue; <b>Itens da hab.</b> conta quantas questões da prova cobram aquele H.
+       Em Linguagens, os itens de língua estrangeira de uma mesma habilidade vêm fundidos
+       numa linha só (chip EN·ES) para padronizar o mix inglês/espanhol — quando isso reúne
+       questões diferentes, a coluna mostra todos os números (ex.: 1/2/3).<br>
+       Habilidades conforme a matriz de referência do INEP (H1–H30 por área).</p>
   </section>
 
   <footer class="rodape">

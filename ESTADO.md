@@ -245,6 +245,36 @@ que ficou morto.
 **Continua no mapa:** o ranking lateral de **NREs e municípios** — comparação
 entre regionais e cidades, não entre escolas. Não foi tocado.
 
+## Tabela de itens ganhou a coluna "Questão" (14/08)
+
+Reportado no uso: na tabela "Desempenho por item" do Painel, **duas questões
+da mesma habilidade viravam duas linhas indistinguíveis** (dois "H9", sem
+como saber qual era qual). Medido: em 2025 há **53 habilidades repetidas** nas
+quatro áreas — o problema atingia quase metade da tabela.
+
+O dado para resolver **já estava no deploy**: `api/questoes/{ano}.json` é
+indexado por `CO_ITEM` e traz `co_posicao` (número da questão) e `recorte`
+(imagem do enunciado). Nenhum rebuild foi necessário — o join é client-side,
+em `app.js` (`questoesDoAno()` com cache por ano + `celQuestao()`).
+
+- Nova **primeira coluna**, com o número em chip escuro, **linkado para a
+  imagem do enunciado**. Resolve a identificação e ainda dá acesso à questão.
+- O número é a posição no **caderno AZUL** — é dele que as imagens saem
+  (`build_questoes_ano.py`). Em outra cor a mesma questão tem outro número, e
+  a nota de pé da tabela diz isso.
+- `Nº itens` virou **`Itens da hab.`**: o rótulo antigo, ao lado do chip de
+  habilidade, parecia descrever a linha, quando conta quantas questões da
+  prova cobram aquele H. Era metade da confusão.
+
+**Achado no teste:** o `fundirLEM` agrupa por *habilidade*, não por questão —
+então uma linha de língua estrangeira pode agregar **questões diferentes**
+(H7 → "1/2/3"), não só o par inglês/espanhol de uma mesma questão. A célula
+mostra todos os números e o título diz qual delas o link abre. A primeira
+versão do comentário no código afirmava o contrário; foi corrigida.
+
+Testado nos 5 anos e nas 4 áreas: **0 linhas sem número** em todos, e
+**0 habilidades ainda ambíguas**. Imagens respondem 200, zero erro de JS.
+
 ## Em aberto
 
 1. **`pr2_deploy` do rebuild ficou sem dado avaliável.** *Adiado* — deixou de

@@ -970,3 +970,17 @@ a.chip-hab:hover { background: var(--pink); color: var(--card); transform: trans
   .duo { grid-template-columns: 1fr; }
 }
 .dist-alerta { color: var(--ink-40); font-style: italic; }
+
+/* Coluna "Questão" da tabela de itens — identifica a linha (duas questões da
+   mesma habilidade deixam de ser indistinguíveis). */
+th.col-q, td.col-q { width: 74px; text-align: center; }
+.chip-q {
+  display: inline-block; min-width: 30px; padding: 3px 8px;
+  border-radius: 999px; font-size: 13px; font-weight: 800;
+  background: var(--ink); color: var(--card); text-decoration: none;
+  font-variant-numeric: tabular-nums;
+  transition: transform .1s, background .15s;
+}
+.chip-q:hover { background: var(--pink); transform: translateY(-1px); }
+.chip-q-off { background: var(--ink-12); color: var(--ink); }
+.q-vazio { color: var(--ink-40); }

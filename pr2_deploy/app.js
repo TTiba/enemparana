@@ -591,7 +591,48 @@ function fundirLEM(rows) {
   return out;
 }
 
-function renderItens(rowsRaw, nivel) {
+/* Mapa CO_ITEM → questão do caderno (api/questoes/{ano}.json), por ano.
+ * Serve pra identificar cada LINHA da tabela de itens: sem isso, duas
+ * questões da mesma habilidade viram duas linhas indistinguíveis — foi o
+ * que o usuário reportou. O número é a posição no **caderno AZUL**, que é o
+ * caderno de onde as imagens foram extraídas (ver build_questoes_ano.py);
+ * em outra cor a mesma questão tem outro número. */
+const QUESTOES_CACHE = {};
+async function questoesDoAno(ano) {
+  if (!(ano in QUESTOES_CACHE)) {
+    QUESTOES_CACHE[ano] = fetch(`api/questoes/${ano}.json`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => d?.itens || {})
+      .catch(() => ({}));
+  }
+  return QUESTOES_CACHE[ano];
+}
+
+/* Célula "Questão": número da questão no caderno + link pro enunciado.
+ *
+ * Em Linguagens o `fundirLEM` agrupa por HABILIDADE, não por questão — e uma
+ * habilidade de língua estrangeira pode ser cobrada por mais de uma questão.
+ * Então uma linha fundida pode agregar 2 ou 3 questões distintas (ex.: H7 →
+ * "1/2/3"), e não só o par inglês/espanhol de uma mesma questão. Nesse caso
+ * o chip mostra todos os números e o título diz qual delas o link abre. */
+function celQuestao(r, qmap) {
+  const ids = String(r.item || "").split("·").filter(Boolean);
+  const qs = ids.map((id) => qmap[id]).filter(Boolean);
+  if (!qs.length) return `<td class="col-q"><span class="q-vazio">–</span></td>`;
+  const pos = [...new Set(qs.map((q) => q.co_posicao))].sort((a, b) => a - b);
+  const primeira = [...qs].sort((a, b) => a.co_posicao - b.co_posicao)[0];
+  const img = primeira.recorte || (primeira.imgs || [])[0];
+  const txt = pos.join("/");
+  const tit = pos.length > 1
+    ? `Esta linha agrega as questões ${pos.join(", ")} do caderno azul`
+      + (img ? ` — o link abre a questão ${pos[0]}` : "")
+    : `Questão ${txt} do caderno azul${img ? " — clique para ver o enunciado" : ""}`;
+  return `<td class="col-q">${img
+    ? `<a class="chip-q" href="${img}" target="_blank" rel="noopener" title="${tit}">${txt}</a>`
+    : `<span class="chip-q chip-q-off" title="${tit}">${txt}</span>`}</td>`;
+}
+
+function renderItens(rowsRaw, nivel, qmap = {}) {
   const tb = $("#tbl-itens tbody");
   let rows = state.area === "LC" ? fundirLEM(rowsRaw) : rowsRaw;
 
@@ -607,7 +648,7 @@ function renderItens(rowsRaw, nivel) {
   atualizarBadgeFiltroComp();
 
   if (!rows.length) {
-    tb.innerHTML = `<tr><td colspan="7" class="skeleton">Sem dados para esta seleção.</td></tr>`;
+    tb.innerHTML = `<tr><td colspan="8" class="skeleton">Sem dados para esta seleção.</td></tr>`;
     return;
   }
   const cor = AREA_INFO[state.area].cor;
@@ -654,6 +695,7 @@ function renderItens(rowsRaw, nivel) {
     const brTd = r.p_br == null ? "–"
       : `<span title="Brasil: ${fmt(r.p_br * 100, 1)}%">${fmt(r.p_br * 100, 0)}%</span>`;
     return `<tr>
+      ${celQuestao(r, qmap)}
       <td>${chip}${lang}</td>
       <td class="pct-n"><b>${n}</b></td>
       <td class="${bCls}">${bTxt}</td>
@@ -680,10 +722,13 @@ function renderItens(rowsRaw, nivel) {
 async function loadItens() {
   const { nivel, chave } = nivelChave();
   $("#tbl-itens tbody").innerHTML =
-    `<tr><td colspan="7" class="skeleton">Carregando itens…</td></tr>`;
+    `<tr><td colspan="8" class="skeleton">Carregando itens…</td></tr>`;
   $("#tit-ano-itens").textContent = state.ano;
-  const rows = await api("itens", { nivel, chave, area: state.area, ano: state.ano });
-  renderItens(rows, nivel);
+  const [rows, qmap] = await Promise.all([
+    api("itens", { nivel, chave, area: state.area, ano: state.ano }),
+    questoesDoAno(state.ano),
+  ]);
+  renderItens(rows, nivel, qmap);
 }
 
 /* Badge visual acima da tabela quando filtro por competência está ativo. */
@@ -1010,7 +1055,7 @@ async function refresh() {
     $("#areas-comp").innerHTML = "";
     $("#evolucao").hidden = true;
     $("#tbl-itens tbody").innerHTML =
-      `<tr><td colspan="7" class="skeleton">Sem dados para esta seleção.</td></tr>`;
+      `<tr><td colspan="8" class="skeleton">Sem dados para esta seleção.</td></tr>`;
     return;
   }
   renderResumo(data);
