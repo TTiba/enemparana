@@ -1,13 +1,13 @@
 # Instruções do repositório
 
 **Leia `ESTADO.md` antes de qualquer coisa.** Ele tem o estado corrente dos
-dois painéis (Paraná e nacional), o que está em aberto e as armadilhas já
-pisadas. `status.md` tem o detalhe e o histórico.
+painéis (Paraná, nacional e Mato Grosso), o que está em aberto e as
+armadilhas já pisadas. `status.md` tem o detalhe e o histórico.
 
 Ao terminar uma tanda de trabalho, atualize o `ESTADO.md` — seções **Onde
 está cada coisa**, **Em aberto** e a data no topo.
 
-## Três fatos que já foram confundidos
+## Fatos que já foram confundidos
 
 1. **O Paraná tem os dois caminhos de publicação, e isso já confundiu.** O
    Netlify **está** ligado ao repo (produção = branch `main`), e além disso
@@ -21,9 +21,16 @@ está cada coisa**, **Em aberto** e a data no topo.
    GitHub).
 2. **`pr2_deploy/` é derivado de `deploy/`** — `deploy_pr2.py` lê
    `deploy/api/` e `data/enem2025.sqlite`. Um rebuild corrige os dois.
+   **`mt_deploy/` também é derivado do `deploy/`** (`pipeline/deploy_mt.py
+   --nacional <clone do painelenem>`), e por isso herda o D que estiver lá —
+   hoje D=1,7. MT está construído mas **não publicado**; nenhum site Netlify
+   aponta pra `mt_deploy/`. Fonte em `mt/`.
 3. **Não afirme número que não mediu.** Há ferramenta pra isso:
-   `verifica_calibracao.py <deploy>` e `diag_deploy.py <deploy>...`.
-   Rode antes de reportar.
+   `pipeline/d1_demo/verifica_calibracao.py <deploy>` e
+   `diag_deploy.py <deploy>...`. Rode antes de reportar.
+4. **Varra texto residual pelo radical, não pela palavra inteira.**
+   `grep -i paraná` não pega "paranaense"; `grep -i oficial` não pega
+   "oficiais". Já deixei passar as duas coisas assim.
 
 ## Branch
 

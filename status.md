@@ -341,6 +341,60 @@ atrás. Fast-forward do branch para a `main` (`git push origin
 claude/enem-canal-bug-5g78e7:main`), que atualizou o GitHub e disparou o
 deploy. `main` e produção coincidem de novo.
 
+## Tanda 16/09 — painel de Mato Grosso
+
+Detalhe completo no `ESTADO.md` §"Painel de Mato Grosso". Aqui só o que
+interessa a quem for mexer no código depois.
+
+**Estratégia:** `mt/` é cópia do `pr2/` com o mesmo JS. Em vez de bifurcar o
+código, cada página de MT declara no `<head>`:
+
+```html
+<script>window.LOCK_UF = "MT"; window.LOCK_UF_NOME = "Mato Grosso";
+        window.SEM_REGIONAL = 1; window.API_STATIC = 1;</script>
+```
+
+Os arquivos `.js` já liam `window.LOCK_UF`; o que faltava era o `SEM_REGIONAL`
+e tirar os "PR"/"Paraná" que estavam cravados no meio do código. Foram seis:
+`redacao.js` (`REDACAO["UF/PR"]`, `api/top_escolas_full/UF/PR.json`, dois
+`"Paraná"` de fallback), `ranking_escolas.js` (`"escolas em Paraná"`),
+`ranking_escolas.html` (`<option value="PR">`) e quatro `"Todos (PR inteiro)"`.
+`redacao.js` e `ranking_escolas.js` nem declaravam `LOCK_UF_NOME`.
+
+**`window.fetchRegional()` (novo em `filtros.js`)** é o choke point da camada
+regional, como o `REDES` é o da rede: com `SEM_REGIONAL` ligado ele devolve
+`null` antes de sair na rede, e todos os chamadores de `data/nre_*.json` já
+tratavam `null`. Sem ele eram 3 a 4 404 por página.
+
+**Três bugs que só apareceram porque MT expôs:**
+
+1. `os.makedirs(api_out)` sem `exist_ok` quebrava o **segundo** rebuild — o
+   restore do `GUARDA` recria `api/questoes/` antes dessa linha. O
+   `deploy_pr2.py` tem o mesmo padrão; não foi mexido (decisão do D=1,7
+   mantém o PR intocado), mas está aqui registrado.
+2. O `recorte` das questões (miniatura da coluna "Questão") **não** está em
+   `imgs` e não era copiado. No PR passava batido porque o `GUARDA` preserva
+   `questoes/` entre rebuilds, então as imagens nunca sumiam.
+3. `[hidden]` perdendo para `.selects label { display: flex }` — regra de
+   folha vence o user-agent. Corrigido só no `styles_mt.css`.
+
+**Mudança de comportamento no `criticas.js`, essa vale para os dois painéis:**
+quando o nível pedido não tem série própria, a página caía no estado **em
+silêncio** e continuava dizendo "Analisando: <escola>". Agora marca
+`fallbackUF` e escreve, em destaque, que os números são os do estado. No PR
+quase nunca dispara (tem `historico/ESC/`); em MT dispara sempre.
+
+**`pipeline/build_redacao_uf.py`** ganhou `--uf` e `--deploy`. Regressão
+conferida: com os defaults, a saída do PR é byte a byte a de antes.
+
+**O erro que eu mesmo cometi e desfiz:** a substituição
+"Paraná"→"Mato Grosso" no `entenda.html` transformou dez números medidos no
+PR em afirmações sobre MT, e as capturas do guia mostram o painel do PR.
+Restaurei a versão de metodologia e apaguei o `mt/guia/`. **Varredura de
+texto residual tem que ser por radical** — `grep -i paraná` não pega
+"paranaense", que era o H1 da home. Mesma família do caso
+"oficiais"/"oficial" de 12/08.
+
 ## Pontos de atenção
 
 - **hist_nota MUN não existe no banco nacional** (só BR/UF). Por isso o
@@ -452,6 +506,14 @@ Continua valendo copiar as imagens pro `deploy/` nacional se quiser que o
   que permitiria separar motivo de zero (fuga ao tema × folha em branco ×
   anulação). Tem que ser script separado: rodar o `build_db.py` traria o
   D=1 junto, contra a decisão de 31/07.
+- [ ] **Publicar o MT**: depende do rebuild D=1 do nacional (o `mt_deploy`
+  herda o `p_esp`; medido hoje em −2,83 pp no UF/MT) e de criar o site
+  Netlify apontado pra `mt_deploy/`.
+- [ ] **`historico/ESC/` de MT** — sem ele a Análise por escola mostra o
+  estado. Hoje avisa na tela; o conserto é rodar o equivalente ao
+  `build_historico_esc_pr.py` para MT.
+- [ ] **Brasão de MT e guia/FAQ com capturas de MT** — o guia atual é do PR
+  e não pode ser reaproveitado sem recapturar as telas e remedir os números.
 - [ ] Considerar filtro NRE na página de priorização.
 - [ ] Rodar `build_hist_nota_pr.py` para os outros anos (2021-2024) se
   quiser histogramas históricos por NRE/MUN.

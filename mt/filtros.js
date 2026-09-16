@@ -1,0 +1,100 @@
+/* Filtros globais persistentes — variante pr2 (Paraná).
+ * Diferenças vs. web/filtros.js:
+ *   - KEY = "enem.filtros.pr2" (isolado do painel nacional).
+ *   - DEFAULTS.uf = "PR" e sempre força uf="PR" (ignora URL/LS para uf).
+ *   - DEFAULTS.rede = "PUB" (default = escolas públicas).
+ *   - Adiciona campo `nre` ao schema.
+ */
+(function () {
+  const KEY = "enem.filtros.pr2";
+  const LOCK_UF = window.LOCK_UF || "PR";
+  // Só "PUB" é aceito — decisão de retirar as escolas particulares do painel
+  // (ver ESTADO.md). Isto é o único lugar que lê `rede` da URL; travando
+  // aqui, nenhuma página aceita mais ?rede=T ou ?rede=PRIV, mesmo que a
+  // pessoa monte o link à mão. As demais páginas nem mostram mais o botão,
+  // mas isso por si só não impediria o parâmetro na URL — por isso o corte
+  // fica aqui, não só na tela.
+  const REDES = new Set(["PUB"]);
+  const DEFAULTS = { uf: LOCK_UF, nre: "", mun: "", esc: "", rede: "PUB" };
+
+  function lerLS() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (!raw) return {};
+      const o = JSON.parse(raw) || {};
+      const out = {};
+      if (typeof o.nre === "string")  out.nre  = o.nre;
+      if (typeof o.mun === "string")  out.mun  = o.mun;
+      if (typeof o.esc === "string")  out.esc  = o.esc;
+      if (REDES.has(o.rede))          out.rede = o.rede;
+      return out;
+    } catch { return {}; }
+  }
+
+  function lerURL() {
+    const p = new URLSearchParams(location.search);
+    const out = {};
+    if (p.get("nre")) out.nre = p.get("nre");
+    if (p.get("mun")) out.mun = p.get("mun");
+    if (p.get("esc")) out.esc = p.get("esc");
+    if (REDES.has(p.get("rede"))) out.rede = p.get("rede");
+    return out;
+  }
+
+  /* Página inicial aberta sem nenhum parâmetro = começar do zero.
+   *
+   * Sem isso o localStorage restaurava a última escola visitada e o painel
+   * abria pré-filtrado num município/escola, em vez de mostrar o Paraná
+   * inteiro. As outras páginas continuam lendo o localStorage — é ele que
+   * carrega o contexto entre elas, já que os links do topo não levam
+   * parâmetros. Como não existe link de volta pro index, chegar aqui é
+   * sempre um começo deliberado.
+   *
+   * A rede (PUB/PRIV/T) não é resetada: é preferência de exibição, não
+   * navegação, e o default já é PUB. */
+  function entradaLimpa() {
+    if (location.search) return false;
+    const p = location.pathname.replace(/\/+$/, "");
+    return p === "" || p.endsWith("/index.html") || p === "index.html";
+  }
+
+  function carregar() {
+    const url = lerURL();
+    const ls  = entradaLimpa() ? {} : lerLS();
+    const p = new URLSearchParams(location.search);
+    const temUrlNre = p.has("nre");
+    const temUrlMun = p.has("mun");
+    const temUrlEsc = p.has("esc");
+    return {
+      uf:   LOCK_UF,
+      nre:  temUrlNre ? (url.nre || "") : (url.nre ?? ls.nre ?? DEFAULTS.nre),
+      mun:  temUrlMun ? (url.mun || "") : (url.mun ?? ls.mun ?? DEFAULTS.mun),
+      esc:  temUrlEsc ? (url.esc || "") : (url.esc ?? ls.esc ?? DEFAULTS.esc),
+      rede: url.rede  ?? lerLS().rede ?? DEFAULTS.rede,
+    };
+  }
+
+  function salvar(f) {
+    try {
+      localStorage.setItem(KEY, JSON.stringify({
+        nre: f.nre || "", mun: f.mun || "", esc: f.esc || "",
+        rede: REDES.has(f.rede) ? f.rede : "PUB",
+      }));
+    } catch { /* ignora */ }
+  }
+
+  function limpar() {
+    try { localStorage.removeItem(KEY); } catch { /* ignora */ }
+  }
+
+  window.Filtros = { carregar, salvar, limpar };
+
+  // Sem camada regional (MT): data/nre_agg.json, data/nre_to_muns.json,
+  // data/nre_hist_resumo.json e data/hist_nota_pr.json só existem no Paraná.
+  // Pedi-los aqui geraria um 404 em toda página, então o fetch é
+  // curto-circuitado. Cada chamador já trata o null.
+  window.fetchRegional = function (url) {
+    if (window.SEM_REGIONAL) return Promise.resolve(null);
+    return fetch(url).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  };
+})();

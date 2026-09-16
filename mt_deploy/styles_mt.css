@@ -1,0 +1,63 @@
+/* ===== Personalização PR =================================================
+   Adaptações mínimas sobre styles.css: brasão no topbar + tag SP.
+   O restante do design/paleta permanece idêntico ao site principal. */
+
+.brand { gap: 12px; }
+
+.brasao-pr {
+  height: 34px;
+  width: auto;
+  display: block;
+  filter: drop-shadow(0 1px 0 rgba(0,0,0,.06));
+}
+
+.pr-tag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 10px 3px;
+  background: var(--ink);
+  color: var(--cream);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  vertical-align: 3px;
+}
+
+/* Chip fixo "Mato Grosso" no lugar do dropdown de UF */
+.uf-chip {
+  display: inline-flex; align-items: center;
+  font: inherit; font-weight: 700; font-size: 14px;
+  color: var(--ink);
+  background: var(--cream-soft);
+  border: 1.5px solid var(--ink-12);
+  border-radius: 999px;
+  padding: 12px 22px;
+  min-height: 46px;
+  white-space: nowrap;
+}
+
+/* Rótulos de rede levemente adaptados no home */
+.selector h1 { max-width: 780px; }
+
+/* Sem camada regional: os seletores de NRE continuam no DOM (assim o JS
+   compartilhado com o painel do PR não precisa de null-guard) e são
+   escondidos com o atributo [hidden]. Só que `.selects label` e
+   `.crit-ctrl > label` no styles.css redefinem `display`, e uma regra de
+   folha vence o `[hidden] { display: none }` do user-agent. Sem o
+   !important abaixo, o rótulo "Núcleo Regional" reaparece em quatro
+   páginas. */
+[hidden] { display: none !important; }
+
+/* Aviso de queda pro estado na Análise. Sem historico/ESC/ publicado, toda
+   escola cai no estado — o destaque existe pra ninguém ler número do estado
+   achando que é da escola. */
+.hab-alvo.alvo-fallback {
+  background: var(--cream-soft);
+  border: 1.5px solid var(--ink-12);
+  border-left: 4px solid var(--pink);
+  border-radius: 10px;
+  padding: 10px 14px;
+  line-height: 1.45;
+}

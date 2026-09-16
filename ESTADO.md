@@ -1,6 +1,6 @@
 # Estado atual — leia isto primeiro
 
-Atualizado: **2026-08-13**
+Atualizado: **2026-09-16**
 
 Arquivo curto e de manutenção obrigatória. Serve pra retomar o trabalho sem
 reconstruir contexto de memória. Detalhe e histórico ficam no `status.md`
@@ -14,14 +14,20 @@ e no `status.md` do `painelenem`.
 
 ## Os dois painéis
 
-| | Paraná | Nacional |
-|---|---|---|
-| repo | `TTiba/enemparana` | `TTiba/painelenem` |
-| clone local | `~/dev/enemparana` | `~/Documents/Microdados ENEM/plataforma` *(não conferido)* |
-| source | `pr2/` | `web/` |
-| build servido | `pr2_deploy/` (commitado) | `deploy/` (commitado) |
-| produção | https://enemparana.netlify.app | https://microdadosenem.netlify.app |
-| **como publica** | **os dois:** ligado ao git (produção = `main`) **e** `netlify deploy --prod --dir=pr2_deploy` manual | **push/merge na `main`** — Netlify ligado ao GitHub, deploy automático |
+| | Paraná | Nacional | Mato Grosso |
+|---|---|---|---|
+| repo | `TTiba/enemparana` | `TTiba/painelenem` | `TTiba/enemparana` |
+| clone local | `~/dev/enemparana` | `~/Documents/Microdados ENEM/plataforma` *(não conferido)* | `~/dev/enemparana` |
+| source | `pr2/` | `web/` | `mt/` |
+| build servido | `pr2_deploy/` (commitado) | `deploy/` (commitado) | `mt_deploy/` (commitado) |
+| produção | https://enemparana.netlify.app | https://microdadosenem.netlify.app | **ainda não publicado** |
+| **como publica** | **os dois:** ligado ao git (produção = `main`) **e** `netlify deploy --prod --dir=pr2_deploy` manual | **push/merge na `main`** — Netlify ligado ao GitHub, deploy automático | a definir — site Netlify próprio, ainda não criado |
+
+> **Atenção ao mergear:** o `mt/` e o `mt_deploy/` vivem no **mesmo repo do
+> Paraná**. Um merge na `main` do `enemparana` publica o painel do PR; o de
+> MT só vai ao ar quando existir um site Netlify apontado para
+> `mt_deploy/`. Enquanto esse site não existir, mergear não expõe o MT — mas
+> quando existir, passa a expor, então confira antes.
 
 **Corrigido em 12/08 — este ponto estava errado aqui e no `CLAUDE.md`.**
 Estava escrito que o Paraná "NÃO é ligado ao git"; está sim. O que
@@ -80,7 +86,13 @@ decisão do D=1,7): `pipeline/build_historico_esc_pr.py`,
 
 Arquivos novos e onde precisam ser registrados: qualquer `.js`/`.html` novo
 em `pr2/` tem que entrar na lista `copiar` do `pr2/deploy_pr2.py`, senão
-some no próximo rebuild.
+some no próximo rebuild. O mesmo vale para `mt/` e a lista do
+`pipeline/deploy_mt.py`.
+
+O painel de **Mato Grosso** mora em `mt/` (fonte) e `mt_deploy/` (build),
+com as mesmas 8 páginas e os mesmos módulos; as diferenças estão na seção
+"Painel de Mato Grosso" mais abaixo. `styles_pr.css` lá se chama
+`styles_mt.css`.
 
 ## Correção do D da TRI (o assunto principal)
 
@@ -275,6 +287,111 @@ versão do comentário no código afirmava o contrário; foi corrigida.
 Testado nos 5 anos e nas 4 áreas: **0 linhas sem número** em todos, e
 **0 habilidades ainda ambíguas**. Imagens respondem 200, zero erro de JS.
 
+## Painel de Mato Grosso — `mt/` + `mt_deploy/` (16/09)
+
+Pedido: reaproveitar **100%** do painel do Paraná, trocando só dados e mapas,
+com **ranking de escolas** (que no PR tinha sido removido), publicando em link
+separado sem mexer no PR. Duas decisões do cliente, tomadas antes de começar:
+**sem camada regional** (o filtro é Estado → Município → Escola) e
+**esperar o rebuild com D=1** antes de publicar.
+
+**Construído e testado; NÃO publicado.** Nenhum site Netlify aponta pra
+`mt_deploy/` ainda.
+
+`pipeline/deploy_mt.py --nacional <clone do painelenem>` monta o
+`mt_deploy/` a partir do `deploy/api/` nacional. Diferenças estruturais
+frente ao `deploy_pr2.py`, documentadas no docstring dele:
+
+1. **Sem camada regional.** MT não tem NREs. Os seletores de NRE continuam
+   no DOM marcados com `[hidden]` — assim o JS compartilhado com o PR não
+   precisa de null-guard — e os `fetch` de `data/nre_*.json` passam pelo
+   `window.fetchRegional()` (novo em `filtros.js`), que devolve `null` na
+   hora quando `window.SEM_REGIONAL` está ligado, em vez de tomar 404.
+2. **Sem dependência do sqlite.** Os INEPs das escolas saem dos próprios
+   `escolas/{cd}.json`.
+3. **Sem `historico/ESC/`** — ver a ressalva abaixo.
+
+`pipeline/build_redacao_uf.py` foi parametrizado (`--uf`, `--deploy`); a
+saída do PR com os defaults continua byte a byte igual à de antes.
+
+O que o build produziu, medido: **142 municípios**, 502 escolas públicas
+(131 privadas excluídas), 476 JSONs de `entidade/ESC`, **196 escolas no
+ranking** (≥30 alunos no 1º dia), 1.682 imagens de questão, 2.189 arquivos.
+Estado: 18.122 alunos no 1º dia, 16.791 no 2º, de 29.130 inscritos.
+
+### Três ressalvas honestas, todas medidas
+
+1. **O deploy de MT está em D=1,7**, igual ao PR. Medido com
+   `python3 pipeline/d1_demo/verifica_calibracao.py mt_deploy`:
+   **UF/MT · PUB −2,83 pp**, municípios −3,11 pp, escolas −3,07 pp. É herança
+   do `deploy/` nacional commitado, que ainda não recebeu o rebuild D=1
+   (item 3 de *Em aberto*). Foi exatamente por isso que o cliente escolheu
+   esperar. **Publicar MT antes desse rebuild significa publicar
+   "Esperado (TRI)" e "Δ vs esperado" errados.**
+2. **Não existe `historico/ESC/` para MT.** O deploy nacional não publica
+   esse nível; no PR ele vem do `build_historico_esc_pr.py`, que precisa do
+   `enem2025.sqlite`. Sem ele, a Análise com uma escola selecionada não tem
+   série própria. **O código antigo caía no estado em silêncio**, mostrando
+   "Analisando: <escola>" em cima dos números do estado — no PR isso quase
+   nunca acontecia; em MT aconteceria com **toda** escola. Corrigido: o
+   `criticas.js` marca o fallback e a página passa a dizer, em destaque,
+   que os números abaixo são os do estado e não os da escola. O aviso
+   também cobre MUN e NRE, e some sozinho quando a série existir.
+3. **Um município sem geometria:** `5101837` Boa Esperança do Norte, criado
+   depois da malha do `tbrugz/geodata-br`. São **29 alunos, 0,16%** do
+   estado. Ele **não** some do painel — aparece no dropdown de município, na
+   lista lateral do mapa e tem página própria; só não tem polígono pintado.
+   O mapa desenha 141 dos 142.
+
+### O que mais mudou no caminho
+
+- **`mt/entenda.html` é a versão de metodologia, não o guia.** A varredura
+  "Paraná"→"Mato Grosso" tinha convertido **dez números medidos no PR** (32
+  NREs, 1.639 escolas, 54.062, 318 registros, 413 removidas, 21,5 pontos,
+  3,13%, 2,1%…) em afirmações falsas sobre MT, e as 16 capturas do guia
+  mostram o painel do PR. Restaurada a versão anterior ao guia e o
+  `mt/guia/` apagado. **O guia de MT só pode ser feito recapturando as telas
+  de MT e remedindo os números.**
+- **Rótulos do mapa.** No PR o nível de cima eram 32 NREs e bastava o corte
+  por área; com 141 municípios os nomes se empilhavam. Entrou um descarte
+  guloso por colisão de caixa — 82 rótulos legíveis em vez de 141 sobrepostos.
+- **Questões 2021–2024 não estão no deploy nacional** (só 2025); elas foram
+  geradas localmente pelo `build_questoes_ano.py` direto dentro do
+  `pr2_deploy/`. O `deploy_mt.py` procura em duas bases, nessa ordem —
+  o dado é nacional, indexado por `CO_ITEM`, idêntico em qualquer UF.
+- **`recorte` fica fora de `imgs`.** A miniatura da coluna "Questão" não
+  estava sendo copiada; no PR o `GUARDA` mascarava isso porque as imagens
+  nunca eram apagadas. Corrigido no `deploy_mt.py`.
+- **`[hidden]` perdia para o CSS.** `.selects label` e `.crit-ctrl > label`
+  redefinem `display`, e regra de folha vence o `[hidden]` do user-agent —
+  o rótulo "Núcleo Regional" reaparecia em quatro páginas. `styles_mt.css`
+  força `[hidden] { display: none !important }`.
+- **`verifica_calibracao.py` só olhava `UF/PR.json`.** Agora varre
+  `entidade/UF/*.json`; a saída do PR não mudou em substância.
+
+### Como foi testado (Playwright, `mt_deploy` servido em :9001)
+
+As 8 páginas carregam com **zero erro de JS e zero 404**. Além disso:
+`index` estado → município → escola pelo combo (KPIs mudam nos três níveis);
+mapa com 141 polígonos e clique abrindo o detalhe; ranking com as 196
+escolas; **758 imagens de questão conferidas uma a uma nos 5 anos × 4 áreas,
+nenhuma quebrada**; Excel da Análise baixa e abre com 120 habilidades e sem
+warning do openpyxl; redação em nível UF com os dois recortes (516,0 com
+zeros / 578,3 sem, 1.343 zeraram = 8,0%).
+
+Varredura por radical (`paran`, `nre`, `curitiba`) em todo o `mt/`: só
+sobram **Paranatinga e Paranaíta**, que são municípios de MT de verdade.
+O H1 ainda dizia "a escola paranaense" — `grep -i paraná` não pegava; foi o
+`grep -i paran` que pegou.
+
+### Ainda não feito em MT
+
+- Brasão de MT (o `brasao_pr.*` foi removido, nada entrou no lugar).
+- Guia + FAQ com capturas de MT.
+- `historico/ESC/`, `hist_nota` abaixo de UF e redação sem zeros abaixo de
+  UF — os três dependem dos microdados na máquina do Raphael.
+- Site Netlify próprio e o link.
+
 ## Em aberto
 
 1. **`pr2_deploy` do rebuild ficou sem dado avaliável.** *Adiado* — deixou de
@@ -351,7 +468,19 @@ Testado nos 5 anos e nas 4 áreas: **0 linhas sem número** em todos, e
    anulação) — hoje o painel não afirma nada sobre isso, justamente por
    falta desse cálculo. Tem que ser script separado: rodar o `build_db.py`
    traz o D=1 junto, contra a decisão de 31/07.
-10. **PDF/Excel e a página de Redação só existem no Paraná.** Não foram
+10. **Publicar o MT.** Bloqueado por dois pré-requisitos, nesta ordem:
+    (a) o rebuild D=1 do nacional (item 3), porque o `mt_deploy` herda o
+    `p_esp` dele e hoje está em D=1,7 (−2,83 pp medidos em UF/MT); depois
+    (b) criar o site Netlify apontado para `mt_deploy/`. Rodar
+    `python3 pipeline/deploy_mt.py --nacional <clone>` de novo depois do
+    rebuild e reconferir com o `verifica_calibracao.py` antes de subir.
+
+11. **`historico/ESC/` de Mato Grosso.** Sem ele a Análise por escola mostra
+    o estado (com aviso na tela desde 16/09, mas ainda é o estado). Precisa
+    do equivalente ao `build_historico_esc_pr.py` para MT, na máquina com os
+    microdados. Enquanto não existir, o aviso segura a leitura errada.
+
+12. **PDF/Excel e a página de Redação só existem no Paraná.** Não foram
     replicados no `painelenem`. Se quiser lá, é a mesma receita em
     `web/criticas.js` + `web/styles.css` (mais o `xlsx_lite.js`).
 

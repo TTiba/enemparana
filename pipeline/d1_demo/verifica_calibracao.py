@@ -76,11 +76,15 @@ def main():
     print("  " + "-" * 82)
 
     vieses = []
-    for rede in ("PUB", "T"):
-        v = linha(f"UF/PR · {rede}",
-                  de_arquivo(os.path.join(api, "entidade", "UF", "PR.json"), rede))
-        if v is not None:
-            vieses.append(v)
+    # A UF não é fixa: o mesmo pipeline gera deploys de PR e de MT (e o
+    # nacional traz as 27). Varrer entidade/UF/ evita a linha vazia que
+    # aparecia ao rodar isto num deploy que não fosse o do Paraná.
+    for uf_json in sorted(glob.glob(os.path.join(api, "entidade", "UF", "*.json"))):
+        sigla = os.path.splitext(os.path.basename(uf_json))[0]
+        for rede in ("PUB", "T"):
+            v = linha(f"UF/{sigla} · {rede}", de_arquivo(uf_json, rede))
+            if v is not None:
+                vieses.append(v)
 
     muns = sorted(glob.glob(os.path.join(api, "entidade", "MUN", "*.json")))
     if muns:
