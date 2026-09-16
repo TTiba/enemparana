@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
-"""Emite histórico item-a-item por escola (nível ESC) para todas as escolas
-do PR. Cobre 2024 e 2025 (anos em que o INEP passou a expor CO_ESCOLA).
+"""Emite histórico item-a-item por escola (nível ESC) para as escolas de uma
+UF. Cobre 2024 e 2025 (anos em que o INEP passou a expor CO_ESCOLA).
 
 O pipeline nacional (`pipeline/exporta_netlify.py`) NÃO emite historico/ESC/
-porque geraria ~2 milhões de arquivos. Aqui filtramos só as ~2.085 escolas
-do PR e emitimos em `pr2_deploy/api/historico/ESC/{inep}.json`.
+porque geraria ~2 milhões de arquivos. Aqui filtramos só as escolas da UF
+pedida e emitimos em `{deploy}/api/historico/ESC/{inep}.json`.
+
+Sem esse arquivo a página Análise, com uma escola selecionada, não tem série
+própria e cai no estado — o `criticas.js` avisa na tela, mas o número é do
+estado. Rodar isto é o que resolve de verdade.
 
 Fonte: data/enem_hist.sqlite (hist_item + itens_meta_all)
-Escolas do PR: data/enem2025.sqlite (tabela escolas)
+Escolas da UF: data/enem2025.sqlite (tabela escolas)
 
 Formato de saída, compatível com pr2/criticas.js:
   { T: { por_ano: { "2024": {CN: [[item, n, p, p_esp, hab, b, lingua], ...],
@@ -16,8 +20,14 @@ Formato de saída, compatível com pr2/criticas.js:
     PUB: {...idem...},   # duplicado; escola pertence a uma rede só
     PRIV: {...idem...} }
 
-Uso: python3 pipeline/build_historico_esc_pr.py
+Uso:
+    python3 pipeline/build_historico_esc_uf.py                    # PR, pr2_deploy
+    python3 pipeline/build_historico_esc_uf.py --uf MT --deploy mt_deploy
+
+Os defaults reproduzem exatamente o comportamento antigo, de quando este
+script se chamava build_historico_esc_pr.py e tinha PR cravado.
 """
+import argparse
 import json
 import os
 import sqlite3
@@ -26,20 +36,36 @@ from collections import defaultdict
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_HIST = os.path.join(BASE, "data", "enem_hist.sqlite")
 DB_2025 = os.path.join(BASE, "data", "enem2025.sqlite")
-OUT_DIR = os.path.join(BASE, "pr2_deploy", "api", "historico", "ESC")
 
 ANOS = ("2024", "2025")
 
 
 def main():
-    # 1) INEPs das escolas públicas do PR — sem as particulares (decisão:
-    # painel PR não apresenta rede privada; ver ESTADO.md). dependencia=4 é
-    # privada, mesmo código usado em escolas/{mun}.json e no resto do pipeline.
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--uf", default="PR")
+    ap.add_argument("--deploy", default="pr2_deploy",
+                    help="pasta do deploy, relativa à raiz do repo ou absoluta")
+    args = ap.parse_args()
+    uf = args.uf.upper()
+    deploy = args.deploy if os.path.isabs(args.deploy) \
+        else os.path.join(BASE, args.deploy)
+    out_dir = os.path.join(deploy, "api", "historico", "ESC")
+
+    if not os.path.isdir(deploy):
+        raise SystemExit(f"não achei o deploy: {deploy}")
+
+    # 1) INEPs das escolas públicas da UF — sem as particulares (decisão: os
+    # painéis estaduais não apresentam rede privada; ver ESTADO.md).
+    # dependencia=4 é privada, mesmo código usado em escolas/{mun}.json e no
+    # resto do pipeline.
     con25 = sqlite3.connect(DB_2025)
-    ineps_pr = {str(r[0]) for r in con25.execute(
-        "SELECT chave FROM escolas WHERE uf='PR' AND dependencia != 4")}
+    ineps_uf = {str(r[0]) for r in con25.execute(
+        "SELECT chave FROM escolas WHERE uf=? AND dependencia != 4", (uf,))}
     con25.close()
-    print(f"escolas PR (sem particulares): {len(ineps_pr):,}", flush=True)
+    print(f"escolas {uf} (sem particulares): {len(ineps_uf):,}", flush=True)
+    if not ineps_uf:
+        raise SystemExit(f"nenhuma escola pública encontrada para uf={uf} — "
+                         "confira a sigla e o data/enem2025.sqlite")
 
     # 2) itens_meta_all — indexa por CO_ITEM
     con_h = sqlite3.connect(DB_HIST)
@@ -61,7 +87,7 @@ def main():
     for ano, chave, co_item, n, p_acerto, p_esp in q:
         n_lidos += 1
         chave = str(chave)
-        if chave not in ineps_pr:
+        if chave not in ineps_uf:
             continue
         m = meta.get(co_item)
         if not m:
@@ -81,12 +107,12 @@ def main():
     print(f"linhas hist_item lidas: {n_lidos:,}", flush=True)
     print(f"escolas com dados: {len(dados):,}", flush=True)
 
-    # 4) escreve um JSON por escola em pr2_deploy/api/historico/ESC/
-    os.makedirs(OUT_DIR, exist_ok=True)
+    # 4) escreve um JSON por escola em {deploy}/api/historico/ESC/
+    os.makedirs(out_dir, exist_ok=True)
     # limpa arquivos antigos
-    for f in os.listdir(OUT_DIR):
+    for f in os.listdir(out_dir):
         if f.endswith(".json"):
-            os.remove(os.path.join(OUT_DIR, f))
+            os.remove(os.path.join(out_dir, f))
 
     n_arq = 0
     for inep, por_ano in dados.items():
@@ -95,13 +121,13 @@ def main():
         payload = {"T":    {"por_ano": por_ano},
                    "PUB":  {"por_ano": por_ano},
                    "PRIV": {"por_ano": por_ano}}
-        with open(os.path.join(OUT_DIR, f"{inep}.json"), "w", encoding="utf-8") as f:
+        with open(os.path.join(out_dir, f"{inep}.json"), "w", encoding="utf-8") as f:
             json.dump(payload, f, ensure_ascii=False, separators=(",", ":"))
         n_arq += 1
 
-    tot_kb = sum(os.path.getsize(os.path.join(OUT_DIR, f))
-                 for f in os.listdir(OUT_DIR)) / 1024
-    print(f"✓ {n_arq:,} arquivos em {OUT_DIR} ({tot_kb:,.0f} KB total)", flush=True)
+    tot_kb = sum(os.path.getsize(os.path.join(out_dir, f))
+                 for f in os.listdir(out_dir)) / 1024
+    print(f"✓ {n_arq:,} arquivos em {out_dir} ({tot_kb:,.0f} KB total)", flush=True)
 
 
 if __name__ == "__main__":

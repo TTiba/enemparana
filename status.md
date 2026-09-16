@@ -55,7 +55,7 @@ enemparana/
 ├── pipeline/
 │   ├── build_nre_hist.py            ← hist_resumo 2021-2025 por NRE (KPIs)
 │   ├── build_hist_nota_pr.py        ← histograma de nota por NRE/MUN (do CSV bruto)
-│   └── build_historico_esc_pr.py    ← histórico item-a-item por escola PR (2024+2025)
+│   └── build_historico_esc_uf.py    ← histórico item-a-item por escola (--uf, 2024+2025)
 ├── server_pr2.py      ← server local (porta 8093) — API dinâmica + fallback estático
 ├── netlify.toml       ← publish = pr2_deploy (com robots noindex)
 ├── wrangler.toml      ← Cloudflare Workers com [assets] directory = pr2_deploy
@@ -95,7 +95,7 @@ python3 pipeline/build_nre_hist.py        # nre_hist_resumo.json (~127 KB)
 
 # 1c. SEMPRE — regera pr2_deploy/ do zero + histórico por escola:
 python3 pr2/deploy_pr2.py                 # ~1 min · gera 5.691 arquivos, 141 MB
-                                          # (chama build_historico_esc_pr.py ao final)
+                                          # (chama build_historico_esc_uf.py ao final)
 
 # 2. no repo enemparana/:
 cd ~/dev/enemparana
@@ -153,7 +153,7 @@ dashboard Cloudflare inconcluso — retomar depois amanhã.
   fica cinza neutro (var(--ink-06)) e o texto é "0 pp" sem sinal. Commit `95e1e98`.
 - **Análise ESC mostrava PR silenciosamente** (26/07): página `criticas.html`
   caía pra dados do Paraná quando escola era selecionada. Bug de fallback em
-  `criticas.js`. Fix: novo pipeline `build_historico_esc_pr.py` gera
+  `criticas.js`. Fix: novo pipeline `build_historico_esc_uf.py` gera
   `api/historico/ESC/{inep}.json` pras 2.085 escolas PR (2024+2025); JS agora
   puxa isso. Anos 2021-2023 continuam vazios (CO_ESCOLA só passou a ser
   publicado pelo INEP em 2024). Commit `d6054a4`.
@@ -511,7 +511,8 @@ Continua valendo copiar as imagens pro `deploy/` nacional se quiser que o
   Netlify apontado pra `mt_deploy/`.
 - [ ] **`historico/ESC/` de MT** — sem ele a Análise por escola mostra o
   estado. Hoje avisa na tela; o conserto é rodar o equivalente ao
-  `build_historico_esc_pr.py` para MT.
+  `build_historico_esc_uf.py --uf MT --deploy mt_deploy` (o `deploy_mt.py`
+  já tenta sozinho e avisa quando o sqlite não está na máquina).
 - [ ] **Brasão de MT e guia/FAQ com capturas de MT** — o guia atual é do PR
   e não pode ser reaproveitado sem recapturar as telas e remedir os números.
 - [ ] Considerar filtro NRE na página de priorização.

@@ -370,10 +370,14 @@ else:
 
 # historico/ESC/{inep}.json — chama script que agrega hist_item por escola PR
 log("Gerando historico/ESC/ (2024+2025 por escola do PR)…")
-script_esc = os.path.join(BASE, "pipeline", "build_historico_esc_pr.py")
-r = subprocess.run(["python3", script_esc], capture_output=True, text=True)
+# (o script foi renomeado pra build_historico_esc_uf.py e parametrizado em
+#  16/09; --uf PR --deploy pr2_deploy são os defaults dele, passados aqui
+#  explícitos pra não ficar dependendo de default silencioso)
+script_esc = os.path.join(BASE, "pipeline", "build_historico_esc_uf.py")
+r = subprocess.run(["python3", script_esc, "--uf", "PR", "--deploy", "pr2_deploy"],
+                   capture_output=True, text=True)
 if r.returncode != 0:
-    log("  ! build_historico_esc_pr.py falhou:")
+    log("  ! build_historico_esc_uf.py falhou:")
     log(r.stderr)
 else:
     for linha in r.stdout.strip().splitlines()[-2:]:

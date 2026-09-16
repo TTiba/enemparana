@@ -14,11 +14,13 @@ Irmão do pr2/deploy_pr2.py, com três diferenças estruturais:
    `escolas/{cd}.json` do deploy nacional — mesma informação, sem precisar do
    banco, o que deixa o script rodável fora da máquina com os microdados.
 
-3. **Sem `historico/ESC/`.** O deploy nacional não publica esse nível (só BR,
-   MUN e UF); no Paraná ele é gerado por `build_historico_esc_pr.py`, que
-   precisa do sqlite. Enquanto não houver o equivalente para MT, a página de
-   Análise com uma escola selecionada não tem série própria — ver AVISO no fim
-   da execução.
+3. **`historico/ESC/` depende do sqlite.** O deploy nacional não publica esse
+   nível (só BR, MUN e UF). Este script tenta gerá-lo chamando
+   `build_historico_esc_uf.py --uf MT`, que precisa do `data/enem_hist.sqlite`
+   e do `data/enem2025.sqlite`; fora da máquina com os microdados isso falha
+   de propósito e o script segue, avisando no fim. Sem esse nível, a Análise
+   com uma escola selecionada cai no estado (o `criticas.js` diz isso na tela
+   desde 16/09, mas o número continua sendo o do estado).
 
 Uso:
     python3 pipeline/deploy_mt.py [--nacional CAMINHO] [--sem-imagens]
@@ -246,6 +248,26 @@ if os.path.exists(hist_orig):
         log(f"  {n} arquivos historico/ESC")
         sem_hist_esc = n == 0
 
+# historico/ESC/ — o nacional não publica esse nível, então geramos aqui a
+# partir do enem_hist.sqlite, do mesmo jeito que o deploy_pr2.py faz pro PR.
+# Sem os microdados na máquina isso falha, e é esperado: o AVISO no fim
+# explica o que fica errado enquanto não rodar.
+if sem_hist_esc:
+    script_esc = os.path.join(BASE, "pipeline", "build_historico_esc_uf.py")
+    if os.path.exists(script_esc):
+        log(f"Gerando historico/ESC/ (2024+2025 por escola de {UF})…")
+        r = subprocess.run(
+            ["python3", script_esc, "--uf", UF, "--deploy", OUT],
+            capture_output=True, text=True)
+        if r.returncode != 0:
+            motivo = (r.stderr or r.stdout).strip().splitlines()
+            log("  ! não gerou: " + (motivo[-1] if motivo else "erro sem mensagem"))
+        else:
+            for linha in r.stdout.strip().splitlines()[-2:]:
+                log("  " + linha)
+            esc_dir = os.path.join(api_out, "historico", "ESC")
+            sem_hist_esc = not (os.path.isdir(esc_dir) and os.listdir(esc_dir))
+
 # refs_hist/
 log("Copiando refs_hist/…")
 rh = os.path.join(API_ORIG, "refs_hist")
@@ -399,8 +421,8 @@ log(f"  local: cd {OUT} && python3 -m http.server 9001")
 
 if sem_hist_esc:
     log("\n! AVISO — sem historico/ESC/: a página Análise com uma ESCOLA")
-    log("  selecionada não tem série própria e cai no estado. O deploy")
-    log("  nacional não publica esse nível; no Paraná ele vem de")
-    log("  pipeline/build_historico_esc_pr.py, que precisa do enem2025.sqlite.")
-    log("  Rode o equivalente pra MT antes de publicar, ou a Análise por")
-    log("  escola sai errada.")
+    log("  selecionada não tem série própria e cai no estado. A tela avisa")
+    log("  isso em destaque, mas o número continua sendo o do estado.")
+    log("  Para resolver, na máquina com os microdados:")
+    log(f"    python3 pipeline/build_historico_esc_uf.py --uf {UF} --deploy {OUT}")
+    log("  (precisa de data/enem_hist.sqlite e data/enem2025.sqlite)")

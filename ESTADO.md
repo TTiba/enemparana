@@ -80,7 +80,7 @@ Módulos compartilhados: `filtros.js` (persistência de filtro entre páginas �
 dependência externa), `styles.css` + `styles_pr.css`.
 
 Scripts que **não** passam pelo `build_db.py` (portanto seguros sob a
-decisão do D=1,7): `pipeline/build_historico_esc_pr.py`,
+decisão do D=1,7): `pipeline/build_historico_esc_uf.py`,
 `build_redacao_uf.py`, `build_hist_nota_pr.py`, `build_nre_hist.py`,
 `build_questoes_ano.py`, `build_alternativas.py`.
 
@@ -329,9 +329,11 @@ Estado: 18.122 alunos no 1º dia, 16.791 no 2º, de 29.130 inscritos.
    esperar. **Publicar MT antes desse rebuild significa publicar
    "Esperado (TRI)" e "Δ vs esperado" errados.**
 2. **Não existe `historico/ESC/` para MT.** O deploy nacional não publica
-   esse nível; no PR ele vem do `build_historico_esc_pr.py`, que precisa do
-   `enem2025.sqlite`. Sem ele, a Análise com uma escola selecionada não tem
-   série própria. **O código antigo caía no estado em silêncio**, mostrando
+   esse nível; ele vem do `build_historico_esc_uf.py` (renomeado e
+   parametrizado em 16/09; antes era `..._pr.py` com PR cravado), que precisa
+   do `enem_hist.sqlite` + `enem2025.sqlite`. O `deploy_mt.py` já tenta
+   chamá-lo sozinho e segue em frente se o banco não estiver na máquina.
+   Sem ele, a Análise com uma escola selecionada não tem série própria. **O código antigo caía no estado em silêncio**, mostrando
    "Analisando: <escola>" em cima dos números do estado — no PR isso quase
    nunca acontecia; em MT aconteceria com **toda** escola. Corrigido: o
    `criticas.js` marca o fallback e a página passa a dizer, em destaque,
@@ -477,8 +479,10 @@ O H1 ainda dizia "a escola paranaense" — `grep -i paraná` não pegava; foi o
 
 11. **`historico/ESC/` de Mato Grosso.** Sem ele a Análise por escola mostra
     o estado (com aviso na tela desde 16/09, mas ainda é o estado). Precisa
-    do equivalente ao `build_historico_esc_pr.py` para MT, na máquina com os
-    microdados. Enquanto não existir, o aviso segura a leitura errada.
+    de rodar, na máquina com os microdados:
+    `python3 pipeline/build_historico_esc_uf.py --uf MT --deploy mt_deploy`
+    (o `deploy_mt.py` já tenta sozinho e avisa quando não consegue).
+    Enquanto não existir, o aviso na tela segura a leitura errada.
 
 12. **PDF/Excel e a página de Redação só existem no Paraná.** Não foram
     replicados no `painelenem`. Se quiser lá, é a mesma receita em
