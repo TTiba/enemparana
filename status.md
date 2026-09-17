@@ -395,6 +395,24 @@ texto residual tem que ser por radical** — `grep -i paraná` não pega
 "paranaense", que era o H1 da home. Mesma família do caso
 "oficiais"/"oficial" de 12/08.
 
+## Tanda 17/09 — rebuild D=1 aplicado, MT calibrado, bug de nomes aberto
+
+Detalhe no `ESTADO.md`. O essencial para quem for mexer:
+
+- O deploy nacional D=1 já existia no disco desde 31/07, só não tinha sido
+  commitado. Está em `painelenem`, branch `deploy-d1-20260916` (`40c4650f5`).
+- **`rebuild_d1.sh` não reexecuta o `carrega_nomes_escolas.py`.** Por isso o
+  deploy saiu com 25.963 escolas sem nome (100%). Os nomes vêm de um CSV do
+  Censo, não dos microdados — o rebuild recria o sqlite e os apaga. **Pôr essa
+  chamada dentro do `rebuild_d1.sh`** é o conserto que evita a repetição.
+- O `deploy_mt.py` ganhou um passo de restauração de nomes a partir de
+  `data/nomes_escolas_{uf}.json`. É paliativo e está comentado como tal. Se o
+  nacional for corrigido na origem, o passo vira no-op sozinho (ele só
+  reescreve quando o nome difere).
+- Reverter deleção em massa antes de commitar virou rotina obrigatória: o
+  rebuild apaga `deploy/questoes/` e `deploy/api/questoes/{2021..2024}.json`,
+  e `git add -A` commitaria as deleções.
+
 ## Pontos de atenção
 
 - **hist_nota MUN não existe no banco nacional** (só BR/UF). Por isso o
@@ -506,9 +524,11 @@ Continua valendo copiar as imagens pro `deploy/` nacional se quiser que o
   que permitiria separar motivo de zero (fuga ao tema × folha em branco ×
   anulação). Tem que ser script separado: rodar o `build_db.py` traria o
   D=1 junto, contra a decisão de 31/07.
-- [ ] **Publicar o MT**: depende do rebuild D=1 do nacional (o `mt_deploy`
-  herda o `p_esp`; medido hoje em −2,83 pp no UF/MT) e de criar o site
-  Netlify apontado pra `mt_deploy/`.
+- [x] ~~**Publicar o MT**: depende do rebuild D=1~~ — destravado em 17/09,
+  `mt_deploy` calibrado em −0,08 pp. Falta só o site Netlify.
+- [ ] **Nomes das escolas no deploy nacional** — 25.963 sem nome (100%).
+  Rodar `carrega_nomes_escolas.py <csv>`, reexportar, e embutir a chamada no
+  `rebuild_d1.sh`. **O nacional não pode ir ao ar antes disso.**
 - [ ] **`historico/ESC/` de MT** — sem ele a Análise por escola mostra o
   estado. Hoje avisa na tela; o conserto é rodar o equivalente ao
   `build_historico_esc_uf.py --uf MT --deploy mt_deploy` (o `deploy_mt.py`

@@ -33,6 +33,7 @@ Uso:
 Saída: mt_deploy/
 """
 import argparse
+import glob
 import json
 import os
 import shutil
@@ -391,6 +392,95 @@ if BASES_Q:
             "\"Questão\" da Análise fica vazia nesses anos")
     if not args.sem_imagens:
         log(f"  {n_img} imagens" + (f" · {n_falta} ausentes" if n_falta else ""))
+
+# nomes das escolas — restauração a partir de data/nomes_escolas_mt.json
+#
+# O rebuild D=1 de 16/09 recriou o data/enem2025.sqlite a partir dos microdados
+# e não reexecutou o pipeline/carrega_nomes_escolas.py, que carrega os nomes de
+# um CSV do Censo. Resultado: o deploy nacional saiu com todas as escolas
+# nomeadas "Escola INEP {codigo}". O nome é rótulo estável por INEP — não
+# depende do D nem de número nenhum recalculado — então é seguro recolocá-lo
+# a partir do deploy anterior. PALIATIVO: o conserto de verdade é rodar o
+# carrega_nomes_escolas.py e reexportar o nacional (ver ESTADO.md).
+#
+# Escolas mascaradas (código 60xxxxx) não estão no mapa e seguem sem nome,
+# como devem.
+NOMES = os.path.join(BASE, "data", f"nomes_escolas_{UF.lower()}.json")
+if os.path.exists(NOMES):
+    with open(NOMES, encoding="utf-8") as f:
+        nomes = json.load(f)
+    log(f"Restaurando nomes de escolas ({len(nomes):,} no mapa)…")
+
+    DEP_NOME = {1: "Federal", 2: "Estadual", 3: "Municipal", 4: "Privada"}
+    n_ent = n_esc = n_top = n_full = 0
+
+    def nome_de(chave):
+        return nomes.get(str(chave))
+
+    # entidade/ESC/{inep}.json → resumo.alvo.nome
+    for arq in glob.glob(os.path.join(api_out, "entidade", "ESC", "*.json")):
+        nm = nome_de(os.path.splitext(os.path.basename(arq))[0])
+        if not nm:
+            continue
+        with open(arq, encoding="utf-8") as f:
+            d = json.load(f)
+        alvo = (d.get("resumo") or {}).get("alvo")
+        if not alvo or alvo.get("nome") == nm:
+            continue
+        alvo["nome"] = nm
+        with open(arq, "w", encoding="utf-8") as f:
+            json.dump(d, f, ensure_ascii=False, separators=(",", ":"))
+        n_ent += 1
+
+    # escolas/{cd}.json → nome + rotulo ("{nome} · {dependencia_nome}")
+    for arq in glob.glob(os.path.join(api_out, "escolas", "*.json")):
+        with open(arq, encoding="utf-8") as f:
+            d = json.load(f)
+        mudou = False
+        for lista in (d.values() if isinstance(d, dict) else [d]):
+            if not isinstance(lista, list):
+                continue
+            for e in lista:
+                nm = nome_de(e.get("chave"))
+                if not nm or e.get("nome") == nm:
+                    continue
+                e["nome"] = nm
+                dep = DEP_NOME.get(e.get("dependencia"))
+                e["rotulo"] = f"{nm} · {dep}" if dep else nm
+                mudou = True
+                n_esc += 1
+        if mudou:
+            with open(arq, "w", encoding="utf-8") as f:
+                json.dump(d, f, ensure_ascii=False, separators=(",", ":"))
+
+    # top_escolas/MUN/*.json e top_escolas_full/UF/{UF}.json → nome
+    for padrao, contador in ((os.path.join(api_out, "top_escolas", "MUN", "*.json"), "top"),
+                             (os.path.join(api_out, "top_escolas_full", "UF", "*.json"), "full")):
+        for arq in glob.glob(padrao):
+            with open(arq, encoding="utf-8") as f:
+                d = json.load(f)
+            mudou = False
+            for lista in (d.values() if isinstance(d, dict) else [d]):
+                if not isinstance(lista, list):
+                    continue
+                for e in lista:
+                    nm = nome_de(e.get("chave"))
+                    if not nm or e.get("nome") == nm:
+                        continue
+                    e["nome"] = nm
+                    mudou = True
+                    if contador == "top":
+                        n_top += 1
+                    else:
+                        n_full += 1
+            if mudou:
+                with open(arq, "w", encoding="utf-8") as f:
+                    json.dump(d, f, ensure_ascii=False, separators=(",", ":"))
+
+    log(f"  entidade/ESC {n_ent} · escolas/ {n_esc} · top_escolas/ {n_top} · ranking {n_full}")
+else:
+    log(f"! sem {os.path.basename(NOMES)} — as escolas ficam como "
+        '"Escola INEP {codigo}" (ver ESTADO.md)')
 
 # redacao/ — recorte "2 dias, sem zeros", nível UF
 log("Gerando api/redacao/…")

@@ -1,6 +1,6 @@
 # Estado atual — leia isto primeiro
 
-Atualizado: **2026-09-16**
+Atualizado: **2026-09-17**
 
 Arquivo curto e de manutenção obrigatória. Serve pra retomar o trabalho sem
 reconstruir contexto de memória. Detalhe e histórico ficam no `status.md`
@@ -394,6 +394,72 @@ O H1 ainda dizia "a escola paranaense" — `grep -i paraná` não pegava; foi o
   UF — os três dependem dos microdados na máquina do Raphael.
 - Site Netlify próprio e o link.
 
+## O rebuild D=1 chegou — e trouxe um bug de nomes (17/09)
+
+**O deploy nacional em D=1 estava pronto no disco do Raphael desde 31/07 e
+nunca tinha sido commitado.** Descoberto ao investigar um `git status`: o
+`rebuild_d1.sh` não precisou rodar de novo. Foi para o branch
+`deploy-d1-20260916` do `painelenem` (commit `40c4650f5`, 49.936 arquivos,
+314 MiB). Calibração medida nele:
+
+| | erro |
+|---|---|
+| BR (média geral) | **+0,07 pp ✓** |
+| UF/PR · PUB | +0,00 pp |
+| UF/MT · PUB | −0,13 pp |
+
+**Duas deleções em massa tiveram que ser revertidas antes do commit**, as duas
+da armadilha do `rmtree` já registrada aqui: 1.223 imagens de questão
+(`deploy/questoes/`) e os 4 JSONs `deploy/api/questoes/{2021..2024}.json`.
+Estavam só no working tree; `git checkout --` resolveu. **Um `git add -A`
+teria commitado as deleções** — é o acidente do `f47484a` se repetindo.
+Por isso o commit foi feito com `git add deploy/` e três verificações
+(`--diff-filter=D` vazio, nada fora de `deploy/`, nada não-staged).
+
+### BUG ABERTO — o deploy nacional D=1 está sem nomes de escola
+
+Medido: **25.963 escolas, 100% do país**, saíram como `"Escola INEP {codigo}"`.
+O deploy anterior tinha 25.391 nomes.
+
+Causa: os nomes não vêm dos microdados. Vêm de um CSV do Censo, carregado no
+`data/enem2025.sqlite` pelo `pipeline/carrega_nomes_escolas.py`. O rebuild
+recriou o sqlite a partir dos microdados e **o `rebuild_d1.sh` não reexecuta
+esse script**, então a exportação saiu com `nome: null`.
+
+> **NÃO PUBLIQUE O NACIONAL ASSIM.** Um painel de escolas sem nome de escola
+> não serve. O conserto é rodar o `carrega_nomes_escolas.py <csv>` e
+> reexportar — e, de quebra, pôr essa chamada dentro do `rebuild_d1.sh`, ou o
+> próximo rebuild repete o problema. Vale checar se o `deploy_pr2.py` precisa
+> do mesmo cuidado antes de qualquer rebuild do PR em 2027.
+
+**Paliativo aplicado só no MT**, e deliberadamente só nele: o nome é rótulo
+estável por INEP, não depende do D nem de número recalculado, então foi
+recuperado do deploy anterior para `data/nomes_escolas_mt.json` (522 nomes) e
+o `deploy_mt.py` ganhou um passo que o reaplica em `entidade/ESC/`,
+`escolas/`, `top_escolas/` e `top_escolas_full/`. Resultado: **0 escolas
+anônimas** em MT; as 72 mascaradas seguem sem nome, como devem. Isso é
+remendo, não conserto — o conserto é o parágrafo acima.
+
+## Mato Grosso calibrado (17/09)
+
+`mt_deploy` reconstruído sobre o deploy D=1: **erro médio −0,08 pp ✓**
+(era −2,72). O efeito na página Análise é o que justificava esperar:
+
+| Análise de MT, nível UF | D=1,7 | D=1 |
+|---|---|---|
+| Δ médio vs esperado | +2,24 pp | **−0,32 pp** |
+| habilidades acima do esperado | 106/120 (88%) | **55/120 (46%)** |
+| abaixo do esperado | 14/120 | **65/120 (54%)** |
+
+Não era deslocamento de régua: a leitura inverteu. Em D=1,7 o painel dizia
+que MT ia acima do esperado em quase tudo.
+
+Reconferido depois do rebuild: 8 páginas sem erro de JS e sem 404 (fora o
+`historico/ESC/`, conhecido e avisado na tela), **876 imagens de questão**
+conferidas uma a uma, nomes de escola de volta em todas as telas.
+
+**Falta só criar o site Netlify apontado para `mt_deploy/`.**
+
 ## Em aberto
 
 1. **`pr2_deploy` do rebuild ficou sem dado avaliável.** *Adiado* — deixou de
@@ -412,8 +478,11 @@ O H1 ainda dizia "a escola paranaense" — `grep -i paraná` não pegava; foi o
    `NULL + x = NULL`, então item sem `c` cadastrado agora rende `p_esp` nulo
    (a antiga nunca tocava em `c`). Conserto: `COALESCE(i.NU_PARAM_C, 0)` —
    vira 2PL no item sem `c`, melhor que perder o item. Não aplicado.
-3. **Publicar o nacional.** Calibração conferida. Falta commitar o `deploy/`
-   reconstruído, dar push e mergear o PR #2.
+3. **Publicar o nacional.** ~~Falta commitar o `deploy/`.~~ Commitado e
+   pushado em 17/09 (`deploy-d1-20260916`, calibração +0,07 pp). **Mas não
+   pode ir ao ar ainda:** está sem os nomes das 25.963 escolas — ver a seção
+   do bug acima. Rodar o `carrega_nomes_escolas.py` e reexportar primeiro.
+   Depois mergear.
 4. **Redação: três populações diferentes nos dados publicados.** Medido em
    31/07 no `pr2_deploy` (UF/PR, rede T):
 
@@ -470,12 +539,9 @@ O H1 ainda dizia "a escola paranaense" — `grep -i paraná` não pegava; foi o
    anulação) — hoje o painel não afirma nada sobre isso, justamente por
    falta desse cálculo. Tem que ser script separado: rodar o `build_db.py`
    traz o D=1 junto, contra a decisão de 31/07.
-10. **Publicar o MT.** Bloqueado por dois pré-requisitos, nesta ordem:
-    (a) o rebuild D=1 do nacional (item 3), porque o `mt_deploy` herda o
-    `p_esp` dele e hoje está em D=1,7 (−2,83 pp medidos em UF/MT); depois
-    (b) criar o site Netlify apontado para `mt_deploy/`. Rodar
-    `python3 pipeline/deploy_mt.py --nacional <clone>` de novo depois do
-    rebuild e reconferir com o `verifica_calibracao.py` antes de subir.
+10. **Publicar o MT.** ~~Bloqueado pelo rebuild D=1.~~ **Destravado em
+    17/09** — o `mt_deploy` está calibrado (−0,08 pp) e testado. Falta só
+    criar o site Netlify apontado para `mt_deploy/`.
 
 11. **`historico/ESC/` de Mato Grosso.** Sem ele a Análise por escola mostra
     o estado (com aviso na tela desde 16/09, mas ainda é o estado). Precisa

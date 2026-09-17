@@ -58,6 +58,14 @@ def main():
     # painéis estaduais não apresentam rede privada; ver ESTADO.md).
     # dependencia=4 é privada, mesmo código usado em escolas/{mun}.json e no
     # resto do pipeline.
+    # sqlite3.connect CRIA o arquivo quando ele não existe, então rodar isto
+    # fora da máquina com os microdados deixava um .sqlite vazio de 0 byte no
+    # data/ — que o git add pegava. Falha explícita é melhor.
+    for banco in (DB_2025, DB_HIST):
+        if not os.path.exists(banco):
+            raise SystemExit(f"não achei {banco} — este script precisa dos "
+                             "microdados; rode na máquina que os tem")
+
     con25 = sqlite3.connect(DB_2025)
     ineps_uf = {str(r[0]) for r in con25.execute(
         "SELECT chave FROM escolas WHERE uf=? AND dependencia != 4", (uf,))}
