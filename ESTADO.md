@@ -467,10 +467,18 @@ Reportado no rascunho. `.hab-quest-grid` é `display:grid` e `.hab-carrossel`
 largura de min-content — o carrossel se recusava a encolher abaixo do tamanho
 da imagem. Medido: a 820px ficava com 760px num container de 730px; a 420px
 ia a 760px dentro de 330px e empurrava scroll horizontal na página inteira.
-Corrigido em `styles_mt.css` com `min-width:0` nos três níveis
-(`.hab-quest-grid > *`, `.hab-carrossel`, `.hc-viewport`). **A correção ficou
-no `styles_mt.css`, não no `styles.css`**, pra não divergir do PR — mas
-**o bug existe igual no painel do Paraná**, que usa o mesmo CSS.
+Corrigido com `min-width:0` nos três níveis (`.hab-quest-grid > *`,
+`.hab-carrossel`, `.hc-viewport`), nos **dois painéis**: `styles_mt.css` e
+`styles_pr.css`. Ficou nos CSS por painel e não no `styles.css` compartilhado,
+que segue idêntico nos dois.
+
+**No Paraná foi medido no próprio `pr2_deploy` antes e depois:** a 820px o
+carrossel saiu de 760px para 730px; a 420px, de 760px para 330px, e o scroll
+horizontal da `habilidade.html` foi de +385 para 0. As 7 páginas do PR seguem
+sem erro de JS e a navegação do carrossel funciona. É CSS puro — não roda o
+`build_db.py`, não toca em `p_esp`, não conflita com a decisão do D=1,7.
+**Falta o Raphael republicar o PR** (`netlify deploy --prod --dir=pr2_deploy`,
+sem `--site`: o vínculo da pasta já aponta pro Paraná).
 
 > **Vazamento em 420px, pré-existente e NÃO corrigido.** Seis páginas rolam
 > horizontalmente em largura de celular. Medido também no `pr2_deploy` que
