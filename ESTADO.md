@@ -460,6 +460,25 @@ conferidas uma a uma, nomes de escola de volta em todas as telas.
 
 **Falta só criar o site Netlify apontado para `mt_deploy/`.**
 
+### Carrossel de questões estourava o container (corrigido)
+
+Reportado no rascunho. `.hab-quest-grid` é `display:grid` e `.hab-carrossel`
+é `display:flex`; nos dois casos o filho nasce com `min-width:auto`, que é a
+largura de min-content — o carrossel se recusava a encolher abaixo do tamanho
+da imagem. Medido: a 820px ficava com 760px num container de 730px; a 420px
+ia a 760px dentro de 330px e empurrava scroll horizontal na página inteira.
+Corrigido em `styles_mt.css` com `min-width:0` nos três níveis
+(`.hab-quest-grid > *`, `.hab-carrossel`, `.hc-viewport`). **A correção ficou
+no `styles_mt.css`, não no `styles.css`**, pra não divergir do PR — mas
+**o bug existe igual no painel do Paraná**, que usa o mesmo CSS.
+
+> **Vazamento em 420px, pré-existente e NÃO corrigido.** Seis páginas rolam
+> horizontalmente em largura de celular. Medido também no `pr2_deploy` que
+> está no ar: `index` +142, `escola` +198, `criticas` +134, `redacao` +198.
+> Culpados: `.topbar-links` (618px) e as tabelas largas (`#tbl-itens` 848px,
+> `#crit-tabela` 750px). Nunca houve tratamento mobile nesses dois. Vale uma
+> tanda própria, nos dois painéis de uma vez.
+
 ## Em aberto
 
 1. **`pr2_deploy` do rebuild ficou sem dado avaliável.** *Adiado* — deixou de

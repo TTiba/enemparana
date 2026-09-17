@@ -61,3 +61,16 @@
   padding: 10px 14px;
   line-height: 1.45;
 }
+
+/* Carrossel de questões: impedir que ele estoure o container.
+   .hab-quest-grid é `display:grid` e .hab-carrossel é `display:flex`; em
+   ambos os casos o item filho nasce com `min-width:auto`, que é a largura
+   de min-content — ou seja, ele se recusa a encolher abaixo do tamanho da
+   imagem da questão. Medido antes da correção: a 820px o carrossel ficava
+   com 760px dentro de um container de 730px, e a 420px ia a 760px dentro de
+   330px, empurrando scroll horizontal na página toda. Zerar o min-width nos
+   dois níveis devolve o controle ao container; quem rola é a viewport do
+   carrossel, que já tem overflow-x:auto pra isso. */
+.hab-quest-grid > * { min-width: 0; }
+.hab-carrossel { min-width: 0; }
+.hc-viewport { min-width: 0; }
